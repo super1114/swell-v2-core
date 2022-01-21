@@ -1,0 +1,41 @@
+{
+  "name": "swv2",
+  "version": "1.0.0",
+  "description": "SwellNetwork V2",
+  "type": "module",
+  "scripts": {
+    "fork:evm": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_KEY .env | cut -d '=' -f2)",
+    "test:inte:evm": "hardhat test test/inte/* --network localhost",
+    "test:unit": "hardhat test test/unit/* "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:SwellNetwork/SwellNetwork.git"
+  },
+  "keywords": [
+    "ETH2"
+  ],
+  "author": "SwellNetwork",
+  "license": "BSL-1.1",
+  "bugs": {
+    "url": "https://github.com/SwellNetwork/v2-core/issues"
+  },
+  "homepage": "https://github.com/SwellNetwork/v2-coree",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "^1.9.0",
+    "@types/mocha": "^8.2.2",
+    "chai": "^4.3.4",
+    "ethers": "^5.4.1",
+    "hardhat": "^2.4.1",
+    "hardhat-gas-reporter": "^1.0.4"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-solhint": "^2.0.0",
+    "@openzeppelin/contracts-upgradeable": "^4.1.0",
+    "dotenv": "^10.0.0",
+    "hardhat-abi-exporter": "^2.2.1"
+  }
+}

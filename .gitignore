@@ -1,0 +1,28 @@
+# Dependency directories
+node_modules/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+#Hardhat files
+cache
+artifacts
+
+# Mac files
+.DS_Store
