@@ -1,7 +1,7 @@
 
 // import { IDepositContract } from "./abi/IDepositContract.json";
-import { ethers, upgrades } from "hardhat";
-import { expect } from 'chai';
+const { ethers, upgrades } = require ( "hardhat" );
+const { expect } = require ( 'chai' );
 // import { solidity } from "ethereum-waffle";
 
 describe("swNFT", async() => {
