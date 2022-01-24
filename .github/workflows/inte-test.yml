@@ -3,7 +3,7 @@
 name: "Integration Test"
 
 # Triggers the workflow on push or pull request events
-on: [push, pull_request, workflow_dispatch]
+on: push
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -44,7 +44,7 @@ jobs:
         run: npx hardhat compile
         if: steps.hardhat-cache.outputs.cache-hit != 'true'
       - name: Run fork in background
-        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ secrets.GITHUB_TOKEN }}
+        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ secrets.ALCHEMY_API_KEY }}
         env:
           PORT: 8545
       - name: Run test
