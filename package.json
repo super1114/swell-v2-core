@@ -10,10 +10,6 @@
     "coverage:inte": "hardhat coverage --testfiles 'test/inte/*.js' ",
     "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' --network localhost"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com:SwellNetwork/SwellNetwork.git"
-  },
   "keywords": [
     "ETH2"
   ],
@@ -45,6 +41,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
+    "cypress": "^9.3.1",
     "dotenv": "^10.0.0"
   },
   "lint-staged": {

@@ -3,7 +3,7 @@
 name: "Integration Test"
 
 # Triggers the workflow on push or pull request events
-on: [push, pull_request, workflow_dispatch]
+on: push
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
       - name: Node module cache
         uses: actions/cache@v2
         id: node-cache
@@ -43,5 +43,16 @@ jobs:
       - name: Hardhat compile
         run: npx hardhat compile
         if: steps.hardhat-cache.outputs.cache-hit != 'true'
-      - name: Run test
-        run: npm run coverage:inte
+      - name: Run Test
+        uses: cypress-io/github-action@v2
+        with:
+          start: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ env.ALCHEMY_API_KEY }}
+          wait-on: 'http://localhost:8545/'
+          command: npm run test:inte
+        env:
+          PORT: 8545
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # pass the project ID from the secrets through environment variable
+          CYPRESS_PROJECT_ID: ${{ secrets.PROJECT_ID }}
