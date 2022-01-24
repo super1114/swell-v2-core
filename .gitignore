@@ -20,9 +20,13 @@ typings/
 .env
 .env.test
 
-#Hardhat files
+# Hardhat files
 cache
 artifacts
 
 # Mac files
 .DS_Store
+
+# Coverage
+coverage/
+coverage.json

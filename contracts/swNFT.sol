@@ -20,8 +20,8 @@ interface IDepositContract {
     ) external payable;
 }
 
-/// @title Contract for swNFT
-contract swNFT is ERC721URIStorageUpgradeable {
+/// @title Contract for SWNFT
+contract SWNFT is ERC721URIStorageUpgradeable {
     uint256 public GWEI;
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for uint256;

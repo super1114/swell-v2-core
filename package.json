@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "SwellNetwork V2",
   "scripts": {
-    "fork:mainnet": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_KEY .env | cut -d '=' -f2)",
-    "test:inte:mainnet": "hardhat test test/inte/* --network localhost",
+    "fork:mainnet": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_API_KEY .env | cut -d '=' -f2)",
+    "test:inte": "hardhat test test/inte/* --network localhost",
     "test:unit": "hardhat test test/unit/* ",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "coverage:inte": "hardhat coverage --testfiles 'test/inte/*.js' ",
+    "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' "
   },
   "repository": {
     "type": "git",
@@ -33,7 +35,9 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.3.1",
     "prettier": "^1.19.1",
-    "solhint": "^3.3.6"
+    "semantic-release": "^19.0.2",
+    "solhint": "^3.3.6",
+    "solidity-coverage": "^0.7.18"
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.4.2",

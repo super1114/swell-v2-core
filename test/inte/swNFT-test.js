@@ -3,7 +3,7 @@ const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 // import { solidity } from "ethereum-waffle";
 
-describe("swNFT", async () => {
+describe("SWNFT", async () => {
   const pubkey =
     "0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005";
   const withdrawal_credentials =
@@ -17,8 +17,8 @@ describe("swNFT", async () => {
 
   before(async () => {
     [signer] = await ethers.getSigners();
-    const swNFT = await ethers.getContractFactory("swNFT");
-    swNFT = await upgrades.deployProxy(swNFT, ["ETH2 Staking NFT", "ETH2SNFT"]);
+    const SWNFT = await ethers.getContractFactory("SWNFT");
+    swNFT = await upgrades.deployProxy(SWNFT, ["Swell NFT", "swNFT"]);
     await swNFT.deployed();
     console.log("swNFT deployed to:", swNFT.address);
   });
@@ -36,7 +36,7 @@ describe("swNFT", async () => {
     ).to.be.revertedWith("Must send at least 1 ETH");
   });
 
-  it("can emit LogState", async function() {
+  it("can emit LogStake", async function() {
     expect(
       swNFT.stake(
         pubkey,
