@@ -46,7 +46,7 @@ jobs:
       - name: Run fork in background
         uses: cypress-io/github-action@v2
         with:
-          start: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/"$ALCHEMY_API_KEY"
+          start: npx hardhat node --fork "https://eth-mainnet.alchemyapi.io/v2/$ALCHEMY_API_KEY"
           wait-on: 'http://localhost:8545/'
         env:
           PORT: 8545
