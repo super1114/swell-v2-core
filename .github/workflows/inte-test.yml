@@ -44,12 +44,12 @@ jobs:
         run: npx hardhat compile
         if: steps.hardhat-cache.outputs.cache-hit != 'true'
       - name: Run fork in background
-        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/"$ALCHEMY_API_KEY"
+        uses: cypress-io/github-action@v2
+        with:
+          start: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/"$ALCHEMY_API_KEY"
+          wait-on: 'http://localhost:8545/'
         env:
           PORT: 8545
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Run test
-        uses: cypress-io/github-action@v2
-        with:
-          start: npm run test:inte
-          wait-on: 'http://localhost:8545/'
+        run: npm run test:inte
