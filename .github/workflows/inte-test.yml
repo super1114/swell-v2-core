@@ -44,8 +44,9 @@ jobs:
         run: npx hardhat compile
         if: steps.hardhat-cache.outputs.cache-hit != 'true'
       - name: Run fork in background
-        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ secrets.ALCHEMY_API_KEY }}
+        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/"$ALCHEMY_API_KEY"
         env:
           PORT: 8545
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Run test
         run: npm run test:inte
