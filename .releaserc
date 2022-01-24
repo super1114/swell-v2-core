@@ -5,5 +5,5 @@
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog"
   ],
-  "branches": ["release", "next"]
+  "branches": ["release"]
 }
