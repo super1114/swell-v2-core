@@ -43,5 +43,9 @@ jobs:
       - name: Hardhat compile
         run: npx hardhat compile
         if: steps.hardhat-cache.outputs.cache-hit != 'true'
+      - name: Run fork in background
+        run: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ secrets.GITHUB_TOKEN }}
+        env:
+          PORT: 8545
       - name: Run test
-        run: npm run coverage:inte
+        run: npm run test:inte
