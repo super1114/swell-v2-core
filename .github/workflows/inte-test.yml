@@ -49,4 +49,7 @@ jobs:
           PORT: 8545
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Run test
-        run: npm run test:inte
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm run test:inte
+          wait-on: 'http://localhost:8545/'
