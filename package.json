@@ -8,7 +8,7 @@
     "test:unit": "hardhat test test/unit/* ",
     "prepare": "husky install",
     "coverage:inte": "hardhat coverage --testfiles 'test/inte/*.js' ",
-    "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' "
+    "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' --network localhost"
   },
   "repository": {
     "type": "git",
