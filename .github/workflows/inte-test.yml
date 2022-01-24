@@ -51,5 +51,9 @@ jobs:
         env:
           PORT: 8545
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # pass the project ID from the secrets through environment variable
+          CYPRESS_PROJECT_ID: ${{ secrets.PROJECT_ID }}
       - name: Run test
         run: npm run test:inte
