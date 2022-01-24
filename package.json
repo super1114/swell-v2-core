@@ -5,7 +5,8 @@
   "scripts": {
     "fork:mainnet": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_KEY .env | cut -d '=' -f2)",
     "test:inte:mainnet": "hardhat test test/inte/* --network localhost",
-    "test:unit": "hardhat test test/unit/* "
+    "test:unit": "hardhat test test/unit/* ",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -22,16 +23,23 @@
   "homepage": "https://github.com/SwellNetwork/v2-coree",
   "devDependencies": {
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
-    "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
     "@openzeppelin/hardhat-upgrades": "^1.13.0",
     "chai": "^4.3.4",
     "hardhat": "^2.8.3",
     "hardhat-abi-exporter": "^2.8.0",
-    "hardhat-gas-reporter": "^1.0.7"
+    "hardhat-gas-reporter": "^1.0.7",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.1",
+    "prettier": "^1.19.1",
+    "solhint": "^3.3.6"
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
     "dotenv": "^10.0.0"
+  },
+  "lint-staged": {
+    "**/*.js": "prettier --write --ignore-unknown",
+    "contracts/*.sol": "solhint --fix"
   }
 }
