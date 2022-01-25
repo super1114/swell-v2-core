@@ -18,7 +18,7 @@ describe("SWNFT", async () => {
   before(async () => {
     [signer] = await ethers.getSigners();
     const SWNFT = await ethers.getContractFactory("SWNFT");
-    swNFT = await upgrades.deployProxy(SWNFT, ["Swell NFT", "swNFT"]);
+    swNFT = await upgrades.deployProxy(SWNFT, ["Swell NFT", "swNFT"], {kind: "uups"});
     await swNFT.deployed();
     console.log("swNFT deployed to:", swNFT.address);
   });
