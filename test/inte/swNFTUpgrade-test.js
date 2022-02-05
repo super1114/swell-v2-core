@@ -3,34 +3,39 @@ const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 // import { solidity } from "ethereum-waffle";
 
-describe("SWNFT", async () => {
+describe("SWNFTUpgrade", async () => {
   const pubkey =
-    "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
+    "0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005";
   const withdrawal_credentials =
-    "0x01000000000000000000000000000000219ab540356cbb839cbe05303d7705fa";
+    "0x00479ca39024528497e333bceed04026a3b6573846c7c449e5a5ef26dfe7fde1";
   const signature =
-    "0xb224d558d829c245fe56bff9d28c7fd0d348d6795eb8faef8ce220c3657e373f8dc0a0c8512be589ecaa749fe39fc0371380a97aab966606ba7fa89c78dc1703858dfc5d3288880a813e7743f1ff379192e1f6b01a6a4a3affee1d50e5b3c849";
+    "0x81786c544c8746d274d292e2decb634165f36641e51d3cd9ea022c27591e5fd6d5cb25072df96b9d4b06ecf4766f7682140ba5e618506c79539799953d9a273f1b7663e30a34dbc33010bac8ccda26341113b26fe26d639a616d106241745f8a";
   const deposit_data_root =
-    "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
+    "0xcf55433ed2ceb04c0d96780245339bea1af9ec60c946c11b4c01f297b7140cd9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
-  let swNFT, signer;
+  let swNFTUpgrade, signer;
 
   before(async () => {
     [signer] = await ethers.getSigners();
-    const SWNFT= await ethers.getContractFactory("SWNFT");
-    swNFT = await SWNFT.deploy(depositAddress);
-    await swNFT.deployed();
-    console.log("swNFT deployed to:", swNFT.address);
+    const Helpers = await ethers.getContractFactory("Helpers");
+    const helpers = await Helpers.deploy();
+    const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
+    // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", { libraries: {
+    //   Helpers: helpers.address,
+    // }});
+    swNFTUpgrade = await upgrades.deployProxy(SWNFTUpgrade, ["Swell NFT", "swNFT"], {kind: "uups"});
+    await swNFTUpgrade.deployed();
+    console.log("swNFTUpgrade deployed to:", swNFTUpgrade.address);
   });
 
   it("cannot stake less than 1 ether", async function() {
     expect(
-      swNFT.stake(
+      swNFTUpgrade.stake(
         pubkey,
-        // withdrawal_credentials,
+        withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
+        "28899",
         { value: 0 }
       )
     ).to.be.revertedWith("Must send at least 1 ETH");
@@ -38,17 +43,17 @@ describe("SWNFT", async () => {
 
   it("can emit LogStake", async function() {
     expect(
-      swNFT.stake(
+      swNFTUpgrade.stake(
         pubkey,
-        // withdrawal_credentials,
+        withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
+        "28899",
         { value: ethers.utils.parseEther("1") }
       )
     )
-      .to.emit(swNFT, "LogStake")
-      .withArgs(signer.address, "1", pubkey, ethers.utils.parseEther("1"));
+      .to.emit(swNFTUpgrade, "LogStake")
+      .withArgs(signer.address, "1", "28899", ethers.utils.parseEther("1"));
   });
 
   it("can stake more than 1 ether", async function() {
@@ -80,12 +85,12 @@ describe("SWNFT", async () => {
 
     // let event = await logStateEvent;
 
-    await swNFT.stake(
+    await swNFTUpgrade.stake(
       pubkey,
-      // withdrawal_credentials,
+      withdrawal_credentials,
       signature,
       deposit_data_root,
-      // "28899",
+      "28899",
       { value: ethers.utils.parseEther("1") }
     );
 
@@ -94,21 +99,30 @@ describe("SWNFT", async () => {
     // expect(event.validatorIndex).to.equal("28899");
     // expect(event.deposit).to.equal(ethers.utils.parseEther("1"));
 
-    const tokenURI = await swNFT.tokenURI("1");
+    const tokenURI = await swNFTUpgrade.tokenURI("1");
+    // expect(tokenURI).to.be.equal(
+    //   "0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005/1000000000000000000.json"
+    // );
     expect(tokenURI).to.be.equal(
-      "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/"+pubkey+"/1000000000000000000.json"
+      "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005/1000000000000000000.json"
     );
 
+    // const token = await swNFTUpgrade.tokens("1");
+    // expect(token.pubKey).to.be.equal(
+    //   "0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005"
+    // );
+    // expect(token.validatorIndex).to.be.equal("28899");
+    // expect(token.deposit).to.equal(ethers.utils.parseEther("1"));
   });
 
   it("cannot stake more than 32 ether", async function() {
     expect(
-      swNFT.stake(
+      swNFTUpgrade.stake(
         pubkey,
-        // withdrawal_credentials,
+        withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
+        "28899",
         { value: ethers.utils.parseEther("32") }
       )
     ).to.be.revertedWith("cannot stake more than 32 ETH");
