@@ -5,20 +5,20 @@ const { expect } = require("chai");
 
 describe("SWNFT", async () => {
   const pubkey =
-    "0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005";
+    "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
   const withdrawal_credentials =
-    "0x00479ca39024528497e333bceed04026a3b6573846c7c449e5a5ef26dfe7fde1";
+    "0x01000000000000000000000000000000219ab540356cbb839cbe05303d7705fa";
   const signature =
-    "0x81786c544c8746d274d292e2decb634165f36641e51d3cd9ea022c27591e5fd6d5cb25072df96b9d4b06ecf4766f7682140ba5e618506c79539799953d9a273f1b7663e30a34dbc33010bac8ccda26341113b26fe26d639a616d106241745f8a";
+    "0xb224d558d829c245fe56bff9d28c7fd0d348d6795eb8faef8ce220c3657e373f8dc0a0c8512be589ecaa749fe39fc0371380a97aab966606ba7fa89c78dc1703858dfc5d3288880a813e7743f1ff379192e1f6b01a6a4a3affee1d50e5b3c849";
   const deposit_data_root =
-    "0xcf55433ed2ceb04c0d96780245339bea1af9ec60c946c11b4c01f297b7140cd9";
+    "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
   let swNFT, signer;
 
   before(async () => {
     [signer] = await ethers.getSigners();
     const SWNFT= await ethers.getContractFactory("SWNFT");
-    swNFT = await SWNFT.deploy("Swell NFT", "swNFT", depositAddress);
+    swNFT = await SWNFT.deploy(depositAddress);
     await swNFT.deployed();
     console.log("swNFT deployed to:", swNFT.address);
   });
@@ -96,7 +96,7 @@ describe("SWNFT", async () => {
 
     const tokenURI = await swNFT.tokenURI("1");
     expect(tokenURI).to.be.equal(
-      "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/"+pubKey+"/1000000000000000000.json"
+      "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/"+pubkey+"/1000000000000000000.json"
     );
 
   });
@@ -105,10 +105,10 @@ describe("SWNFT", async () => {
     expect(
       swNFT.stake(
         pubkey,
-        withdrawal_credentials,
+        // withdrawal_credentials,
         signature,
         deposit_data_root,
-        "28899",
+        // "28899",
         { value: ethers.utils.parseEther("32") }
       )
     ).to.be.revertedWith("cannot stake more than 32 ETH");
