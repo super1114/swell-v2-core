@@ -67,7 +67,7 @@ contract SWNFT is
         require(msg.value % GWEI == 0, "deposit value not multiple of gwei");
         require(
             validatorDeposits[pubKey] + msg.value <= 32 ether,
-            "can not stake more than 32 ETH"
+            "cannot stake more than 32 ETH"
         );
 
         depositContract.deposit{value: msg.value}(
