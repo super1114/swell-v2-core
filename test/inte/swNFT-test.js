@@ -1,6 +1,7 @@
 // import { IDepositContract } from "./abi/IDepositContract.json";
 const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
+const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 // import { solidity } from "ethereum-waffle";
 
 describe("SWNFT", async () => {
@@ -13,7 +14,7 @@ describe("SWNFT", async () => {
   const deposit_data_root =
     "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
-  let swNFT, signer;
+  let swNFT, swETH, signer;
 
   before(async () => {
     [signer] = await ethers.getSigners();
@@ -21,11 +22,16 @@ describe("SWNFT", async () => {
     swNFT = await SWNFT.deploy(depositAddress);
     await swNFT.deployed();
     console.log("swNFT deployed to:", swNFT.address);
+    const SWETH= await ethers.getContractFactory("SWETH");
+    swETH = await SWETH.deploy(swNFT.address);
+    await swETH.deployed();
+    console.log("swETH deployed to:", swETH.address);
+    await swNFT.setBaseTokenAddress(swETH.address);
   });
 
-  it("cannot stake less than 1 ether", async function() {
+  it("cannot deposit less than 1 ether", async function() {
     expect(
-      swNFT.stake(
+      swNFT.deposit(
         pubkey,
         // withdrawal_credentials,
         signature,
@@ -36,9 +42,9 @@ describe("SWNFT", async () => {
     ).to.be.revertedWith("Must send at least 1 ETH");
   });
 
-  it("can emit LogStake", async function() {
+  it("can emit LogDeposit", async function() {
     expect(
-      swNFT.stake(
+      swNFT.deposit(
         pubkey,
         // withdrawal_credentials,
         signature,
@@ -47,14 +53,14 @@ describe("SWNFT", async () => {
         { value: ethers.utils.parseEther("1") }
       )
     )
-      .to.emit(swNFT, "LogStake")
+      .to.emit(swNFT, "LogDeposit")
       .withArgs(signer.address, "1", pubkey, ethers.utils.parseEther("1"));
   });
 
-  it("can stake more than 1 ether", async function() {
+  it("can deposit more than 1 ether", async function() {
     // let logStateEvent = new Promise<any>((resolve, reject) => {
     //   swNFT.on(
-    //     "LogStake",
+    //     "LogDeposit",
     //     (
     //       user,
     //       itemId,
@@ -80,7 +86,7 @@ describe("SWNFT", async () => {
 
     // let event = await logStateEvent;
 
-    await swNFT.stake(
+    await swNFT.deposit(
       pubkey,
       // withdrawal_credentials,
       signature,
@@ -95,15 +101,20 @@ describe("SWNFT", async () => {
     // expect(event.deposit).to.equal(ethers.utils.parseEther("1"));
 
     const tokenURI = await swNFT.tokenURI("1");
-    expect(tokenURI).to.be.equal(
-      "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/"+pubkey+"/1000000000000000000.json"
-    );
+    const decodeTokenURI = extractJSONFromURI(tokenURI);
+    expect(decodeTokenURI.name).to.be.equal("SwellNetwork Validator - 0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec - 1 Ether");
+    expect(decodeTokenURI.description).to.be.equal("This NFT represents a position in a SwellNetwork Validator. The owner of this NFT can modify or redeem position. \n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.");
+    expect(decodeTokenURI.image).to.be.equal("data:image/svg+xml;base64,");
 
+    const position = await swNFT.positions("1");
+    expect(position.pubKey).to.be.equal(pubkey);
+    expect(position.value).to.be.equal('1000000000000000000');
+    expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
   });
 
-  it("cannot stake more than 32 ether", async function() {
+  it("cannot deposit more than 32 ether", async function() {
     expect(
-      swNFT.stake(
+      swNFT.deposit(
         pubkey,
         // withdrawal_credentials,
         signature,
@@ -111,7 +122,7 @@ describe("SWNFT", async () => {
         // "28899",
         { value: ethers.utils.parseEther("32") }
       )
-    ).to.be.revertedWith("cannot stake more than 32 ETH");
+    ).to.be.revertedWith("cannot deposit more than 32 ETH");
   });
 
   // it("Should be able to unstake when ETH2 phrase 1", async function() {
