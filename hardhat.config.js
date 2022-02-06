@@ -27,7 +27,8 @@ module.exports = {
   abiExporter: {
     clear: true,
     flat: true,
-    only: ["SWNFT"],
+    runOnCompile: true,
+    only: ["SWNFT", "SWETH"],
   },
   gasReporter: {
     showTimeSpent: true,

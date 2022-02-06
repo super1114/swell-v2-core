@@ -1,14 +1,22 @@
 [
   {
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
         "internalType": "address",
-        "name": "_eth1WithdrawalAddress",
+        "name": "previousAdmin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAdmin",
         "type": "address"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "name": "AdminChanged",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -64,6 +72,19 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "beacon",
+        "type": "address"
+      }
+    ],
+    "name": "BeaconUpgraded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "address",
         "name": "user",
@@ -77,9 +98,9 @@
       },
       {
         "indexed": false,
-        "internalType": "bytes",
-        "name": "pubKey",
-        "type": "bytes"
+        "internalType": "string",
+        "name": "validatorIndex",
+        "type": "string"
       },
       {
         "indexed": false,
@@ -88,7 +109,7 @@
         "type": "uint256"
       }
     ],
-    "name": "LogDeposit",
+    "name": "LogStake",
     "type": "event"
   },
   {
@@ -136,8 +157,21 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      }
+    ],
+    "name": "Upgraded",
+    "type": "event"
+  },
+  {
     "inputs": [],
-    "name": "ETHER",
+    "name": "GWEI",
     "outputs": [
       {
         "internalType": "uint256",
@@ -187,54 +221,12 @@
   },
   {
     "inputs": [],
-    "name": "baseTokenAddress",
+    "name": "baseURI",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "string",
         "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "pubKey",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "depositDataRoot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "deposit",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "newItemId",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "eth1WithdrawalAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -257,6 +249,24 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -331,30 +341,20 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "positions",
-    "outputs": [
-      {
         "internalType": "bytes",
         "name": "pubKey",
         "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "baseTokenBalance",
-        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "pubKeyToString",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -436,14 +436,40 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_baseTokenAddress",
-        "type": "address"
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "withdrawalCredentials",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "depositDataRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "validatorIndex",
+        "type": "string"
       }
     ],
-    "name": "setBaseTokenAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "stake",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "newItemId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -473,19 +499,6 @@
         "internalType": "string",
         "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tokenIds",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -549,36 +562,48 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
+        "internalType": "address",
+        "name": "newImplementation",
+        "type": "address"
       }
     ],
-    "name": "validatorDeposits",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "upgradeTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
+        "name": "newImplementation",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "upgradeToAndCall",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
         "name": "",
-        "type": "uint256"
+        "type": "bytes"
       }
     ],
     "name": "validators",
     "outputs": [
       {
-        "internalType": "bytes",
+        "internalType": "uint256",
         "name": "",
-        "type": "bytes"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
