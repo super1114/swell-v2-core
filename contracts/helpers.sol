@@ -66,7 +66,7 @@ library Helpers {
     /// @param b bytes input
     /// @param offset uint256 offset
     /// @return out bytes16 outout
-    function bytesToBytes16(bytes calldata b, uint offset) internal pure returns (bytes16 out) {
+    function bytesToBytes16(bytes memory b, uint offset) internal pure returns (bytes16 out) {
         for (uint i = 0; i < 16; i++) {
             out |= bytes16(b[offset + i] & 0xFF) >> (i * 8);
         }

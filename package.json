@@ -14,7 +14,7 @@
     "ETH2"
   ],
   "author": "SwellNetwork",
-  "license": "BSL-1.1",
+  "license": "BUSL-1.1",
   "bugs": {
     "url": "https://github.com/SwellNetwork/v2-core/issues"
   },
@@ -42,6 +42,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
+    "base64-sol": "^1.1.0",
     "cypress": "^9.3.1",
     "dotenv": "^10.0.0"
   },
