@@ -3,9 +3,10 @@
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./interfaces/ISWETH.sol";
 
 /// @title Contract for SWNFT
-contract SWETH is ERC20 {
+contract SWETH is ISWETH, ERC20 {
 
     address public minter;
 

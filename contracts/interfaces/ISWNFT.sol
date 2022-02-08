@@ -19,6 +19,8 @@ interface ISWNFT is IERC721
         bytes32 depositDataRoot
     ) external payable returns (uint256 newItemId);
 
+    function setBaseTokenAddress(address _baseTokenAddress) external;
+
     // ============ Events ============
 
     event LogStake(

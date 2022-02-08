@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import 'base64-sol/base64.sol';
@@ -29,7 +29,7 @@ interface IDepositContract {
 
 /// @title Contract for SWNFT
 contract SWNFT is
-    ERC721URIStorage,
+    ERC721,
     Ownable,
     ISWNFT
 {
@@ -42,12 +42,12 @@ contract SWNFT is
     address public baseTokenAddress;
     uint256 public ETHER = 1e18;
 
-    bytes[] public validators;
-    mapping(bytes => uint256) public validatorDeposits;
-
     IDepositContract depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa
     );
+
+    bytes[] public validators;
+    mapping(bytes => uint256) public validatorDeposits;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
