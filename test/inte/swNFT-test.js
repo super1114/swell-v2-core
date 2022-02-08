@@ -29,76 +29,27 @@ describe("SWNFT", async () => {
     await swNFT.setBaseTokenAddress(swETH.address);
   });
 
-  it("cannot deposit less than 1 ether", async function() {
+  it("cannot stake less than 1 Ether", async function() {
     expect(
-      swNFT.deposit(
+      swNFT.stake(
         pubkey,
-        // withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
-        { value: 0 }
+        { value: ethers.utils.parseEther("0.1") }
       )
     ).to.be.revertedWith("Must send at least 1 ETH");
   });
 
-  it("can emit LogDeposit", async function() {
+  it("can stake 1 Ether", async function() {
     expect(
-      swNFT.deposit(
+      swNFT.stake(
         pubkey,
-        // withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
         { value: ethers.utils.parseEther("1") }
       )
-    )
-      .to.emit(swNFT, "LogDeposit")
-      .withArgs(signer.address, "1", pubkey, ethers.utils.parseEther("1"));
-  });
-
-  it("can deposit more than 1 ether", async function() {
-    // let logStateEvent = new Promise<any>((resolve, reject) => {
-    //   swNFT.on(
-    //     "LogDeposit",
-    //     (
-    //       user,
-    //       itemId,
-    //       validatorIndex,
-    //       deposit,
-    //       event,
-    //     ) => {
-    //       event.removeListener();
-
-    //       resolve({
-    //         user: user,
-    //         itemId: itemId,
-    //         validatorIndex: validatorIndex,
-    //         deposit: deposit,
-    //       });
-    //     },
-    //   );
-
-    //   setTimeout(() => {
-    //     reject(new Error("timeout"));
-    //   }, 60000);
-    // });
-
-    // let event = await logStateEvent;
-
-    await swNFT.deposit(
-      pubkey,
-      // withdrawal_credentials,
-      signature,
-      deposit_data_root,
-      // "28899",
-      { value: ethers.utils.parseEther("1") }
-    );
-
-    // expect(event.user).to.equal(signer.address);
-    // expect(event.itemId).to.equal("1");
-    // expect(event.validatorIndex).to.equal("28899");
-    // expect(event.deposit).to.equal(ethers.utils.parseEther("1"));
+    ).to.emit(swNFT, "LogStake")
+     .withArgs(signer.address, "1", pubkey, ethers.utils.parseEther("1"));
 
     const tokenURI = await swNFT.tokenURI("1");
     const decodeTokenURI = extractJSONFromURI(tokenURI);
@@ -112,9 +63,9 @@ describe("SWNFT", async () => {
     expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
   });
 
-  it("cannot deposit more than 32 ether", async function() {
+  it("cannot stake more than 32 Ether", async function() {
     expect(
-      swNFT.deposit(
+      swNFT.stake(
         pubkey,
         // withdrawal_credentials,
         signature,
@@ -122,17 +73,56 @@ describe("SWNFT", async () => {
         // "28899",
         { value: ethers.utils.parseEther("32") }
       )
-    ).to.be.revertedWith("cannot deposit more than 32 ETH");
+    ).to.be.revertedWith("cannot stake more than 32 ETH");
   });
 
-  // it("Should be able to unstake when ETH2 phrase 1", async function() {
-  //   const tx = await eTH2Staking.unstake(ether("1"), {from: sender});
-  //   expectEvent(tx, "Transfer", {
-  //     from: sender,
-  //     to: constants.ZERO_ADDRESS,
-  //     value: ether("1")
-  //   })
-  //   const balance = await eTH2Staking.balanceOf(sender);
-  //   expect(balance).to.be.bignumber.equal("0");
-  // });
+  it("cannot withdraw 2 swETH", async function() {
+    expect(
+      swNFT.withdraw(
+        "1",
+        ethers.utils.parseEther("2")
+      )
+    ).to.be.revertedWith("cannot withdraw more than the position value");
+  });
+
+  it("can withdraw 1 swETH", async function() {
+    expect(
+      swNFT.withdraw(
+        "1",
+        ethers.utils.parseEther("1")
+      )
+    ).to.emit(swNFT, "LogWithdraw")
+     .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+
+    const position = await swNFT.positions("1");
+    expect(position.pubKey).to.be.equal(pubkey);
+    expect(position.value).to.be.equal('1000000000000000000');
+    expect(position.baseTokenBalance).to.be.equal('0');
+  });
+
+  it("cannot deposit 2 swETH", async function() {
+    await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
+    expect(
+      swNFT.deposit(
+        "1",
+        ethers.utils.parseEther("2")
+      )
+    ).to.be.revertedWith("cannot deposit more than the position value");
+  });
+
+  it("can deposit 1 swETH", async function() {
+    await swETH.approve(swNFT.address, ethers.utils.parseEther("1"));
+    expect(
+      swNFT.deposit(
+        "1",
+        ethers.utils.parseEther("1")
+      )
+    ).to.emit(swNFT, "LogDeposit")
+     .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+
+    const position = await swNFT.positions("1");
+    expect(position.pubKey).to.be.equal(pubkey);
+    expect(position.value).to.be.equal('1000000000000000000');
+    expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
+  });
 });

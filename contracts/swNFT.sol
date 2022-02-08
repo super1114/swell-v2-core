@@ -58,24 +58,24 @@ contract SWNFT is
         eth1WithdrawalAddress = _eth1WithdrawalAddress;
     }
 
-    // ============ Mutative functions ============
+    // ============ Public Mutative functions ============
 
     /// @notice Deposit ETH into official contract
     /// @param pubKey The public key of the validatator
     /// @param signature The signature of the withdrawal
     /// @param depositDataRoot The root of the deposit data
     /// @return newItemId The token ID of the new token
-    function deposit(
+    function stake(
         bytes calldata pubKey,
         bytes calldata signature,
         bytes32 depositDataRoot
     ) external payable returns (uint256 newItemId) {
-        // Check deposit amount
+        // Check stake amount
         require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % ETHER == 0, "deposit value not multiple of Ether");
+        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         require(
             validatorDeposits[pubKey] + msg.value <= 32 ether,
-            "cannot deposit more than 32 ETH"
+            "cannot stake more than 32 ETH"
         );
 
         depositContract.deposit{value: msg.value}(
@@ -101,7 +101,7 @@ contract SWNFT is
             msg.value
         );
 
-        emit LogDeposit(msg.sender, newItemId, pubKey, msg.value);
+        emit LogStake(msg.sender, newItemId, pubKey, msg.value);
     }
 
     /// @notice set base token address
@@ -110,6 +110,8 @@ contract SWNFT is
         require(_baseTokenAddress != address(0), "Address cannot be 0");
         baseTokenAddress = _baseTokenAddress;
     }
+
+    // ============ Public Getter functions ============
 
     /// @notice get token URI from token ID
     /// @param tokenId The token ID
@@ -125,18 +127,21 @@ contract SWNFT is
     // /e9c26aaea0/contracts/contract/minipool/RocketMinipoolManager.sol#L196
     /// @notice Get the withdrawal credentials for the withdrawal contract
     /// @return The withdrawal credentials
-    function _getWithdrawalCredentials() internal view returns (bytes memory) {
+    function _getWithdrawalCredentials() private view returns (bytes memory) {
         return abi.encodePacked(bytes1(0x01), bytes11(0x0), eth1WithdrawalAddress);
     }
 
     /// @notice Convert public key from bytes to string output
     /// @param pubKey The public key
     /// @return The public key in string format
-    function _pubKeyToString(bytes memory pubKey) internal pure returns (string memory) {
+    function _pubKeyToString(bytes memory pubKey) private pure returns (string memory) {
         return string(abi.encodePacked(bytes32(pubKey).toHex(), (pubKey.bytesToBytes16(32)).toHex16()));
     }
 
-    function _constructTokenURI(Position memory params) internal view returns (string memory) {
+    /// @notice Constructing the token URI
+    /// @param params The position params
+    /// @return The token URI in string format
+    function _constructTokenURI(Position memory params) private view returns (string memory) {
         bytes memory name = _generateName(params.pubKey, params.value);
         bytes memory description = _generateDescription();
         // string memory image = Base64.encode(bytes(generateSVGImage(params)));
@@ -162,7 +167,8 @@ contract SWNFT is
     }
 
     /// @notice Return name of the metadata
-    function _generateName(bytes memory pubKey, uint value) internal view returns (bytes memory) {
+    /// @return The name of the metadata in bytes
+    function _generateName(bytes memory pubKey, uint value) private view returns (bytes memory) {
         return abi.encodePacked(
             "SwellNetwork Validator",
             " - ",
@@ -173,7 +179,9 @@ contract SWNFT is
         );
     }
 
-    function _generateDescription() internal pure returns (bytes memory) {
+    /// @notice Return description of the metadata
+    /// @return The description of the metadata in bytes
+    function _generateDescription() private pure returns (bytes memory) {
         return abi.encodePacked(
                 'This NFT represents a position in a SwellNetwork Validator. ',
                 'The owner of this NFT can modify or redeem position. ',
@@ -181,6 +189,25 @@ contract SWNFT is
                 unicode'⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. ',
                 'Make sure token addresses match the expected tokens, as token symbols may be imitated.'
             );
+    }
+
+    function deposit(uint tokenId, uint amount) external returns (bool success) {
+        uint value = positions[tokenId].value;
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
+        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance += amount;
+        emit LogDeposit(tokenId, msg.sender, amount);
+    }
+
+    function withdraw(uint tokenId, uint amount) external returns (bool success) {
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
+        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance -= amount;
+        emit LogWithdraw(tokenId, msg.sender, amount);
     }
 
 }
