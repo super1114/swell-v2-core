@@ -21,6 +21,8 @@ interface ISWNFT is IERC721
 
     function setBaseTokenAddress(address _baseTokenAddress) external;
 
+    function baseTokenAddress() external view returns (address);
+
     // ============ Events ============
 
     event LogStake(
@@ -38,6 +40,31 @@ interface ISWNFT is IERC721
 
     event LogWithdraw(
         uint tokenId,
+        address user,
+        uint amount
+    );
+
+    event LogAddStrategy(
+        address strategy
+    );
+
+    event LogRemoveStrategy(
+        uint strategyIndex,
+        address strategy
+    );
+
+    event LogEnterStrategy(
+        uint tokenId,
+        uint strategyIndex,
+        address strategy,
+        address user,
+        uint amount
+    );
+
+    event LogExitStrategy(
+        uint tokenId,
+        uint strategyIndex,
+        address strategy,
         address user,
         uint amount
     );

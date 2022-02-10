@@ -14,7 +14,8 @@ describe("SWNFT", async () => {
   const deposit_data_root =
     "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
-  let swNFT, swETH, signer;
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+  let swNFT, swETH, signer, strategy;
 
   before(async () => {
     [signer] = await ethers.getSigners();
@@ -22,11 +23,17 @@ describe("SWNFT", async () => {
     swNFT = await SWNFT.deploy(depositAddress);
     await swNFT.deployed();
     console.log("swNFT deployed to:", swNFT.address);
+
     const SWETH= await ethers.getContractFactory("SWETH");
     swETH = await SWETH.deploy(swNFT.address);
     await swETH.deployed();
     console.log("swETH deployed to:", swETH.address);
     await swNFT.setBaseTokenAddress(swETH.address);
+
+    const Strategy = await ethers.getContractFactory("Strategy");
+    strategy = await Strategy.deploy(swNFT.address);
+    await strategy.deployed();
+    console.log("strategy deployed to:", strategy.address);
   });
 
   it("cannot stake less than 1 Ether", async function() {
@@ -124,5 +131,56 @@ describe("SWNFT", async () => {
     expect(position.pubKey).to.be.equal(pubkey);
     expect(position.value).to.be.equal('1000000000000000000');
     expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
+  });
+
+  it("can add strategy", async function() {
+    expect(
+      swNFT.addStrategy(zeroAddress)
+    ).to.be.revertedWith("address cannot be 0");
+
+    expect(
+      swNFT.addStrategy(depositAddress)
+    ).to.emit(swNFT, "LogAddStrategy")
+     .withArgs(depositAddress);
+    let strategyAddress = await swNFT.strategies("0");
+    expect(strategyAddress).to.be.equal(depositAddress);
+
+    expect(
+      swNFT.addStrategy(strategy.address)
+    ).to.emit(swNFT, "LogAddStrategy")
+     .withArgs(strategy.address);
+    strategyAddress = await swNFT.strategies("1");
+    expect(strategyAddress).to.be.equal(strategy.address);
+  });
+
+  it("can enter strategy", async function() {
+    expect(
+      swNFT.enterStrategy("2", "1")
+    ).to.be.revertedWith("Query for nonexistent token");
+
+    expect(
+      swNFT.enterStrategy("1", "1")
+    ).to.emit(swNFT, "LogEnterStrategy")
+     .withArgs("1", "1", strategy.address, signer.address, ethers.utils.parseEther("1"));
+
+    expect(
+      swNFT.enterStrategy("1", "1")
+    ).to.be.revertedWith("cannot enter strategy with no base token balance");
+  });
+
+  it("can exit strategy", async function() {
+    expect(
+      swNFT.exitStrategy("1", "1")
+    ).to.emit(swNFT, "LogExitStrategy")
+     .withArgs("1", "1", strategy.address, signer.address, ethers.utils.parseEther("1"));
+
+    expect(
+      swNFT.exitStrategy("1", "1")
+    ).to.be.revertedWith("No position to exit");
+  });
+
+  it("can remove strategy", async function(){
+    expect(swNFT.removeStrategy("0")).to.emit(swNFT, "LogRemoveStrategy").withArgs("0", depositAddress);
+    expect(swNFT.removeStrategy("1")).to.emit(swNFT, "LogRemoveStrategy").withArgs("1", strategy.address);
   });
 });
