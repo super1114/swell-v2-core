@@ -4,10 +4,10 @@
   "description": "SwellNetwork V2",
   "scripts": {
     "fork:mainnet": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_API_KEY .env | cut -d '=' -f2)",
-    "test:inte": "hardhat test test/inte/* --network localhost",
+    "test:inte": "hardhat test --testfiles 'test/inte/swNFT-test.js' --network localhost",
     "test:unit": "hardhat test test/unit/* ",
     "prepare": "husky install",
-    "coverage:inte": "hardhat coverage --testfiles 'test/inte/*.js' ",
+    "coverage:inte": "hardhat coverage --testfiles 'test/inte/swNFT-test.js' ",
     "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' --network localhost"
   },
   "keywords": [
