@@ -61,7 +61,35 @@ contract SWNFT is
         eth1WithdrawalAddress = _eth1WithdrawalAddress;
     }
 
-    // ============ Public Mutative functions ============
+    // ============ Public Mutative with permission functions ============
+
+    /// @notice set base token address
+    /// @param _baseTokenAddress The address of the base token
+    function setBaseTokenAddress(address _baseTokenAddress) external onlyOwner {
+        require(_baseTokenAddress != address(0), "Address cannot be 0");
+        baseTokenAddress = _baseTokenAddress;
+    }
+
+    /// @notice Add a new strategy
+    /// @param strategy The strategy address to add
+    function addStrategy(address strategy) onlyOwner external{
+        require(strategy != address(0), "address cannot be 0");
+        strategies.push(strategy);
+        emit LogAddStrategy(strategy);
+    }
+
+    /// @notice Remove a strategy
+    /// @param strategy The strategy index to remove
+    function removeStrategy(uint strategy) onlyOwner external{
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        uint length = strategies.length;
+        address last = strategies[length-1];
+        emit LogRemoveStrategy(strategy, strategies[strategy]);
+        strategies[strategy] = last;
+        strategies.pop();
+    }
+
+    // ============ Public Mutative without permission functions ============
 
     /// @notice Deposit ETH into official contract
     /// @param pubKey The public key of the validatator
@@ -107,13 +135,80 @@ contract SWNFT is
         emit LogStake(msg.sender, newItemId, pubKey, msg.value);
     }
 
-    /// @notice set base token address
-    /// @param _baseTokenAddress The address of the base token
-    function setBaseTokenAddress(address _baseTokenAddress) external onlyOwner {
-        require(_baseTokenAddress != address(0), "Address cannot be 0");
-        baseTokenAddress = _baseTokenAddress;
+    /// @notice Deposit swETH into position
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH to deposit
+    /// @return success Whether the deposit was successful
+    function deposit(uint tokenId, uint amount) external returns (bool success) {
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(amount > 0, "Amount must be greater than 0");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
+        uint value = positions[tokenId].value;
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
+        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance += amount;
+        emit LogDeposit(tokenId, msg.sender, amount);
     }
 
+    /// @notice Withdraw swETH from position
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH to withdraw
+    /// @return success Whether the withdraw was successful
+    function withdraw(uint tokenId, uint amount) external returns (bool success) {
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(amount > 0, "Amount must be greater than 0");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
+        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance -= amount;
+        emit LogWithdraw(tokenId, msg.sender, amount);
+    }
+
+    /// @notice Enter strategy for a token
+    /// @param tokenId The token ID
+    /// @param strategy The strategy index to enter
+    /// @return success Whether the strategy enter was successful
+    function enterStrategy(uint tokenId, uint strategy) external returns (bool success){
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
+        uint amount = positions[tokenId].baseTokenBalance;
+        require(amount > 0, "cannot enter strategy with no base token balance");
+        ISWETH(baseTokenAddress).approve(strategies[strategy], amount);
+        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance -= amount;
+        emit LogEnterStrategy(
+        tokenId,
+        strategy,
+        strategies[strategy],
+        msg.sender,
+        amount
+        );
+    }
+
+    /// @notice Exit strategy for a token
+    /// @param tokenId The token ID
+    /// @param strategy The strategy index to enter
+    /// @return amount The amount of swETH withdrawn
+    function exitStrategy(uint tokenId, uint strategy) external returns (uint amount){
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
+        amount = IStrategy(strategies[strategy]).exit(tokenId);
+        positions[tokenId].baseTokenBalance += amount;
+        emit LogExitStrategy(
+        tokenId,
+        strategy,
+        strategies[strategy],
+        msg.sender,
+        amount
+        );
+    }
     // ============ Public Getter functions ============
 
     /// @notice get token URI from token ID
@@ -194,93 +289,4 @@ contract SWNFT is
             );
     }
 
-    /// @notice Deposit swETH into position
-    /// @param tokenId The token ID
-    /// @param amount The amount of swETH to deposit
-    /// @return success Whether the deposit was successful
-    function deposit(uint tokenId, uint amount) external returns (bool success) {
-        require(_exists(tokenId), "Query for nonexistent token");
-        require(amount > 0, "Amount must be greater than 0");
-        uint value = positions[tokenId].value;
-        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
-        require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
-        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
-        if(!success) return success;
-        positions[tokenId].baseTokenBalance += amount;
-        emit LogDeposit(tokenId, msg.sender, amount);
-    }
-
-    /// @notice Withdraw swETH from position
-    /// @param tokenId The token ID
-    /// @param amount The amount of swETH to withdraw
-    /// @return success Whether the withdraw was successful
-    function withdraw(uint tokenId, uint amount) external returns (bool success) {
-        require(_exists(tokenId), "Query for nonexistent token");
-        require(amount > 0, "Amount must be greater than 0");
-        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
-        require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
-        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
-        if(!success) return success;
-        positions[tokenId].baseTokenBalance -= amount;
-        emit LogWithdraw(tokenId, msg.sender, amount);
-    }
-
-    /// @notice Add a new strategy
-    /// @param strategy The strategy address to add
-    function addStrategy(address strategy) onlyOwner external{
-        require(strategy != address(0), "address cannot be 0");
-        strategies.push(strategy);
-        emit LogAddStrategy(strategy);
-    }
-
-    /// @notice Remove a strategy
-    /// @param strategy The strategy index to remove
-    function removeStrategy(uint strategy) onlyOwner external{
-        require(strategies[strategy] != address(0), "strategy does not exist");
-        uint length = strategies.length;
-        address last = strategies[length-1];
-        emit LogRemoveStrategy(strategy, strategies[strategy]);
-        strategies[strategy] = last;
-        strategies.pop();
-    }
-
-    /// @notice Enter strategy for a token
-    /// @param tokenId The token ID
-    /// @param strategy The strategy index to enter
-    /// @return success Whether the strategy enter was successful
-    function enterStrategy(uint tokenId, uint strategy) external returns (bool success){
-        require(_exists(tokenId), "Query for nonexistent token");
-        require(strategies[strategy] != address(0), "strategy does not exist");
-        uint amount = positions[tokenId].baseTokenBalance;
-        require(amount > 0, "cannot enter strategy with no base token balance");
-        ISWETH(baseTokenAddress).approve(strategies[strategy], amount);
-        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
-        if(!success) return success;
-        positions[tokenId].baseTokenBalance -= amount;
-        emit LogEnterStrategy(
-        tokenId,
-        strategy,
-        strategies[strategy],
-        msg.sender,
-        amount
-        );
-    }
-
-    /// @notice Exit strategy for a token
-    /// @param tokenId The token ID
-    /// @param strategy The strategy index to enter
-    /// @return amount The amount of swETH withdrawn
-    function exitStrategy(uint tokenId, uint strategy) external returns (uint amount){
-        require(_exists(tokenId), "Query for nonexistent token");
-        require(strategies[strategy] != address(0), "strategy does not exist");
-        amount = IStrategy(strategies[strategy]).exit(tokenId);
-        positions[tokenId].baseTokenBalance += amount;
-        emit LogExitStrategy(
-        tokenId,
-        strategy,
-        strategies[strategy],
-        msg.sender,
-        amount
-        );
-    }
 }
