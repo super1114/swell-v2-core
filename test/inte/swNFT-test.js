@@ -1,24 +1,20 @@
-// import { IDepositContract } from "./abi/IDepositContract.json";
 const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
-// import { solidity } from "ethereum-waffle";
 
 describe("SWNFT", async () => {
   const pubkey =
     "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
-  const withdrawal_credentials =
-    "0x01000000000000000000000000000000219ab540356cbb839cbe05303d7705fa";
   const signature =
     "0xb224d558d829c245fe56bff9d28c7fd0d348d6795eb8faef8ce220c3657e373f8dc0a0c8512be589ecaa749fe39fc0371380a97aab966606ba7fa89c78dc1703858dfc5d3288880a813e7743f1ff379192e1f6b01a6a4a3affee1d50e5b3c849";
   const deposit_data_root =
     "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-  let swNFT, swETH, signer, strategy;
+  let swNFT, swETH, signer, user, strategy;
 
   before(async () => {
-    [signer] = await ethers.getSigners();
+    [signer, user] = await ethers.getSigners();
     const SWNFT= await ethers.getContractFactory("SWNFT");
     swNFT = await SWNFT.deploy(depositAddress);
     await swNFT.deployed();
@@ -74,10 +70,8 @@ describe("SWNFT", async () => {
     expect(
       swNFT.stake(
         pubkey,
-        // withdrawal_credentials,
         signature,
         deposit_data_root,
-        // "28899",
         { value: ethers.utils.parseEther("32") }
       )
     ).to.be.revertedWith("cannot stake more than 32 ETH");
@@ -90,6 +84,13 @@ describe("SWNFT", async () => {
         ethers.utils.parseEther("2")
       )
     ).to.be.revertedWith("cannot withdraw more than the position value");
+
+    expect(
+      swNFT.connect(user).withdraw(
+        "1",
+        ethers.utils.parseEther("1")
+      )
+    ).to.be.revertedWith("Only owner can withdraw");
   });
 
   it("can withdraw 1 swETH", async function() {
@@ -109,6 +110,13 @@ describe("SWNFT", async () => {
 
   it("cannot deposit 2 swETH", async function() {
     await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
+    expect(
+      swNFT.connect(user).deposit(
+        "1",
+        ethers.utils.parseEther("2")
+      )
+    ).to.be.revertedWith("Only owner can deposit");
+
     expect(
       swNFT.deposit(
         "1",
@@ -155,6 +163,10 @@ describe("SWNFT", async () => {
 
   it("can enter strategy", async function() {
     expect(
+      swNFT.connect(user).enterStrategy("1", "1")
+    ).to.be.revertedWith("Only owner can exit strategy");
+
+    expect(
       swNFT.enterStrategy("2", "1")
     ).to.be.revertedWith("Query for nonexistent token");
 
@@ -169,6 +181,10 @@ describe("SWNFT", async () => {
   });
 
   it("can exit strategy", async function() {
+    expect(
+      swNFT.connect(user).exitStrategy("1", "1")
+    ).to.be.revertedWith("Only owner can exit strategy");
+
     expect(
       swNFT.exitStrategy("1", "1")
     ).to.emit(swNFT, "LogExitStrategy")
