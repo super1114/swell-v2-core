@@ -445,48 +445,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_baseTokenAddress",
-        "type": "address"
-      }
-    ],
-    "name": "setBaseTokenAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "pubKey",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "depositDataRoot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "stake",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "newItemId",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"

@@ -13,13 +13,14 @@ interface ISWNFT is IERC721
         uint baseTokenBalance;
     }
 
-    function stake(
-        bytes calldata pubKey,
-        bytes calldata signature,
-        bytes32 depositDataRoot
-    ) external payable returns (uint256 newItemId);
+    struct Action {
+        uint tokenId;
+        uint action;
+        uint amount;
+        uint strategy;
+    }
 
-    function setBaseTokenAddress(address _baseTokenAddress) external;
+    enum ActionChoices { Deposit, Withdraw, EnterStrategy, ExitStrategy }
 
     function baseTokenAddress() external view returns (address);
 
