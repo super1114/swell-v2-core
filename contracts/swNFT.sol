@@ -2,15 +2,18 @@
 
 pragma solidity 0.8.9;
 
+// Packages
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import 'base64-sol/base64.sol';
+import "base64-sol/base64.sol";
 
+// Interfaces
 import "./interfaces/ISWNFT.sol";
 import "./interfaces/ISWETH.sol";
 import "./interfaces/IStrategy.sol";
 
+// Libraries
 import { Helpers } from "./helpers.sol";
 
 interface IDepositContract {
@@ -139,7 +142,7 @@ contract SWNFT is
     /// @param tokenId The token ID
     /// @param amount The amount of swETH to deposit
     /// @return success Whether the deposit was successful
-    function deposit(uint tokenId, uint amount) external returns (bool success) {
+    function deposit(uint tokenId, uint amount) public returns (bool success) {
         require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
@@ -156,7 +159,7 @@ contract SWNFT is
     /// @param tokenId The token ID
     /// @param amount The amount of swETH to withdraw
     /// @return success Whether the withdraw was successful
-    function withdraw(uint tokenId, uint amount) external returns (bool success) {
+    function withdraw(uint tokenId, uint amount) public returns (bool success) {
         require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
@@ -172,7 +175,7 @@ contract SWNFT is
     /// @param tokenId The token ID
     /// @param strategy The strategy index to enter
     /// @return success Whether the strategy enter was successful
-    function enterStrategy(uint tokenId, uint strategy) external returns (bool success){
+    function enterStrategy(uint tokenId, uint strategy) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
@@ -195,7 +198,7 @@ contract SWNFT is
     /// @param tokenId The token ID
     /// @param strategy The strategy index to enter
     /// @return amount The amount of swETH withdrawn
-    function exitStrategy(uint tokenId, uint strategy) external returns (uint amount){
+    function exitStrategy(uint tokenId, uint strategy) public returns (uint amount){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
@@ -209,6 +212,26 @@ contract SWNFT is
         amount
         );
     }
+
+    /// @notice Able to bactch action for multiple tokens
+    /// @param actions The actions to perform
+    function batchAction(Action[] calldata actions) external {
+        for(uint i = 0; i < actions.length; i++){
+            if(actions[i].action == uint(ActionChoices.Deposit)) {
+                deposit(actions[i].tokenId, actions[i].amount);
+            }
+            if(actions[i].action == uint(ActionChoices.Withdraw)) {
+                withdraw(actions[i].tokenId, actions[i].amount);
+            }
+            if(actions[i].action == uint(ActionChoices.EnterStrategy)) {
+                enterStrategy(actions[i].tokenId, actions[i].strategy);
+            }
+            if(actions[i].action == uint(ActionChoices.ExitStrategy)) {
+                exitStrategy(actions[i].tokenId, actions[i].strategy);
+            }
+        }
+    }
+
     // ============ Public Getter functions ============
 
     /// @notice get token URI from token ID

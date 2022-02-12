@@ -66,6 +66,29 @@ describe("SWNFT", async () => {
     expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
   });
 
+  it("can stake 1 Ether again", async function(){
+    expect(
+      swNFT.stake(
+        pubkey,
+        signature,
+        deposit_data_root,
+        { value: ethers.utils.parseEther("1") }
+      )
+    ).to.emit(swNFT, "LogStake")
+     .withArgs(signer.address, "2", pubkey, ethers.utils.parseEther("1"));
+
+    const tokenURI = await swNFT.tokenURI("2");
+    const decodeTokenURI = extractJSONFromURI(tokenURI);
+    expect(decodeTokenURI.name).to.be.equal("SwellNetwork Validator - 0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec - 1 Ether");
+    expect(decodeTokenURI.description).to.be.equal("This NFT represents a position in a SwellNetwork Validator. The owner of this NFT can modify or redeem position. \n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.");
+    expect(decodeTokenURI.image).to.be.equal("data:image/svg+xml;base64,");
+
+    const position = await swNFT.positions("2");
+    expect(position.pubKey).to.be.equal(pubkey);
+    expect(position.value).to.be.equal('1000000000000000000');
+    expect(position.baseTokenBalance).to.be.equal('1000000000000000000');
+  });
+
   it("cannot stake more than 32 Ether", async function() {
     expect(
       swNFT.stake(
@@ -195,8 +218,35 @@ describe("SWNFT", async () => {
     ).to.be.revertedWith("No position to exit");
   });
 
+  it("can batch actions", async function() {
+    expect(
+      swNFT.batchAction([{
+        tokenId: "1",
+        action: "2",
+        amount: "0",
+        strategy: "1"
+      },{
+        tokenId: "1",
+        action: "3",
+        amount: "0",
+        strategy: "1"
+      },{
+        tokenId: "1",
+        action: "1",
+        amount: ethers.utils.parseEther("1"),
+        strategy: "0",
+      }])
+    ).to.emit(swNFT, "LogExitStrategy")
+     .withArgs("1", "1", strategy.address, signer.address, ethers.utils.parseEther("1"))
+    .to.emit(swNFT, "LogEnterStrategy")
+     .withArgs("1", "1", strategy.address, signer.address, ethers.utils.parseEther("1"))
+    .to.emit(swNFT, "LogWithdraw")
+     .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+  });
+
   it("can remove strategy", async function(){
     expect(swNFT.removeStrategy("0")).to.emit(swNFT, "LogRemoveStrategy").withArgs("0", depositAddress);
     expect(swNFT.removeStrategy("1")).to.emit(swNFT, "LogRemoveStrategy").withArgs("1", strategy.address);
   });
+
 });
