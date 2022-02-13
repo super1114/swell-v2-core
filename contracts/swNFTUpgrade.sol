@@ -1,10 +1,20 @@
 //SPDX-License-Identifier: BUSL-1.1
+
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+// Packages
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "base64-sol/base64.sol";
+
+// Interfaces
+import "./interfaces/ISWNFT.sol";
+import "./interfaces/ISWETH.sol";
+import "./interfaces/IStrategy.sol";
+
+// Libraries
 import { Helpers } from "./helpers.sol";
 
 interface IDepositContract {
@@ -24,105 +34,310 @@ interface IDepositContract {
 
 /// @title Contract for SWNFTUpgrade
 contract SWNFTUpgrade is
-    ERC721URIStorageUpgradeable,
+    ERC721Upgradeable,
     UUPSUpgradeable,
-    OwnableUpgradeable
+    OwnableUpgradeable,
+    ISWNFT
 {
     uint256 public GWEI;
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
 
-    CountersUpgradeable.Counter private _tokenIds;
+    CountersUpgradeable.Counter public tokenIds;
 
-    mapping(bytes => uint256) public validators;
+    address public eth1WithdrawalAddress;
+    address public baseTokenAddress;
+    uint256 public ETHER;
 
-    string public baseURI;
+    IDepositContract public depositContract;
+
+    bytes[] public validators;
+    mapping(bytes => uint256) public validatorDeposits;
+
+    /// @dev The token ID position data
+    mapping(uint256 => Position) public positions;
+
+    address[] public strategies;
 
     /// @notice initialise the contract to issue the token
-    /// @param name The name of the token
-    /// @param symbol The symbol of the token
-    function initialize(string memory name, string memory symbol)
-        public
+    function initialize(address _eth1WithdrawalAddress)
+        external
         initializer
     {
-        __ERC721_init(name, symbol);
-        GWEI = 1e9;
+        __ERC721_init("Swell NFT", "swNFT");
+        __UUPSUpgradeable_init();
+        __Ownable_init();
+        eth1WithdrawalAddress = _eth1WithdrawalAddress;
+        ETHER = 1e18;
+        depositContract = IDepositContract(
+        0x00000000219ab540356cBB839Cbe05303d7705Fa);
     }
 
-    /// @notice Stake ETH into official contract
+    // ============ External mutative with permission functions ============
+
+    /// @notice set base token address
+    /// @param _baseTokenAddress The address of the base token
+    function setBaseTokenAddress(address _baseTokenAddress) onlyOwner external {
+        require(_baseTokenAddress != address(0), "Address cannot be 0");
+        baseTokenAddress = _baseTokenAddress;
+    }
+
+    /// @notice Add a new strategy
+    /// @param strategy The strategy address to add
+    function addStrategy(address strategy) onlyOwner external{
+        require(strategy != address(0), "address cannot be 0");
+        strategies.push(strategy);
+        emit LogAddStrategy(strategy);
+    }
+
+    /// @notice Remove a strategy
+    /// @param strategy The strategy index to remove
+    function removeStrategy(uint strategy) onlyOwner external{
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        uint length = strategies.length;
+        address last = strategies[length-1];
+        emit LogRemoveStrategy(strategy, strategies[strategy]);
+        strategies[strategy] = last;
+        strategies.pop();
+    }
+
+    // ============ Public mutative without permission functions ============
+
+    /// @notice Deposit ETH into official contract
     /// @param pubKey The public key of the validatator
-    /// @param withdrawalCredentials The withdrawal credentials of the validator
     /// @param signature The signature of the withdrawal
     /// @param depositDataRoot The root of the deposit data
-    /// @param validatorIndex The index of the validator
+    /// @return newItemId The token ID of the new token
     function stake(
         bytes calldata pubKey,
-        bytes calldata withdrawalCredentials,
         bytes calldata signature,
-        bytes32 depositDataRoot,
-        string calldata validatorIndex
+        bytes32 depositDataRoot
     ) external payable returns (uint256 newItemId) {
-        IDepositContract depositContract = IDepositContract(
-            0x00000000219ab540356cBB839Cbe05303d7705Fa
-        );
-
-        // Check deposit amount
         require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % GWEI == 0, "deposit value not multiple of gwei");
+        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         require(
-            validators[pubKey] + msg.value <= 32 ether,
-            "can not stake more than 32 ETH"
+            validatorDeposits[pubKey] + msg.value <= 32 ether,
+            "cannot stake more than 32 ETH"
         );
 
         depositContract.deposit{value: msg.value}(
             pubKey,
-            withdrawalCredentials,
+            _getWithdrawalCredentials(),
             signature,
             depositDataRoot
         );
 
-        validators[pubKey] += msg.value;
+        validators.push(pubKey);
+        validatorDeposits[pubKey] += msg.value;
 
-        _tokenIds.increment();
+        tokenIds.increment();
 
-        newItemId = _tokenIds.current();
-        _mint(msg.sender, newItemId);
-        // "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/
-        // 0xa5e7f4a06080b860d376871ce0798aa7677e7a4b117a5bd0909f15fee02f28a62388496982c133fef1eba087d8a06005/
-        // 1000000000000000000.json"
-        _setTokenURI(
-            newItemId,
-            string(
-                abi.encodePacked(
-                    pubKeyToString(pubKey),
-                    "/",
-                    msg.value.uint2str(),
-                    ".json"
-                )
-            )
+        newItemId = tokenIds.current();
+
+        _safeMint(msg.sender, newItemId);
+        ISWETH(baseTokenAddress).mint(msg.value);
+
+        positions[newItemId] = Position(
+            pubKey,
+            msg.value,
+            msg.value
         );
 
-        emit LogStake(msg.sender, newItemId, validatorIndex, msg.value);
+        emit LogStake(msg.sender, newItemId, pubKey, msg.value);
+    }
+
+    /// @notice Deposit swETH into position
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH to deposit
+    /// @return success Whether the deposit was successful
+    function deposit(uint tokenId, uint amount) public returns (bool success) {
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(amount > 0, "Amount must be greater than 0");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
+        uint value = positions[tokenId].value;
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
+        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance += amount;
+        emit LogDeposit(tokenId, msg.sender, amount);
+    }
+
+    /// @notice Withdraw swETH from position
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH to withdraw
+    /// @return success Whether the withdraw was successful
+    function withdraw(uint tokenId, uint amount) public returns (bool success) {
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(amount > 0, "Amount must be greater than 0");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
+        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
+        require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
+        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance -= amount;
+        emit LogWithdraw(tokenId, msg.sender, amount);
+    }
+
+    /// @notice Enter strategy for a token
+    /// @param tokenId The token ID
+    /// @param strategy The strategy index to enter
+    /// @return success Whether the strategy enter was successful
+    function enterStrategy(uint tokenId, uint strategy) public returns (bool success){
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
+        uint amount = positions[tokenId].baseTokenBalance;
+        require(amount > 0, "cannot enter strategy with no base token balance");
+        ISWETH(baseTokenAddress).approve(strategies[strategy], amount);
+        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
+        if(!success) return success;
+        positions[tokenId].baseTokenBalance -= amount;
+        emit LogEnterStrategy(
+        tokenId,
+        strategy,
+        strategies[strategy],
+        msg.sender,
+        amount
+        );
+    }
+
+    /// @notice Exit strategy for a token
+    /// @param tokenId The token ID
+    /// @param strategy The strategy index to enter
+    /// @return amount The amount of swETH withdrawn
+    function exitStrategy(uint tokenId, uint strategy) public returns (uint amount){
+        require(_exists(tokenId), "Query for nonexistent token");
+        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
+        amount = IStrategy(strategies[strategy]).exit(tokenId);
+        positions[tokenId].baseTokenBalance += amount;
+        emit LogExitStrategy(
+        tokenId,
+        strategy,
+        strategies[strategy],
+        msg.sender,
+        amount
+        );
+    }
+
+    /// @notice Able to bactch action for multiple tokens
+    /// @param actions The actions to perform
+    function batchAction(Action[] calldata actions) external {
+        for(uint i = 0; i < actions.length; i++){
+            if(actions[i].action == uint(ActionChoices.Deposit)) {
+                deposit(actions[i].tokenId, actions[i].amount);
+            }
+            if(actions[i].action == uint(ActionChoices.Withdraw)) {
+                withdraw(actions[i].tokenId, actions[i].amount);
+            }
+            if(actions[i].action == uint(ActionChoices.EnterStrategy)) {
+                enterStrategy(actions[i].tokenId, actions[i].strategy);
+            }
+            if(actions[i].action == uint(ActionChoices.ExitStrategy)) {
+                exitStrategy(actions[i].tokenId, actions[i].strategy);
+            }
+        }
+    }
+
+    /**
+     * @dev Unstake Ether and burn according token
+     *
+     * Currently this is intentionally not supported since Ethereum 2.0 withdrawals specification
+     * might change before withdrawals are enabled. This contract sits behind a proxy that can be
+     * upgraded to a new implementation contract collectively by swDAO holders by performing a vote.
+     *
+     * When Ethereum 2.0 withdrawals specification is finalized, Swell DAO will prepare the new
+     * implementation contract and initiate a vote among swDAO holders for upgrading the proxy to
+     * the new implementation.
+     */
+    function unstake() pure external {
+        revert("not supported");
+    }
+
+    // ============ Public Getter functions ============
+
+    /// @notice get token URI from token ID
+    /// @param tokenId The token ID
+    /// @return The URI of the token
+    function tokenURI(uint tokenId) public view override returns (string memory) {
+        require(_exists(tokenId), "Query for nonexistent token");
+        return _constructTokenURI(positions[tokenId]);
+    }
+
+    // ============ Private functions ============
+
+    // https://github.com/rocket-pool/rocketpool/blob
+    // /e9c26aaea0/contracts/contract/minipool/RocketMinipoolManager.sol#L196
+    /// @notice Get the withdrawal credentials for the withdrawal contract
+    /// @return The withdrawal credentials
+    function _getWithdrawalCredentials() private view returns (bytes memory) {
+        return abi.encodePacked(bytes1(0x01), bytes11(0x0), eth1WithdrawalAddress);
+    }
+
+    /// @notice Convert public key from bytes to string output
+    /// @param pubKey The public key
+    /// @return The public key in string format
+    function _pubKeyToString(bytes memory pubKey) private pure returns (string memory) {
+        return string(abi.encodePacked(bytes32(pubKey).toHex(), (pubKey.bytesToBytes16(32)).toHex16()));
+    }
+
+    /// @notice Constructing the token URI
+    /// @param params The position params
+    /// @return The token URI in string format
+    function _constructTokenURI(Position memory params) private view returns (string memory) {
+        bytes memory name = _generateName(params.pubKey, params.value);
+        bytes memory description = _generateDescription();
+        // string memory image = Base64.encode(bytes(generateSVGImage(params)));
+
+        return
+            string(
+                abi.encodePacked(
+                    'data:application/json;base64,',
+                    Base64.encode(
+                        abi.encodePacked(
+                            '{"name":"',
+                            name,
+                            '", "description":"',
+                            description,
+                            '", "image": "',
+                            'data:image/svg+xml;base64,',
+                            // image,
+                            '"}'
+                        )
+                    )
+                )
+            );
+    }
+
+    /// @notice Return name of the metadata
+    /// @return The name of the metadata in bytes
+    function _generateName(bytes memory pubKey, uint value) private view returns (bytes memory) {
+        return abi.encodePacked(
+            "SwellNetwork Validator",
+            " - ",
+            _pubKeyToString(pubKey),
+            " - ",
+            (value / ETHER).uint2str(),
+            " Ether"
+        );
+    }
+
+    /// @notice Return description of the metadata
+    /// @return The description of the metadata in bytes
+    function _generateDescription() private pure returns (bytes memory) {
+        return abi.encodePacked(
+                'This NFT represents a position in a SwellNetwork Validator. ',
+                'The owner of this NFT can modify or redeem position. ',
+                '\\n\\n',
+                unicode'⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. ',
+                'Make sure token addresses match the expected tokens, as token symbols may be imitated.'
+            );
     }
 
     /// @notice authorize upgrade for UUPS
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
-
-    function pubKeyToString(bytes calldata pubKey) public pure returns (string memory) {
-        return string(abi.encodePacked(bytes32(pubKey).toHex(), (pubKey.bytesToBytes16(32)).toHex16()));
-    }
-
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://raw.githubusercontent.com/leckylao/Eth2S/main/metaData/";
-    }
-
-    event LogStake(
-        address user,
-        uint256 itemId,
-        string validatorIndex,
-        uint256 deposit
-    );
 
     uint256[50] private __gap;
 }
