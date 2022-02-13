@@ -1,11 +1,9 @@
 //SPDX-License-Identifier: BUSL-1.1
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-
 pragma solidity 0.8.9;
 
 /// @title Interface for swNFT
-interface ISWNFT is IERC721
+interface ISWNFT
 {
     struct Position {
         bytes pubKey;

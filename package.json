@@ -4,7 +4,7 @@
   "description": "SwellNetwork V2",
   "scripts": {
     "fork:mainnet": "hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/$(grep ALCHEMY_API_KEY .env | cut -d '=' -f2)",
-    "test:inte": "hardhat test test/inte/swNFT-test.js",
+    "test:inte": "hardhat test test/inte/swNFTUpgrade-test.js",
     "test:unit": "hardhat test test/unit/* ",
     "prepare": "husky install",
     "coverage:inte": "hardhat coverage --testfiles 'test/inte/swNFT-test.js' ",

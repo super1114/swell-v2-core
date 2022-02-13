@@ -46,7 +46,7 @@ contract SWNFT is
     address public baseTokenAddress;
     uint256 public ETHER = 1e18;
 
-    IDepositContract depositContract = IDepositContract(
+    IDepositContract public depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa
     );
 
@@ -64,11 +64,11 @@ contract SWNFT is
         eth1WithdrawalAddress = _eth1WithdrawalAddress;
     }
 
-    // ============ Public Mutative with permission functions ============
+    // ============ External mutative with permission functions ============
 
     /// @notice set base token address
     /// @param _baseTokenAddress The address of the base token
-    function setBaseTokenAddress(address _baseTokenAddress) external onlyOwner {
+    function setBaseTokenAddress(address _baseTokenAddress) onlyOwner external {
         require(_baseTokenAddress != address(0), "Address cannot be 0");
         baseTokenAddress = _baseTokenAddress;
     }
@@ -104,7 +104,6 @@ contract SWNFT is
         bytes calldata signature,
         bytes32 depositDataRoot
     ) external payable returns (uint256 newItemId) {
-        // Check stake amount
         require(msg.value >= 1 ether, "Must send at least 1 ETH");
         require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         require(
