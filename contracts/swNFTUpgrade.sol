@@ -241,7 +241,7 @@ contract SWNFTUpgrade is
     }
 
     /**
-     * @dev Unstake Ether and burn according token
+     * @dev Unstake Ether and burn according swNFT and swETH token
      *
      * Currently this is intentionally not supported since Ethereum 2.0 withdrawals specification
      * might change before withdrawals are enabled. This contract sits behind a proxy that can be
