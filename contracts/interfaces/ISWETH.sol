@@ -9,5 +9,5 @@ interface ISWETH is IERC20
 {
     function mint(uint256 amount) external;
 
-    function burnt(uint256 amount) external;
+    function burn(uint256 amount) external;
 }

@@ -25,7 +25,7 @@ contract SWETH is ISWETH, ERC20 {
         _mint(minter, amount);
     }
 
-    function burnt(uint256 amount) external onlyMinter{
-        _mint(minter, amount);
+    function burn(uint256 amount) external onlyMinter{
+        _burn(minter, amount);
     }
 }
