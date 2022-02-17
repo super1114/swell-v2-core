@@ -53,6 +53,7 @@ contract SWNFTUpgrade is
 
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
+    mapping(bytes => bool) public whiteList;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -101,6 +102,13 @@ contract SWNFTUpgrade is
         strategies.pop();
     }
 
+    /// @notice Add a new validator into whiteList
+    /// @param pubKey The public key of the validator
+    function addWhiteList(bytes calldata pubKey) onlyOwner external{
+        whiteList[pubKey] = true;
+        emit LogAddWhiteList(msg.sender, pubKey);
+    }
+
     // ============ Public mutative without permission functions ============
 
     /// @notice Deposit ETH into official contract
@@ -119,6 +127,11 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + msg.value <= 32 ether,
             "cannot stake more than 32 ETH"
         );
+        // https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971
+        if(validatorDeposits[pubKey] == 0)
+          require(msg.sender == owner(), "First deposit must be from owner");
+        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 17 ether && msg.sender != owner())
+          require(msg.value >= 16 ether, "Must send at least 16 ETH");
 
         depositContract.deposit{value: msg.value}(
             pubKey,
@@ -127,7 +140,7 @@ contract SWNFTUpgrade is
             depositDataRoot
         );
 
-        validators.push(pubKey);
+        if(validatorDeposits[pubKey] == 0) validators.push(pubKey);
         validatorDeposits[pubKey] += msg.value;
 
         tokenIds.increment();
@@ -263,6 +276,12 @@ contract SWNFTUpgrade is
     function tokenURI(uint tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "Query for nonexistent token");
         return _constructTokenURI(positions[tokenId]);
+    }
+
+    /// @notice get length of validators
+    /// @return length The length of the validators
+    function validatorsLength() view external returns (uint length) {
+        length = validators.length;
     }
 
     // ============ Private functions ============

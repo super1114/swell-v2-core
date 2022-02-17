@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ISWETH.sol";
 
 /// @title Contract for SWNFT
-contract SWETH is ISWETH, ERC20, Ownable {
+contract SWDAO is ISWETH, ERC20, Ownable {
 
     /// @notice initialise the contract to issue the token
     constructor() ERC20("Swell DAO", "swDAO") {}
