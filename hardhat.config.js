@@ -28,7 +28,7 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWNFT", "SWETH"],
+    only: ["SWNFT", "SWETH", "SWNFTUpgrade", "SWDAO", "Strategy"],
   },
   gasReporter: {
     showTimeSpent: true,

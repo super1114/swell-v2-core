@@ -67,4 +67,9 @@ interface ISWNFT
         address user,
         uint amount
     );
+
+    event LogAddWhiteList(
+        address user,
+        bytes pubKey
+    );
 }
