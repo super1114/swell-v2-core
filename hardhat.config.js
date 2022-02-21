@@ -13,6 +13,10 @@ module.exports = {
       forking: {
         url: "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
       }
+    },
+    goerli: {
+      url: "https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     }
   },
   solidity: {
@@ -21,7 +25,7 @@ module.exports = {
       optimizer: {
         enabled: true,
         runs: 200
-      }
+      },
     }
   },
   abiExporter: {
