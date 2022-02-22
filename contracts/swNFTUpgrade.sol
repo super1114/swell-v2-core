@@ -45,7 +45,6 @@ contract SWNFTUpgrade is
 
     CountersUpgradeable.Counter public tokenIds;
 
-    address public eth1WithdrawalAddress;
     address public baseTokenAddress;
     uint256 public ETHER;
 
@@ -61,14 +60,14 @@ contract SWNFTUpgrade is
     address[] public strategies;
 
     /// @notice initialise the contract to issue the token
-    function initialize(address _eth1WithdrawalAddress)
+    function initialize()
+        virtual
         external
         initializer
     {
         __ERC721_init("Swell NFT", "swNFT");
         __UUPSUpgradeable_init();
         __Ownable_init();
-        eth1WithdrawalAddress = _eth1WithdrawalAddress;
         ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
@@ -135,7 +134,7 @@ contract SWNFTUpgrade is
 
         depositContract.deposit{value: msg.value}(
             pubKey,
-            _getWithdrawalCredentials(),
+            getWithdrawalCredentials(),
             signature,
             depositDataRoot
         );
@@ -284,15 +283,15 @@ contract SWNFTUpgrade is
         length = validators.length;
     }
 
-    // ============ Private functions ============
-
     // https://github.com/rocket-pool/rocketpool/blob
     // /e9c26aaea0/contracts/contract/minipool/RocketMinipoolManager.sol#L196
     /// @notice Get the withdrawal credentials for the withdrawal contract
     /// @return The withdrawal credentials
-    function _getWithdrawalCredentials() private view returns (bytes memory) {
-        return abi.encodePacked(bytes1(0x01), bytes11(0x0), eth1WithdrawalAddress);
+    function getWithdrawalCredentials() public virtual view returns (bytes memory) {
+        return abi.encodePacked(bytes1(0x01), bytes11(0x0), address(this));
     }
+
+    // ============ Private functions ============
 
     /// @notice Convert public key from bytes to string output
     /// @param pubKey The public key

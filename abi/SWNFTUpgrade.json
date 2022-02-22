@@ -543,19 +543,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "eth1WithdrawalAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -599,13 +586,20 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "getWithdrawalCredentials",
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "_eth1WithdrawalAddress",
-        "type": "address"
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
       }
     ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
