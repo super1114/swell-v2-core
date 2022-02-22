@@ -15,8 +15,12 @@ describe("SWNFTUpgrade", async () => {
 
   before(async () => {
     [signer, user] = await ethers.getSigners();
-    const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-    swNFT = await upgrades.deployProxy(SWNFTUpgrade, [depositAddress], {kind: "uups"});
+    // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
+    const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade");
+    swNFT = await upgrades.deployProxy(SWNFTUpgrade, [depositAddress], {
+      kind: "uups",
+      initializer: 'initialize(address)',
+    });
     await swNFT.deployed();
 
     const SWETH= await ethers.getContractFactory("SWETH");
