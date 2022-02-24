@@ -45,7 +45,8 @@ contract SWNFTUpgrade is
 
     CountersUpgradeable.Counter public tokenIds;
 
-    address public baseTokenAddress;
+    address public swETHAddress;
+    address public swDAOAddress;
     uint256 public ETHER;
 
     IDepositContract public depositContract;
@@ -60,26 +61,29 @@ contract SWNFTUpgrade is
     address[] public strategies;
 
     /// @notice initialise the contract to issue the token
-    function initialize()
+    /// @param _swDAOAddress The address of the swDAO contract
+    function initialize(address _swDAOAddress)
         virtual
         external
         initializer
     {
+        require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
         __ERC721_init("Swell NFT", "swNFT");
         __UUPSUpgradeable_init();
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
+        swDAOAddress = _swDAOAddress;
     }
 
     // ============ External mutative with permission functions ============
 
     /// @notice set base token address
-    /// @param _baseTokenAddress The address of the base token
-    function setBaseTokenAddress(address _baseTokenAddress) onlyOwner external {
-        require(_baseTokenAddress != address(0), "Address cannot be 0");
-        baseTokenAddress = _baseTokenAddress;
+    /// @param _swETHAddress The address of the base token
+    function setswETHAddress(address _swETHAddress) onlyOwner external {
+        require(_swETHAddress != address(0), "Address cannot be 0");
+        swETHAddress = _swETHAddress;
     }
 
     /// @notice Add a new strategy
@@ -126,11 +130,10 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + msg.value <= 32 ether,
             "cannot stake more than 32 ETH"
         );
-        // https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971
-        if(validatorDeposits[pubKey] == 0)
-          require(msg.sender == owner(), "First deposit must be from owner");
-        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 17 ether && msg.sender != owner())
+        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
           require(msg.value >= 16 ether, "Must send at least 16 ETH");
+          // Will add require for swDAO bond once there's price
+        }
 
         depositContract.deposit{value: msg.value}(
             pubKey,
@@ -147,7 +150,7 @@ contract SWNFTUpgrade is
         newItemId = tokenIds.current();
 
         _safeMint(msg.sender, newItemId);
-        ISWETH(baseTokenAddress).mint(msg.value);
+        ISWETH(swETHAddress).mint(msg.value);
 
         positions[newItemId] = Position(
             pubKey,
@@ -169,7 +172,7 @@ contract SWNFTUpgrade is
         uint value = positions[tokenId].value;
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
-        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
+        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
@@ -185,7 +188,7 @@ contract SWNFTUpgrade is
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
-        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
+        success = ISWETH(swETHAddress).transfer(msg.sender, amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance -= amount;
         emit LogWithdraw(tokenId, msg.sender, amount);
@@ -201,7 +204,7 @@ contract SWNFTUpgrade is
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         uint amount = positions[tokenId].baseTokenBalance;
         require(amount > 0, "cannot enter strategy with no base token balance");
-        ISWETH(baseTokenAddress).approve(strategies[strategy], amount);
+        ISWETH(swETHAddress).approve(strategies[strategy], amount);
         success = IStrategy(strategies[strategy]).enter(tokenId, amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance -= amount;

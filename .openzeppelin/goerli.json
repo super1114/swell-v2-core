@@ -117,7 +117,7 @@
           },
           {
             "contract": "SWNFTUpgradeGoerli",
-            "label": "baseTokenAddress",
+            "label": "swETHAddress",
             "type": "t_address",
             "src": "contracts/swNFTUpgradeGoerli.sol:48"
           },
