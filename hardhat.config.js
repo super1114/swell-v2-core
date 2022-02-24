@@ -6,6 +6,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("dotenv").config();
 require("@openzeppelin/hardhat-upgrades");
 require("solidity-coverage");
+require("./deploy/deploy");
 
 module.exports = {
   networks: {
@@ -16,6 +17,10 @@ module.exports = {
     },
     goerli: {
       url: "https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+    kaleido: {
+      url: "https://a0sv8enxlo:Kg4U1ZHfDPbe73AmOGrL1W5guN0ndXnUjcfZbfl5OqA@a0dvp0tprn-a0tyfit5m9-rpc.au0-aws.kaleido.io",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     }
   },
@@ -32,7 +37,7 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWNFT", "SWETH", "SWNFTUpgrade", "SWDAO", "Strategy"],
+    only: ["SWNFT", "SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"],
   },
   gasReporter: {
     showTimeSpent: true,

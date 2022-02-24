@@ -591,6 +591,24 @@
         "internalType": "address",
         "name": "_swDAOAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_depositContract",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_swDAOAddress",
+        "type": "address"
       }
     ],
     "name": "initialize",
