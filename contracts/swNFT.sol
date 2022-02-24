@@ -43,7 +43,7 @@ contract SWNFT is
     Counters.Counter public tokenIds;
 
     address public eth1WithdrawalAddress;
-    address public baseTokenAddress;
+    address public swETHAddress;
     uint256 public ETHER = 1e18;
 
     IDepositContract public depositContract = IDepositContract(
@@ -67,10 +67,10 @@ contract SWNFT is
     // ============ External mutative with permission functions ============
 
     /// @notice set base token address
-    /// @param _baseTokenAddress The address of the base token
-    function setBaseTokenAddress(address _baseTokenAddress) onlyOwner external {
-        require(_baseTokenAddress != address(0), "Address cannot be 0");
-        baseTokenAddress = _baseTokenAddress;
+    /// @param _swETHAddress The address of the base token
+    function setswETHAddress(address _swETHAddress) onlyOwner external {
+        require(_swETHAddress != address(0), "Address cannot be 0");
+        swETHAddress = _swETHAddress;
     }
 
     /// @notice Add a new strategy
@@ -126,7 +126,7 @@ contract SWNFT is
         newItemId = tokenIds.current();
 
         _safeMint(msg.sender, newItemId);
-        ISWETH(baseTokenAddress).mint(msg.value);
+        ISWETH(swETHAddress).mint(msg.value);
 
         positions[newItemId] = Position(
             pubKey,
@@ -148,7 +148,7 @@ contract SWNFT is
         uint value = positions[tokenId].value;
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
-        success = ISWETH(baseTokenAddress).transferFrom(msg.sender, address(this), amount);
+        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
@@ -164,7 +164,7 @@ contract SWNFT is
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
-        success = ISWETH(baseTokenAddress).transfer(msg.sender, amount);
+        success = ISWETH(swETHAddress).transfer(msg.sender, amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance -= amount;
         emit LogWithdraw(tokenId, msg.sender, amount);
@@ -180,7 +180,7 @@ contract SWNFT is
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         uint amount = positions[tokenId].baseTokenBalance;
         require(amount > 0, "cannot enter strategy with no base token balance");
-        ISWETH(baseTokenAddress).approve(strategies[strategy], amount);
+        ISWETH(swETHAddress).approve(strategies[strategy], amount);
         success = IStrategy(strategies[strategy]).enter(tokenId, amount);
         if(!success) return success;
         positions[tokenId].baseTokenBalance -= amount;

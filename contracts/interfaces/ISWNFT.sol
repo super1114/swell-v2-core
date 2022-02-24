@@ -20,7 +20,7 @@ interface ISWNFT
 
     enum ActionChoices { Deposit, Withdraw, EnterStrategy, ExitStrategy }
 
-    function baseTokenAddress() external view returns (address);
+    function swETHAddress() external view returns (address);
 
     // ============ Events ============
 

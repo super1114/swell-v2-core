@@ -22,7 +22,7 @@ async function main() {
   // const SWETH = await ethers.getContractFactory("SWETH");
   // swETH = await SWETH.deploy(swNFT.address);
   // await swETH.deployed();
-  // await swNFT.setBaseTokenAddress(swETH.address);
+  // await swNFT.setswETHAddress(swETH.address);
   // console.log("swETH:", swETH.address);
 
   const Strategy = await ethers.getContractFactory("Strategy");
