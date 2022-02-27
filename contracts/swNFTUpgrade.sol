@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "base64-sol/base64.sol";
+import '@openzeppelin/contracts/utils/Strings.sol';
 
 // Interfaces
 import "./interfaces/ISWNFT.sol";
@@ -16,6 +17,7 @@ import "./interfaces/IStrategy.sol";
 
 // Libraries
 import { Helpers } from "./helpers.sol";
+import { NFTDescriptor } from "./libraries/NFTDescriptor.sol";
 
 interface IDepositContract {
     /// @notice Submit a Phase 0 DepositData object.
@@ -42,10 +44,12 @@ contract SWNFTUpgrade is
     uint256 public GWEI;
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
+    using Strings for uint256;
 
     CountersUpgradeable.Counter public tokenIds;
 
     address public swETHAddress;
+    string public swETHSymbol;
     address public swDAOAddress;
     uint256 public ETHER;
 
@@ -75,6 +79,7 @@ contract SWNFTUpgrade is
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swDAOAddress = _swDAOAddress;
+        swETHSymbol = "swETH";
     }
 
     // ============ External mutative with permission functions ============
@@ -277,7 +282,18 @@ contract SWNFTUpgrade is
     /// @return The URI of the token
     function tokenURI(uint tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "Query for nonexistent token");
-        return _constructTokenURI(positions[tokenId]);
+        Position memory position = positions[tokenId];
+        return NFTDescriptor.constructTokenURI(NFTDescriptor.ConstructTokenURIParams({
+            tokenId: tokenId,
+            quoteTokenAddress: swETHAddress,
+            baseTokenAddress: swETHAddress,
+            quoteTokenSymbol: swETHSymbol,
+            baseTokenSymbol: swETHSymbol,
+            baseTokenBalance: position.baseTokenBalance,
+            baseTokenDecimals: ETHER,
+            pubKey: _pubKeyToString(position.pubKey),
+            value: position.value
+        }));
     }
 
     /// @notice get length of validators
@@ -301,59 +317,6 @@ contract SWNFTUpgrade is
     /// @return The public key in string format
     function _pubKeyToString(bytes memory pubKey) private pure returns (string memory) {
         return string(abi.encodePacked(bytes32(pubKey).toHex(), (pubKey.bytesToBytes16(32)).toHex16()));
-    }
-
-    /// @notice Constructing the token URI
-    /// @param params The position params
-    /// @return The token URI in string format
-    function _constructTokenURI(Position memory params) private view returns (string memory) {
-        bytes memory name = _generateName(params.pubKey, params.value);
-        bytes memory description = _generateDescription();
-        // string memory image = Base64.encode(bytes(generateSVGImage(params)));
-
-        return
-            string(
-                abi.encodePacked(
-                    'data:application/json;base64,',
-                    Base64.encode(
-                        abi.encodePacked(
-                            '{"name":"',
-                            name,
-                            '", "description":"',
-                            description,
-                            '", "image": "',
-                            'data:image/svg+xml;base64,',
-                            // image,
-                            '"}'
-                        )
-                    )
-                )
-            );
-    }
-
-    /// @notice Return name of the metadata
-    /// @return The name of the metadata in bytes
-    function _generateName(bytes memory pubKey, uint value) private view returns (bytes memory) {
-        return abi.encodePacked(
-            "SwellNetwork Validator",
-            " - ",
-            _pubKeyToString(pubKey),
-            " - ",
-            (value / ETHER).uint2str(),
-            " Ether"
-        );
-    }
-
-    /// @notice Return description of the metadata
-    /// @return The description of the metadata in bytes
-    function _generateDescription() private pure returns (bytes memory) {
-        return abi.encodePacked(
-                'This NFT represents a position in a SwellNetwork Validator. ',
-                'The owner of this NFT can modify or redeem position. ',
-                '\\n\\n',
-                unicode'⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. ',
-                'Make sure token addresses match the expected tokens, as token symbols may be imitated.'
-            );
     }
 
     /// @notice authorize upgrade for UUPS
