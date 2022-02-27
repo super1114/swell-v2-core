@@ -7,7 +7,7 @@
     "test:inte": "hardhat test test/inte/swNFTUpgrade-test.js",
     "test:unit": "hardhat test test/unit/* ",
     "prepare": "husky install",
-    "coverage:inte": "hardhat coverage --testfiles 'test/inte/swNFT-test.js' ",
+    "coverage:inte": "hardhat coverage --testfiles 'test/inte/*.js' ",
     "coverage:unit": "hardhat coverage --testfiles 'test/unit/*.js' --network localhost"
   },
   "keywords": [
@@ -33,6 +33,7 @@
     "hardhat-abi-exporter": "^2.8.0",
     "hardhat-gas-reporter": "^1.0.7",
     "husky": "^7.0.4",
+    "is-svg": "^4.3.2",
     "lint-staged": "^12.3.1",
     "prettier": "^1.19.1",
     "semantic-release": "^19.0.2",

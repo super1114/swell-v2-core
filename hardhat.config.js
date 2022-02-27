@@ -29,7 +29,10 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 200,
+        details: {
+          yul: false
+        }
       },
     }
   },
@@ -37,12 +40,12 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWNFT", "SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"],
+    only: ["SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"],
   },
   gasReporter: {
     showTimeSpent: true,
     gasPrice: 100,
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     currency: "USD",
   },
   etherscan: {

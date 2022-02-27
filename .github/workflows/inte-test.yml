@@ -48,7 +48,7 @@ jobs:
         with:
           start: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ env.ALCHEMY_API_KEY }}
           wait-on: 'http://localhost:8545/'
-          command: npm run test:inte
+          command: npm run coverage:inte
         env:
           PORT: 8545
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}

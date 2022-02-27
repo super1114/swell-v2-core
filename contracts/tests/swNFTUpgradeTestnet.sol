@@ -15,5 +15,6 @@ contract SWNFTUpgradeTestnet is SWNFTUpgrade {
         ETHER = 1e18;
         depositContract = IDepositContract(_depositContract);
         swDAOAddress = _swDAOAddress;
+        swETHSymbol = "swETH";
     }
 }
