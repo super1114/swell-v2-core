@@ -119,52 +119,7 @@ contract SWNFTUpgrade is
 
     // ============ Public mutative without permission functions ============
 
-    /// @notice Deposit ETH into official contract
-    /// @param pubKey The public key of the validatator
-    /// @param signature The signature of the withdrawal
-    /// @param depositDataRoot The root of the deposit data
-    /// @return newItemId The token ID of the new token
-    function stake(
-        bytes calldata pubKey,
-        bytes calldata signature,
-        bytes32 depositDataRoot
-    ) external payable returns (uint256 newItemId) {
-        require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
-        require(
-            validatorDeposits[pubKey] + msg.value <= 32 ether,
-            "cannot stake more than 32 ETH"
-        );
-        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
-          require(msg.value >= 16 ether, "Must send at least 16 ETH");
-          // Will add require for swDAO bond once there's price
-        }
-
-        depositContract.deposit{value: msg.value}(
-            pubKey,
-            getWithdrawalCredentials(),
-            signature,
-            depositDataRoot
-        );
-
-        if(validatorDeposits[pubKey] == 0) validators.push(pubKey);
-        validatorDeposits[pubKey] += msg.value;
-
-        tokenIds.increment();
-
-        newItemId = tokenIds.current();
-
-        _safeMint(msg.sender, newItemId);
-        ISWETH(swETHAddress).mint(msg.value);
-
-        positions[newItemId] = Position(
-            pubKey,
-            msg.value,
-            msg.value
-        );
-
-        emit LogStake(msg.sender, newItemId, pubKey, msg.value);
-    }
+    
 
     /// @notice Deposit swETH into position
     /// @param tokenId The token ID
@@ -260,6 +215,16 @@ contract SWNFTUpgrade is
         }
     }
 
+    /// @notice batch stake for multiple validators
+    /// @param stakes The stakes to perform
+    /// @return ids The token IDs that were minted
+    function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
+        ids = new uint[](stakes.length);
+        for(uint i = 0; i < stakes.length; i++){
+            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot);
+        }
+    }
+
     /**
      * @dev Unstake Ether and burn according swNFT and swETH token
      *
@@ -275,7 +240,21 @@ contract SWNFTUpgrade is
         revert("not supported");
     }
 
-    // ============ Public Getter functions ============
+    // ============ Public/External Getter functions ============
+
+    /// @notice get length of validators
+    /// @return length The length of the validators
+    function validatorsLength() view external returns (uint length) {
+        length = validators.length;
+    }
+
+    /// @notice get total staked value of all positions
+    /// @return value The total Ether value has been staked
+    function tvl() external view returns (uint value) {
+        for(uint i = 0; i < totalSupply(); i++){
+            value += positions[tokenByIndex(i)].value;
+        }
+    }
 
     /// @notice get token URI from token ID
     /// @param tokenId The token ID
@@ -296,12 +275,6 @@ contract SWNFTUpgrade is
         }));
     }
 
-    /// @notice get length of validators
-    /// @return length The length of the validators
-    function validatorsLength() view external returns (uint length) {
-        length = validators.length;
-    }
-
     // https://github.com/rocket-pool/rocketpool/blob
     // /e9c26aaea0/contracts/contract/minipool/RocketMinipoolManager.sol#L196
     /// @notice Get the withdrawal credentials for the withdrawal contract
@@ -311,6 +284,53 @@ contract SWNFTUpgrade is
     }
 
     // ============ Private functions ============
+
+    /// @notice Deposit ETH into official contract
+    /// @param pubKey The public key of the validatator
+    /// @param signature The signature of the withdrawal
+    /// @param depositDataRoot The root of the deposit data
+    /// @return newItemId The token ID of the new token
+    function _stake(
+        bytes calldata pubKey,
+        bytes calldata signature,
+        bytes32 depositDataRoot
+    ) private returns (uint256 newItemId) {
+        require(msg.value >= 1 ether, "Must send at least 1 ETH");
+        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
+        require(
+            validatorDeposits[pubKey] + msg.value <= 32 ether,
+            "cannot stake more than 32 ETH"
+        );
+        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
+          require(msg.value >= 16 ether, "Must send at least 16 ETH");
+          // Will add require for swDAO bond once there's price
+        }
+
+        depositContract.deposit{value: msg.value}(
+            pubKey,
+            getWithdrawalCredentials(),
+            signature,
+            depositDataRoot
+        );
+
+        if(validatorDeposits[pubKey] == 0) validators.push(pubKey);
+        validatorDeposits[pubKey] += msg.value;
+
+        tokenIds.increment();
+
+        newItemId = tokenIds.current();
+
+        _safeMint(msg.sender, newItemId);
+        ISWETH(swETHAddress).mint(msg.value);
+
+        positions[newItemId] = Position(
+            pubKey,
+            msg.value,
+            msg.value
+        );
+
+        emit LogStake(msg.sender, newItemId, pubKey, msg.value);
+    }
 
     /// @notice Convert public key from bytes to string output
     /// @param pubKey The public key
