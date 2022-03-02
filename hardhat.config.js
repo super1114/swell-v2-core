@@ -8,6 +8,57 @@ require("@openzeppelin/hardhat-upgrades");
 require("solidity-coverage");
 require("./deploy/deploy");
 
+const LOW_OPTIMIZER_COMPILER_SETTINGS = {
+  version: '0.8.9',
+  settings: {
+    evmVersion: 'istanbul',
+    optimizer: {
+      enabled: true,
+      runs: 2_000,
+      details: {
+        yul: false
+      }
+    },
+    metadata: {
+      bytecodeHash: 'none',
+    },
+  },
+}
+
+const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
+  version: '0.8.9',
+  settings: {
+    evmVersion: 'istanbul',
+    optimizer: {
+      enabled: true,
+      runs: 1_000,
+      details: {
+        yul: false
+      }
+    },
+    metadata: {
+      bytecodeHash: 'none',
+    },
+  },
+}
+
+const DEFAULT_COMPILER_SETTINGS = {
+  version: '0.8.9',
+  settings: {
+    evmVersion: 'istanbul',
+    optimizer: {
+      enabled: true,
+      runs: 1_000_000,
+      details: {
+        yul: false
+      }
+    },
+    metadata: {
+      bytecodeHash: 'none',
+    },
+  },
+}
+
 module.exports = {
   networks: {
     hardhat: {
@@ -25,16 +76,10 @@ module.exports = {
     }
   },
   solidity: {
-    version: "0.8.9",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-        details: {
-          yul: false
-        }
-      },
-    }
+    compilers: [DEFAULT_COMPILER_SETTINGS],
+    overrides: {
+      'contracts/libraries/NFTDescriptor.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
+    },
   },
   abiExporter: {
     clear: true,

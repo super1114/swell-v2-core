@@ -31,7 +31,7 @@ task("deploy", "Deploy the contracts")
     versions[newTag].network = network;
     versions[newTag].date = new Date().toUTCString();
 
-    if(network.chainId === 1191572815) {
+    if (network.chainId === 1191572815) {
       depositContractAddress = await deployDepositContract();
     }
 
@@ -41,7 +41,7 @@ task("deploy", "Deploy the contracts")
     console.log("swDAO:", swDAO.address);
     versions[newTag].contracts.swDAO = swDAO.address;
 
-    switch(network.chainId){
+    switch (network.chainId) {
       case 5:
         swNFT = await deploySWNFTUpgradeTestnet(swDAO.address, goerliDepositContract);
         break;
@@ -49,8 +49,21 @@ task("deploy", "Deploy the contracts")
         swNFT = await deploySWNFTUpgradeTestnet(swDAO.address, depositContractAddress);
         break;
       default:
-        const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-        swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swDAO.address], { kind: "uups" });
+        const nftDescriptorLibraryFactory = await ethers.getContractFactory('NFTDescriptor')
+        const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
+
+        const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        });
+        swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swDAO.address], {
+          kind: "uups",
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+          unsafeAllowLinkedLibraries: true
+        });
         await swNFT.deployed();
         console.log("swNFT:", swNFT.address);
     }
