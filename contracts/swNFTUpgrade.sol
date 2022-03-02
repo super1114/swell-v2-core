@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "base64-sol/base64.sol";
-import '@openzeppelin/contracts/utils/Strings.sol';
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Interfaces
 import "./interfaces/ISWNFT.sol";
@@ -36,7 +37,7 @@ interface IDepositContract {
 
 /// @title Contract for SWNFTUpgrade
 contract SWNFTUpgrade is
-    ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
     UUPSUpgradeable,
     OwnableUpgradeable,
     ISWNFT
@@ -73,7 +74,6 @@ contract SWNFTUpgrade is
     {
         require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
         __ERC721_init("Swell NFT", "swNFT");
-        __UUPSUpgradeable_init();
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(

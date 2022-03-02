@@ -10,7 +10,6 @@ contract SWNFTUpgradeTestnet is SWNFTUpgrade {
         require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
         require(_depositContract != address(0), "depositContract cannot be 0");
         __ERC721_init("Swell NFT", "swNFT");
-        __UUPSUpgradeable_init();
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(_depositContract);
