@@ -18,6 +18,12 @@ interface ISWNFT
         uint strategy;
     }
 
+    struct Stake {
+        bytes pubKey;
+        bytes signature;
+        bytes32 depositDataRoot;
+    }
+
     enum ActionChoices { Deposit, Withdraw, EnterStrategy, ExitStrategy }
 
     function swETHAddress() external view returns (address);
