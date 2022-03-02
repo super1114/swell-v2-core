@@ -81,9 +81,9 @@ describe("SWNFTUpgrade", async () => {
 
     const tokenURI = await swNFT.tokenURI("1");
     const decodeTokenURI = extractJSONFromURI(tokenURI);
-    expect(decodeTokenURI.name).to.be.equal("Swell Network Validator - swETH - 0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec <> 1 Ether");
+    expect(decodeTokenURI.name).to.be.equal("Swell Network Validator - swETH - " + pubKey + " <> 1 Ether");
     expect(decodeTokenURI.description).to.be.equal("This NFT represents a liquidity position in a Swell Network Validator. The owner of this NFT can modify or redeem the position.\n" +
-    "swETH Address: 0xfd6f7a6a5c21a3f503ebae7a473639974379c351\n" +
+    "swETH Address: " + swETH.address.toLowerCase() + "\n" +
     "Token ID: 1\n\n" +
     "⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.");
 
@@ -132,9 +132,9 @@ describe("SWNFTUpgrade", async () => {
 
     const tokenURI = await swNFT.tokenURI("2");
     const decodeTokenURI = extractJSONFromURI(tokenURI);
-    expect(decodeTokenURI.name).to.be.equal("Swell Network Validator - swETH - 0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec <> 1 Ether");
+    expect(decodeTokenURI.name).to.be.equal("Swell Network Validator - swETH - " + pubKey + " <> 1 Ether");
     expect(decodeTokenURI.description).to.be.equal("This NFT represents a liquidity position in a Swell Network Validator. The owner of this NFT can modify or redeem the position.\n" +
-    "swETH Address: 0xfd6f7a6a5c21a3f503ebae7a473639974379c351\n" +
+    "swETH Address: " + swETH.address.toLowerCase() + "\n" +
     "Token ID: 2\n\n" +
     "⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.");
 

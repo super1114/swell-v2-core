@@ -12,7 +12,6 @@ contract TestswNFTUpgrade is SWNFTUpgrade {
         require(_eth1WithdrawalAddress != address(0), "eth1WithdrawalAddress cannot be 0");
         eth1WithdrawalAddress = _eth1WithdrawalAddress;
         __ERC721_init("Swell NFT", "swNFT");
-        __UUPSUpgradeable_init();
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(
