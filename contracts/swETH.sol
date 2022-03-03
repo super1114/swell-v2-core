@@ -17,7 +17,7 @@ contract SWETH is ISWETH, ERC20 {
     }
 
     modifier onlyMinter {
-        require(msg.sender == minter, "SWETH: caller is not the owner");
+        require(msg.sender == minter, "SWETH: caller is not the minter");
         _;
     }
 
