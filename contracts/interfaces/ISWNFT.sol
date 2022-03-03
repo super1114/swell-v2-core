@@ -9,6 +9,7 @@ interface ISWNFT
         bytes pubKey;
         uint value;
         uint baseTokenBalance;
+        uint timeStamp;
     }
 
     struct Action {
@@ -34,7 +35,8 @@ interface ISWNFT
         address user,
         uint256 itemId,
         bytes pubKey,
-        uint deposit
+        uint deposit,
+        uint timeStamp
     );
 
     event LogDeposit(

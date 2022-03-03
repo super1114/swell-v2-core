@@ -52,7 +52,9 @@ contract SWNFTUpgrade is
     address public swETHAddress;
     string public swETHSymbol;
     address public swDAOAddress;
-    uint256 public ETHER;
+    uint public ETHER;
+    address feePool;
+    uint fee;
 
     IDepositContract public depositContract;
 
@@ -80,6 +82,8 @@ contract SWNFTUpgrade is
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swDAOAddress = _swDAOAddress;
         swETHSymbol = "swETH";
+        fee = 1e17; // default 10 %
+        feePool = msg.sender;
     }
 
     // ============ External mutative with permission functions ============
@@ -89,6 +93,13 @@ contract SWNFTUpgrade is
     function setswETHAddress(address _swETHAddress) onlyOwner external {
         require(_swETHAddress != address(0), "Address cannot be 0");
         swETHAddress = _swETHAddress;
+    }
+
+    /// @notice set fee pool address
+    /// @param _feePool The address of the fee pool
+    function setFeePool(address _feePool) onlyOwner external {
+        require(_feePool != address(0), "Address cannot be 0");
+        feePool = _feePool;
     }
 
     /// @notice Add a new strategy
@@ -225,19 +236,11 @@ contract SWNFTUpgrade is
         }
     }
 
-    /**
-     * @dev Unstake Ether and burn according swNFT and swETH token
-     *
-     * Currently this is intentionally not supported since Ethereum 2.0 withdrawals specification
-     * might change before withdrawals are enabled. This contract sits behind a proxy that can be
-     * upgraded to a new implementation contract collectively by swDAO holders by performing a vote.
-     *
-     * When Ethereum 2.0 withdrawals specification is finalized, Swell DAO will prepare the new
-     * implementation contract and initiate a vote among swDAO holders for upgrading the proxy to
-     * the new implementation.
-     */
-    function unstake() pure external {
-        revert("not supported");
+    function unstake(uint tokenId) pure external {
+        // require(_exists(tokenId), "Query for nonexistent token");
+        // require(ownerOf(tokenId) == msg.sender, "Only owner can unstake");
+        // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough base token balance");
+        revert("Need to wait till LP is available");
     }
 
     // ============ Public/External Getter functions ============
@@ -251,8 +254,8 @@ contract SWNFTUpgrade is
     /// @notice get total staked value of all positions
     /// @return value The total Ether value has been staked
     function tvl() external view returns (uint value) {
-        for(uint i = 0; i < totalSupply(); i++){
-            value += positions[tokenByIndex(i)].value;
+        for(uint i = 0; i < validators.length; i++){
+            value += validatorDeposits[validators[i]];
         }
     }
 
@@ -323,13 +326,14 @@ contract SWNFTUpgrade is
         _safeMint(msg.sender, newItemId);
         ISWETH(swETHAddress).mint(msg.value);
 
-        positions[newItemId] = Position(
-            pubKey,
-            msg.value,
-            msg.value
-        );
+        positions[newItemId] = Position({
+            pubKey: pubKey,
+            value: msg.value,
+            baseTokenBalance: msg.value,
+            timeStamp: block.timestamp
+        });
 
-        emit LogStake(msg.sender, newItemId, pubKey, msg.value);
+        emit LogStake(msg.sender, newItemId, pubKey, msg.value, block.timestamp);
     }
 
     /// @notice Convert public key from bytes to string output

@@ -18,7 +18,7 @@ contract Strategy is IStrategy {
     }
 
     modifier onlyswNFT {
-        require(msg.sender == swNFT);
+        require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
         _;
     }
 

@@ -3,6 +3,8 @@ const { getTag } = require("./helpers");
 const { deployDepositContract, deploySWNFTUpgradeTestnet } = require("./deployTestnet");
 const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
 let depositContractAddress, swNFT;
+const pubKey =
+  "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
 
 task("deploy", "Deploy the contracts")
   .addOptionalParam("keepVersion", "keep the previous release published version. don't update it", false, types.boolean)
@@ -67,6 +69,7 @@ task("deploy", "Deploy the contracts")
         await swNFT.deployed();
         console.log("swNFT:", swNFT.address);
     }
+    await swNFT.addWhiteList(pubKey);
     versions[newTag].contracts.swNFT = swNFT.address;
 
     const SWETH = await ethers.getContractFactory("SWETH");
