@@ -35,6 +35,7 @@ task("deploy", "Deploy the contracts")
 
     if (network.chainId === 1191572815) {
       depositContractAddress = await deployDepositContract();
+      versions[newTag].contracts.depositContractAddress = depositContractAddress;
     }
 
     const SWDAO = await ethers.getContractFactory("SWDAO");
