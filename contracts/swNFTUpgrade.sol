@@ -93,6 +93,7 @@ contract SWNFTUpgrade is
     function setswETHAddress(address _swETHAddress) onlyOwner external {
         require(_swETHAddress != address(0), "Address cannot be 0");
         swETHAddress = _swETHAddress;
+        emit LogSetSWETHAddress(swETHAddress);
     }
 
     /// @notice set fee pool address
@@ -114,7 +115,9 @@ contract SWNFTUpgrade is
     /// @param strategy The strategy index to remove
     function removeStrategy(uint strategy) onlyOwner external{
         require(strategies[strategy] != address(0), "strategy does not exist");
+        //TODO: Need to check balance before removing
         uint length = strategies.length;
+        require(length >= 1, "no strategy to remove");
         address last = strategies[length-1];
         emit LogRemoveStrategy(strategy, strategies[strategy]);
         strategies[strategy] = last;
@@ -306,7 +309,7 @@ contract SWNFTUpgrade is
         );
         if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
           require(msg.value >= 16 ether, "Must send at least 16 ETH");
-          // Will add require for swDAO bond once there's price
+          //TODO: Will add require for swDAO bond once there's price
         }
 
         depositContract.deposit{value: msg.value}(

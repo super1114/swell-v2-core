@@ -80,4 +80,8 @@ interface ISWNFT
         address user,
         bytes pubKey
     );
+
+    event LogSetSWETHAddress(
+        address swETHAddress
+    );
 }

@@ -237,6 +237,19 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "swETHAddress",
+        "type": "address"
+      }
+    ],
+    "name": "LogSetSWETHAddress",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "user",
         "type": "address"
       },
