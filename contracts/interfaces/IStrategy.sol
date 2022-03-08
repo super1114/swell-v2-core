@@ -10,12 +10,12 @@ interface IStrategy {
     // ============ Events ============
 
     event LogEnter(
-        uint tokenId,
+        uint indexed tokenId,
         uint amount
     );
 
     event LogExit(
-        uint tokenId,
+        uint indexed tokenId,
         uint amount
     );
 }

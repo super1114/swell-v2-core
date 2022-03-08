@@ -33,36 +33,36 @@ interface ISWNFT
     // ============ Events ============
 
     event LogStake(
-        address user,
-        uint256 itemId,
-        bytes pubKey,
+        address indexed user,
+        uint256 indexed itemId,
+        bytes indexed pubKey,
         uint deposit,
         uint timeStamp
     );
 
     event LogDeposit(
-        uint tokenId,
+        uint indexed tokenId,
         address user,
         uint amount
     );
 
     event LogWithdraw(
-        uint tokenId,
+        uint indexed tokenId,
         address user,
         uint amount
     );
 
     event LogAddStrategy(
-        address strategy
+        address indexed strategy
     );
 
     event LogRemoveStrategy(
         uint strategyIndex,
-        address strategy
+        address indexed strategy
     );
 
     event LogEnterStrategy(
-        uint tokenId,
+        uint indexed tokenId,
         uint strategyIndex,
         address strategy,
         address user,
@@ -70,7 +70,7 @@ interface ISWNFT
     );
 
     event LogExitStrategy(
-        uint tokenId,
+        uint indexed tokenId,
         uint strategyIndex,
         address strategy,
         address user,
@@ -79,7 +79,7 @@ interface ISWNFT
 
     event LogAddWhiteList(
         address user,
-        bytes pubKey
+        bytes indexed pubKey
     );
 
     event LogSetSWETHAddress(

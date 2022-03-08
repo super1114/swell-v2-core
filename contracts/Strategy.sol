@@ -11,9 +11,10 @@ contract Strategy is IStrategy {
     /// @dev The token ID position data
     mapping(uint256 => uint) public positions;
 
-    address public swNFT;
+    address public immutable swNFT;
 
     constructor(address _swNFT) {
+        require(_swNFT != address(0), "Address cannot be 0");
         swNFT = _swNFT;
     }
 
