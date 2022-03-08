@@ -8,11 +8,12 @@ import "./interfaces/ISWETH.sol";
 /// @title Contract for SWNFT
 contract SWETH is ISWETH, ERC20 {
 
-    address public minter;
+    address public immutable minter;
 
     /// @notice initialise the contract to issue the token
     /// @param _minter address of the minter
     constructor(address _minter) ERC20("Swell Ether", "swETH") {
+        require(_minter != address(0), "Address cannot be 0");
         minter = _minter;
     }
 

@@ -131,6 +131,11 @@ contract SWNFTUpgrade is
         emit LogAddWhiteList(msg.sender, pubKey);
     }
 
+    /// @notice Renonce ownership is not allowed
+    function renounceOwnership() view public override onlyOwner {
+        revert("Cannot renonce ownership");
+    }
+
     // ============ Public mutative without permission functions ============
 
     
@@ -243,7 +248,7 @@ contract SWNFTUpgrade is
         }
     }
 
-    function unstake(uint tokenId) pure external {
+    function unstake() pure external {
         // require(_exists(tokenId), "Query for nonexistent token");
         // require(ownerOf(tokenId) == msg.sender, "Only owner can unstake");
         // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough base token balance");
