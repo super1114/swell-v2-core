@@ -333,9 +333,6 @@ contract SWNFTUpgrade is
 
         newItemId = tokenIds.current();
 
-        _safeMint(msg.sender, newItemId);
-        ISWETH(swETHAddress).mint(amount);
-
         positions[newItemId] = Position({
             pubKey: pubKey,
             value: amount,
@@ -344,6 +341,9 @@ contract SWNFTUpgrade is
         });
 
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
+
+        _safeMint(msg.sender, newItemId);
+        ISWETH(swETHAddress).mint(amount);
     }
 
     /// @notice Convert public key from bytes to string output
