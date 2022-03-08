@@ -233,9 +233,13 @@ contract SWNFTUpgrade is
     /// @param stakes The stakes to perform
     /// @return ids The token IDs that were minted
     function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
+        require(msg.value >= 1 ether, "Must send at least 1 ETH");
+        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         ids = new uint[](stakes.length);
+        uint totalAmount = msg.value;
         for(uint i = 0; i < stakes.length; i++){
-            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot);
+            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount);
+            totalAmount -= stakes[i].amount;
         }
     }
 
@@ -295,24 +299,27 @@ contract SWNFTUpgrade is
     /// @param pubKey The public key of the validatator
     /// @param signature The signature of the withdrawal
     /// @param depositDataRoot The root of the deposit data
+    /// @param amount The amount of ETH to deposit
     /// @return newItemId The token ID of the new token
     function _stake(
         bytes calldata pubKey,
         bytes calldata signature,
-        bytes32 depositDataRoot
+        bytes32 depositDataRoot,
+        uint amount
     ) private returns (uint256 newItemId) {
-        require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
+        require(amount <= msg.value, "cannot stake more than sent");
+        require(amount >= 1 ether, "Must send at least 1 ETH");
+        require(amount % ETHER == 0, "stake value not multiple of Ether");
         require(
-            validatorDeposits[pubKey] + msg.value <= 32 ether,
+            validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
         if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
-          require(msg.value >= 16 ether, "Must send at least 16 ETH");
+          require(amount >= 16 ether, "Must send at least 16 ETH");
           //TODO: Will add require for swDAO bond once there's price
         }
 
-        depositContract.deposit{value: msg.value}(
+        depositContract.deposit{value: amount}(
             pubKey,
             getWithdrawalCredentials(),
             signature,
@@ -320,23 +327,23 @@ contract SWNFTUpgrade is
         );
 
         if(validatorDeposits[pubKey] == 0) validators.push(pubKey);
-        validatorDeposits[pubKey] += msg.value;
+        validatorDeposits[pubKey] += amount;
 
         tokenIds.increment();
 
         newItemId = tokenIds.current();
 
         _safeMint(msg.sender, newItemId);
-        ISWETH(swETHAddress).mint(msg.value);
+        ISWETH(swETHAddress).mint(amount);
 
         positions[newItemId] = Position({
             pubKey: pubKey,
-            value: msg.value,
-            baseTokenBalance: msg.value,
+            value: amount,
+            baseTokenBalance: amount,
             timeStamp: block.timestamp
         });
 
-        emit LogStake(msg.sender, newItemId, pubKey, msg.value, block.timestamp);
+        emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
     }
 
     /// @notice Convert public key from bytes to string output

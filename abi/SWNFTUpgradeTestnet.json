@@ -884,6 +884,11 @@
             "internalType": "bytes32",
             "name": "depositDataRoot",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
           }
         ],
         "internalType": "struct ISWNFT.Stake[]",

@@ -23,6 +23,7 @@ interface ISWNFT
         bytes pubKey;
         bytes signature;
         bytes32 depositDataRoot;
+        uint amount;
     }
 
     enum ActionChoices { Deposit, Withdraw, EnterStrategy, ExitStrategy }

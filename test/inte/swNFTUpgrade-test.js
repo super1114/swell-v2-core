@@ -46,12 +46,14 @@ describe("SWNFTUpgrade", async () => {
   });
 
   it("cannot stake less than 1 Ether", async function() {
+    amount = ethers.utils.parseEther("0.1");
     expect(
       swNFT.stake(
         [ { pubKey,
         signature,
-        depositDataRoot } ],
-        { value: ethers.utils.parseEther("0.1") }
+        depositDataRoot,
+        amount } ],
+        { value: amount }
       )
     ).to.be.revertedWith("Must send at least 1 ETH");
   });
@@ -69,12 +71,14 @@ describe("SWNFTUpgrade", async () => {
   // });
 
   it("can stake 1 Ether", async function() {
+    amount = ethers.utils.parseEther("1");
     await expect(
       await swNFT.stake(
         [ { pubKey,
         signature,
-        depositDataRoot } ],
-        { value: ethers.utils.parseEther("1") }
+        depositDataRoot,
+        amount } ],
+        { value: amount }
       )
     ).to.emit(swNFT, "LogStake")
     //  .withArgs(signer.address, "1", pubKey, ethers.utils.parseEther("1"), Math.round(Date.now() / 1000));
@@ -105,12 +109,14 @@ describe("SWNFTUpgrade", async () => {
   });
 
   it("cannot stake 1 Ether again", async function() {
+    amount = ethers.utils.parseEther("1");
     await expect(
       swNFT.connect(user).stake(
         [ { pubKey,
         signature,
-        depositDataRoot } ],
-        { value: ethers.utils.parseEther("1") }
+        depositDataRoot,
+        amount } ],
+        { value: amount }
       )
     ).to.be.revertedWith("Must send at least 16 ETH");
   });
@@ -123,12 +129,14 @@ describe("SWNFTUpgrade", async () => {
   });
 
   it("can stake 1 Ether again", async function() {
+    amount = ethers.utils.parseEther("1");
     await expect(
       await swNFT.connect(user).stake(
         [ { pubKey,
         signature,
-        depositDataRoot } ],
-        { value: ethers.utils.parseEther("1") }
+        depositDataRoot,
+        amount } ],
+        { value: amount }
       )
     ).to.emit(swNFT, "LogStake")
     //  .withArgs(user.address, "2", pubKey, ethers.utils.parseEther("1"))
@@ -159,12 +167,14 @@ describe("SWNFTUpgrade", async () => {
   });
 
   it("cannot stake more than 32 Ether", async function() {
+    amount = ethers.utils.parseEther("32");
     expect(
       swNFT.stake(
         [ { pubKey,
         signature,
-        depositDataRoot } ],
-        { value: ethers.utils.parseEther("32") }
+        depositDataRoot,
+        amount } ],
+        { value: amount }
       )
     ).to.be.revertedWith("cannot stake more than 32 ETH");
   });
