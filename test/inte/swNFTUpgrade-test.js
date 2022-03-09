@@ -185,7 +185,7 @@ describe("SWNFTUpgrade", async () => {
         "1",
         ethers.utils.parseEther("2")
       )
-    ).to.be.revertedWith("cannot withdraw more than the position value");
+    ).to.be.revertedWith("cannot withdraw more than the position balance");
 
     expect(
       swNFT.connect(user).withdraw(
@@ -210,7 +210,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.baseTokenBalance).to.be.equal('0');
   });
 
-  it("cannot deposit 2 swETH", async function() {
+  it("cannot deposit if not owner", async function() {
     await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
     expect(
       swNFT.connect(user).deposit(
@@ -219,12 +219,6 @@ describe("SWNFTUpgrade", async () => {
       )
     ).to.be.revertedWith("Only owner can deposit");
 
-    expect(
-      swNFT.deposit(
-        "1",
-        ethers.utils.parseEther("2")
-      )
-    ).to.be.revertedWith("cannot deposit more than the position value");
   });
 
   it("can deposit 1 swETH", async function() {
