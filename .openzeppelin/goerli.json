@@ -2,15 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x304c9dEb9Aa63fdD4232EeA9661c466B40301621",
-      "txHash": "0xc2a1349916ede72db19a30a8616d2d1394b62f04c7a28d70436f16ecae5a452b",
+      "address": "0x5257bfE84bd3403C910d4b4EC28056100eb268Ec",
+      "txHash": "0xb39a927285c8414c4931edb62766fb9b00ffe1f28cf5035638d98ec374370edc",
       "kind": "uups"
     }
   ],
   "impls": {
-    "94a3d07abd07748794bd6e59f2e26a6124fd84423db6911e9f84aa755e4a1f51": {
-      "address": "0xDF122b8c1364b96c6d0a1B05e513183FfaA0BBA6",
-      "txHash": "0x142e51a272fc3eaffcc4e28f3822e7e7d922f3c3d0ac46620483cc814779ef68",
+    "175e4612886ff692b99460fad7146345ca606ed0ba2cb36c1317996d2d8f3a54": {
+      "address": "0x286E1f6415e4E79A94449c64DC3260061Cb02731",
+      "txHash": "0xdf792772370a4530e282c7923ba07ab4ba5fac85fa60a10bb2c966592b5f90dc",
       "layout": {
         "storage": [
           {
@@ -171,45 +171,57 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "depositContract",
-            "type": "t_contract(IDepositContract)5533",
+            "label": "feePool",
+            "type": "t_address",
+            "src": "contracts/swNFTUpgrade.sol:56"
+          },
+          {
+            "contract": "SWNFTUpgrade",
+            "label": "fee",
+            "type": "t_uint256",
             "src": "contracts/swNFTUpgrade.sol:57"
+          },
+          {
+            "contract": "SWNFTUpgrade",
+            "label": "depositContract",
+            "type": "t_contract(IDepositContract)5564",
+            "src": "contracts/swNFTUpgrade.sol:59"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validators",
             "type": "t_array(t_bytes_storage)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:59"
+            "src": "contracts/swNFTUpgrade.sol:61"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validatorDeposits",
             "type": "t_mapping(t_bytes_memory_ptr,t_uint256)",
-            "src": "contracts/swNFTUpgrade.sol:60"
+            "src": "contracts/swNFTUpgrade.sol:62"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "whiteList",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
-            "src": "contracts/swNFTUpgrade.sol:61"
+            "src": "contracts/swNFTUpgrade.sol:63"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "positions",
-            "type": "t_mapping(t_uint256,t_struct(Position)4334_storage)",
-            "src": "contracts/swNFTUpgrade.sol:64"
+            "type": "t_mapping(t_uint256,t_struct(Position)4347_storage)",
+            "src": "contracts/swNFTUpgrade.sol:66"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "strategies",
             "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:66"
+            "src": "contracts/swNFTUpgrade.sol:68"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/swNFTUpgrade.sol:346"
+            "src": "contracts/swNFTUpgrade.sol:357"
           }
         ],
         "types": {
@@ -231,7 +243,7 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_contract(IDepositContract)5533": {
+          "t_contract(IDepositContract)5564": {
             "label": "contract IDepositContract"
           },
           "t_array(t_bytes_storage)dyn_storage": {
@@ -249,10 +261,10 @@
           "t_bool": {
             "label": "bool"
           },
-          "t_mapping(t_uint256,t_struct(Position)4334_storage)": {
+          "t_mapping(t_uint256,t_struct(Position)4347_storage)": {
             "label": "mapping(uint256 => struct ISWNFT.Position)"
           },
-          "t_struct(Position)4334_storage": {
+          "t_struct(Position)4347_storage": {
             "label": "struct ISWNFT.Position",
             "members": [
               {
@@ -265,6 +277,10 @@
               },
               {
                 "label": "baseTokenBalance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "timeStamp",
                 "type": "t_uint256"
               }
             ]
