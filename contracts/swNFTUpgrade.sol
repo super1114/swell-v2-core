@@ -138,8 +138,6 @@ contract SWNFTUpgrade is
 
     // ============ Public mutative without permission functions ============
 
-    
-
     /// @notice Deposit swETH into position
     /// @param tokenId The token ID
     /// @param amount The amount of swETH to deposit
@@ -148,13 +146,9 @@ contract SWNFTUpgrade is
         require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
-        uint value = positions[tokenId].value;
-        uint baseTokenBalance = positions[tokenId].baseTokenBalance;
-        require(amount + baseTokenBalance <= value, "cannot deposit more than the position value");
-        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
-        if(!success) return success;
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
+        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
     }
 
     /// @notice Withdraw swETH from position
@@ -166,11 +160,10 @@ contract SWNFTUpgrade is
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
-        require(amount <= baseTokenBalance, "cannot withdraw more than the position value");
-        success = ISWETH(swETHAddress).transfer(msg.sender, amount);
-        if(!success) return success;
+        require(amount <= baseTokenBalance, "cannot withdraw more than the position balance");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogWithdraw(tokenId, msg.sender, amount);
+        success = ISWETH(swETHAddress).transfer(msg.sender, amount);
     }
 
     /// @notice Enter strategy for a token
@@ -183,9 +176,6 @@ contract SWNFTUpgrade is
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         uint amount = positions[tokenId].baseTokenBalance;
         require(amount > 0, "cannot enter strategy with no base token balance");
-        ISWETH(swETHAddress).approve(strategies[strategy], amount);
-        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
-        if(!success) return success;
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(
         tokenId,
@@ -194,6 +184,8 @@ contract SWNFTUpgrade is
         msg.sender,
         amount
         );
+        ISWETH(swETHAddress).approve(strategies[strategy], amount);
+        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
     }
 
     /// @notice Exit strategy for a token
