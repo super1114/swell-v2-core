@@ -2,7 +2,7 @@ const fs = require("fs");
 const { getTag } = require("./helpers");
 const { deployDepositContract, deploySWNFTUpgradeTestnet } = require("./deployTestnet");
 const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
-let depositContractAddress, swNFT;
+let depositContractAddress, swNFT, nftDescriptorLibrary ;
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
 
@@ -29,7 +29,8 @@ task("deploy", "Deploy the contracts")
 
     const contracts = versions[oldTag].contracts;
     versions[newTag] = new Object();
-    versions[newTag].contracts = { ...contracts };
+    // versions[newTag].contracts = { ...contracts };
+    versions[newTag].contracts = new Object();
     versions[newTag].network = network;
     versions[newTag].date = new Date().toUTCString();
 
@@ -46,14 +47,15 @@ task("deploy", "Deploy the contracts")
 
     switch (network.chainId) {
       case 5:
-        swNFT = await deploySWNFTUpgradeTestnet(swDAO.address, goerliDepositContract);
+        ( { swNFT, nftDescriptorLibrary} = await deploySWNFTUpgradeTestnet(swDAO.address, goerliDepositContract) );
         break;
       case 1191572815:
-        swNFT = await deploySWNFTUpgradeTestnet(swDAO.address, depositContractAddress);
+        ( { swNFT, nftDescriptorLibrary} = await deploySWNFTUpgradeTestnet(swDAO.address, depositContractAddress) );
         break;
       default:
         const nftDescriptorLibraryFactory = await ethers.getContractFactory('NFTDescriptor')
-        const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
+        nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
+        console.log("nftDescriptorLibrary:", nftDescriptorLibrary.address);
 
         const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
           libraries: {
@@ -67,10 +69,11 @@ task("deploy", "Deploy the contracts")
           },
           unsafeAllowLinkedLibraries: true
         });
-        await swNFT.deployed();
-        console.log("swNFT:", swNFT.address);
     }
+    await swNFT.deployed();
+    console.log("swNFT:", swNFT.address);
     await swNFT.addWhiteList(pubKey);
+    versions[newTag].contracts.nftDescriptorLibrary = nftDescriptorLibrary.address;
     versions[newTag].contracts.swNFT = swNFT.address;
 
     const SWETH = await ethers.getContractFactory("SWETH");

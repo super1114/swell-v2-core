@@ -9,6 +9,7 @@ async function deployDepositContract() {
 async function deploySWNFTUpgradeTestnet(swDAOAddress, depositContractAddress) {
   const nftDescriptorLibraryFactory = await ethers.getContractFactory('NFTDescriptor')
   const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
+  console.log("nftDescriptorLibrary:", nftDescriptorLibrary.address);
 
   const SWNFTUpgradeTestnet = await ethers.getContractFactory("SWNFTUpgradeTestnet", {
     libraries: {
@@ -20,9 +21,7 @@ async function deploySWNFTUpgradeTestnet(swDAOAddress, depositContractAddress) {
     initializer: "initialize(address,address)",
     unsafeAllowLinkedLibraries: true
   });
-  await swNFT.deployed();
-  console.log("swNFT:", swNFT.address);
-  return swNFT;
+  return { swNFT, nftDescriptorLibrary };
 }
 
 module.exports = {

@@ -2,15 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0xf3544e0E22dD80Ac6300f7E306769553e406d927",
-      "txHash": "0x82ffd2a02b1f2384ae29049ec4c7c13953aecb8b98cd043856a2f62a15da133e",
+      "address": "0xF60e61765fA8d038a00f4a647676Cb21E6d3F2b2",
+      "txHash": "0x3ffa91be29a65f1ed3aed7cb2d12e10bbde448daa54aeb101784e2ccf2e17c50",
       "kind": "uups"
     }
   ],
   "impls": {
-    "b48396ce81a508ef212201d439027754b2d682317b8ddf443149b6ddfbd74aac": {
-      "address": "0x382E65F9816568D3Ef7d9f1F0572aA4546078252",
-      "txHash": "0x9632f6d6248e5cde00cb965b422d1087947e16c683d3dcda753952fa33eeea07",
+    "df92e35a37c81efef53cfb4b8f582eea3caf7d026127baaf1cad77167f78381c": {
+      "address": "0x2E95E74714f2Ae6966848D95972a91DDAe3C9b3E",
+      "txHash": "0xf0e8af0924f83e8959e85d20ba1a46541746c00d892f5ac66fc1a1675fefd287",
       "layout": {
         "storage": [
           {
@@ -184,7 +184,7 @@
           {
             "contract": "SWNFTUpgrade",
             "label": "depositContract",
-            "type": "t_contract(IDepositContract)5538",
+            "type": "t_contract(IDepositContract)5564",
             "src": "contracts/swNFTUpgrade.sol:59"
           },
           {
@@ -208,7 +208,7 @@
           {
             "contract": "SWNFTUpgrade",
             "label": "positions",
-            "type": "t_mapping(t_uint256,t_struct(Position)4337_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Position)4347_storage)",
             "src": "contracts/swNFTUpgrade.sol:66"
           },
           {
@@ -221,7 +221,7 @@
             "contract": "SWNFTUpgrade",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/swNFTUpgrade.sol:350"
+            "src": "contracts/swNFTUpgrade.sol:357"
           }
         ],
         "types": {
@@ -243,7 +243,7 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_contract(IDepositContract)5538": {
+          "t_contract(IDepositContract)5564": {
             "label": "contract IDepositContract"
           },
           "t_array(t_bytes_storage)dyn_storage": {
@@ -261,10 +261,10 @@
           "t_bool": {
             "label": "bool"
           },
-          "t_mapping(t_uint256,t_struct(Position)4337_storage)": {
+          "t_mapping(t_uint256,t_struct(Position)4347_storage)": {
             "label": "mapping(uint256 => struct ISWNFT.Position)"
           },
-          "t_struct(Position)4337_storage": {
+          "t_struct(Position)4347_storage": {
             "label": "struct ISWNFT.Position",
             "members": [
               {
