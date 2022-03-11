@@ -101,6 +101,7 @@ contract SWNFTUpgrade is
     function setFeePool(address _feePool) onlyOwner external {
         require(_feePool != address(0), "Address cannot be 0");
         feePool = _feePool;
+        emit LogSetFeePool(feePool);
     }
 
     /// @notice Add a new strategy
@@ -114,9 +115,10 @@ contract SWNFTUpgrade is
     /// @notice Remove a strategy
     /// @param strategy The strategy index to remove
     function removeStrategy(uint strategy) onlyOwner external{
+        uint length = strategies.length;
+        require(strategy < length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         //TODO: Need to check balance before removing
-        uint length = strategies.length;
         require(length >= 1, "no strategy to remove");
         address last = strategies[length-1];
         emit LogRemoveStrategy(strategy, strategies[strategy]);
@@ -172,6 +174,7 @@ contract SWNFTUpgrade is
     /// @return success Whether the strategy enter was successful
     function enterStrategy(uint tokenId, uint strategy) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
+        require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         uint amount = positions[tokenId].baseTokenBalance;
@@ -194,6 +197,7 @@ contract SWNFTUpgrade is
     /// @return amount The amount of swETH withdrawn
     function exitStrategy(uint tokenId, uint strategy) public returns (uint amount){
         require(_exists(tokenId), "Query for nonexistent token");
+        require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
         amount = IStrategy(strategies[strategy]).exit(tokenId);
@@ -238,6 +242,7 @@ contract SWNFTUpgrade is
             ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount);
             totalAmount -= stakes[i].amount;
         }
+        payable(msg.sender).transfer(totalAmount); // refund the extra ETH
     }
 
     function unstake() pure external {

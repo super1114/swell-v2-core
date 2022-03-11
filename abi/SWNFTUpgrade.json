@@ -237,6 +237,19 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "feePool",
+        "type": "address"
+      }
+    ],
+    "name": "LogSetFeePool",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "swETHAddress",
         "type": "address"
       }
