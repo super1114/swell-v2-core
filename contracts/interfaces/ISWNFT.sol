@@ -85,4 +85,8 @@ interface ISWNFT
     event LogSetSWETHAddress(
         address swETHAddress
     );
+
+    event LogSetFeePool(
+        address feePool
+    );
 }
