@@ -89,6 +89,8 @@ task("deploy", "Deploy the contracts")
     console.log("strategy:", strategy.address);
     versions[newTag].contracts.strategy = strategy.address;
 
+    await swNFT.addStrategy(strategy.address);
+
     // convert JSON object to string
     const data = JSON.stringify(versions, null, 2);
 

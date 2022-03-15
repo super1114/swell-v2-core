@@ -2,15 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x5257bfE84bd3403C910d4b4EC28056100eb268Ec",
-      "txHash": "0xb39a927285c8414c4931edb62766fb9b00ffe1f28cf5035638d98ec374370edc",
+      "address": "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414",
+      "txHash": "0x6d94c017a87ee28f82a42870b169d0441afd33e9f2e5a4bfd3e2a09f33de6db2",
       "kind": "uups"
     }
   ],
   "impls": {
-    "175e4612886ff692b99460fad7146345ca606ed0ba2cb36c1317996d2d8f3a54": {
-      "address": "0x286E1f6415e4E79A94449c64DC3260061Cb02731",
-      "txHash": "0xdf792772370a4530e282c7923ba07ab4ba5fac85fa60a10bb2c966592b5f90dc",
+    "0cd2cc7573a3e595b6e9f1872ece63006242a03bd05d6a27405767abb58115dc": {
+      "address": "0x96Ac43108b8CcB8C93CeAB394ff66d79cddB126D",
+      "txHash": "0x5a4b77f2c4dcce42e9207bb62759869b316b83371217fa9d9089142a7197e6d1",
       "layout": {
         "storage": [
           {
@@ -184,7 +184,7 @@
           {
             "contract": "SWNFTUpgrade",
             "label": "depositContract",
-            "type": "t_contract(IDepositContract)5564",
+            "type": "t_contract(IDepositContract)5568",
             "src": "contracts/swNFTUpgrade.sol:59"
           },
           {
@@ -221,7 +221,7 @@
             "contract": "SWNFTUpgrade",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "contracts/swNFTUpgrade.sol:357"
+            "src": "contracts/swNFTUpgrade.sol:362"
           }
         ],
         "types": {
@@ -243,7 +243,7 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_contract(IDepositContract)5564": {
+          "t_contract(IDepositContract)5568": {
             "label": "contract IDepositContract"
           },
           "t_array(t_bytes_storage)dyn_storage": {
