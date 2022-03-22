@@ -295,6 +295,12 @@ contract SWNFTUpgrade is
         return abi.encodePacked(bytes1(0x01), bytes11(0x0), address(this));
     }
 
+    /// @notice Get the length of the strategies
+    /// @return length The length of the strategies
+    function getStrategyLength() view external returns (uint length) {
+        length = strategies.length;
+    }
+
     // ============ Private functions ============
 
     /// @notice Deposit ETH into official contract

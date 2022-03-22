@@ -606,6 +606,19 @@
   },
   {
     "inputs": [],
+    "name": "getStrategyLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getWithdrawalCredentials",
     "outputs": [
       {

@@ -31,7 +31,13 @@ task("upgrade", "Upgrade the contracts")
         NFTDescriptor: contracts.nftDescriptorLibrary,
       },
     });
-    const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade);
+    const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
+      kind: "uups",
+      libraries: {
+        NFTDescriptor: contracts.nftDescriptorLibrary,
+      },
+      unsafeAllowLinkedLibraries: true
+    });
     versions[newTag].contracts.swNFT = swNFT.address;
 
     // convert JSON object to string
