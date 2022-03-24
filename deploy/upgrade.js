@@ -2,8 +2,13 @@ const fs = require("fs");
 const { getTag } = require("./helpers");
 
 task("upgrade", "Upgrade the contracts")
-  .addOptionalParam("keepVersion", "keep the previous release published version. don't update it", false, types.boolean)
-  .setAction(async (taskArgs) => {
+  .addOptionalParam(
+    "keepVersion",
+    "keep the previous release published version. don't update it",
+    false,
+    types.boolean
+  )
+  .setAction(async taskArgs => {
     let network = await ethers.provider.getNetwork();
     console.log("network:", network);
 
@@ -22,19 +27,19 @@ task("upgrade", "Upgrade the contracts")
 
     const contracts = versions[oldTag].contracts;
     versions[newTag] = new Object();
-    versions[newTag].contracts = new Object();
+    versions[newTag].contracts = contracts;
     versions[newTag].network = network;
     versions[newTag].date = new Date().toUTCString();
 
     const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
       libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
-      },
+        NFTDescriptor: contracts.nftDescriptorLibrary
+      }
     });
     const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
       kind: "uups",
       libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
+        NFTDescriptor: contracts.nftDescriptorLibrary
       },
       unsafeAllowLinkedLibraries: true
     });
