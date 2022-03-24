@@ -171,14 +171,14 @@ contract SWNFTUpgrade is
     /// @notice Enter strategy for a token
     /// @param tokenId The token ID
     /// @param strategy The strategy index to enter
+    /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
-    function enterStrategy(uint tokenId, uint strategy) public returns (bool success){
+    function enterStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
-        uint amount = positions[tokenId].baseTokenBalance;
-        require(amount > 0, "cannot enter strategy with no base token balance");
+        require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(
         tokenId,
@@ -193,14 +193,15 @@ contract SWNFTUpgrade is
 
     /// @notice Exit strategy for a token
     /// @param tokenId The token ID
-    /// @param strategy The strategy index to enter
-    /// @return amount The amount of swETH withdrawn
-    function exitStrategy(uint tokenId, uint strategy) public returns (uint amount){
+    /// @param strategy The strategy index to exit
+    /// @param amount The amount of swETH to exit
+    /// @return success Whether the strategy exit was successful
+    function exitStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
-        amount = IStrategy(strategies[strategy]).exit(tokenId);
+        require(amount > 0, "cannot exit strategy with 0 amount");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(
         tokenId,
@@ -209,6 +210,7 @@ contract SWNFTUpgrade is
         msg.sender,
         amount
         );
+        success = IStrategy(strategies[strategy]).exit(tokenId, amount);
     }
 
     /// @notice Able to bactch action for multiple tokens
@@ -222,10 +224,10 @@ contract SWNFTUpgrade is
                 withdraw(actions[i].tokenId, actions[i].amount);
             }
             if(actions[i].action == uint(ActionChoices.EnterStrategy)) {
-                enterStrategy(actions[i].tokenId, actions[i].strategy);
+                enterStrategy(actions[i].tokenId, actions[i].strategy, actions[i].amount);
             }
             if(actions[i].action == uint(ActionChoices.ExitStrategy)) {
-                exitStrategy(actions[i].tokenId, actions[i].strategy);
+                exitStrategy(actions[i].tokenId, actions[i].strategy, actions[i].amount);
             }
         }
     }

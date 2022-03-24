@@ -23,21 +23,28 @@ contract Strategy is IStrategy {
         _;
     }
 
+    /// @notice Enter vault
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH
+    /// @return success or not
     function enter(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
+        require(amount > 0, "cannot enter strategy with 0 amount");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
-        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
-        if(!success) return success;
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
+        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
     }
 
-    function exit(uint tokenId) external onlyswNFT returns (uint amount) {
-        address swETHAddress = ISWNFT(swNFT).swETHAddress();
-        amount = positions[tokenId];
+    /// @notice Exit vault
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH
+    /// @return success or not
+    function exit(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
         require(amount > 0, "No position to exit");
-        bool success = ISWETH(swETHAddress).transfer(msg.sender, amount);
-        if(!success) return 0;
+        require(amount <= positions[tokenId], "Not enough position to exit");
+        address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] -= amount;
         emit LogExit(tokenId, amount);
+        success = ISWETH(swETHAddress).transfer(msg.sender, amount);
     }
 }
