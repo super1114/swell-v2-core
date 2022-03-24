@@ -48,7 +48,7 @@
     "dotenv": "^10.0.0"
   },
   "lint-staged": {
-    "test/**/*.js": "prettier --write --ignore-unknown",
-    "contracts/*.sol": "solhint --fix"
+    "*.js": "prettier --write test/**/*.js",
+    "*.sol": "solhint --fix contracts/**/*.sol"
   }
 }
