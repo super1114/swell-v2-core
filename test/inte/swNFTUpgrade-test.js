@@ -169,7 +169,10 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-    // expect(position.operator).to.be.equal(true);
+
+    
+    const whiteList = await swNFT.whiteList(pubKey);
+    expect(position.operator).to.be.equal(!whiteList);
 
     const tvl = await swNFT.tvl();
     expect(tvl).to.be.equal("2000000000000000000");
@@ -222,6 +225,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
+    
   });
 
   it("can add strategy", async function() {
