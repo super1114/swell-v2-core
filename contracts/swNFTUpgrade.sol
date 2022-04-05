@@ -65,6 +65,8 @@ contract SWNFTUpgrade is
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
 
+    mapping(address => uint) public opRate;
+
     address[] public strategies;
 
     /// @notice initialise the contract to issue the token
@@ -253,7 +255,11 @@ contract SWNFTUpgrade is
         // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough base token balance");
         revert("Need to wait till LP is available");
     }
-
+    
+    /// @param rate The amount of update rate
+    function updateOpRate(uint rate) public {
+        opRate[msg.sender] = rate;
+    }
     // ============ Public/External Getter functions ============
 
     /// @notice get length of validators
