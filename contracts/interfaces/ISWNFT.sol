@@ -10,6 +10,7 @@ interface ISWNFT
         uint value;
         uint baseTokenBalance;
         uint timeStamp;
+        bool operator;
     }
 
     struct Action {

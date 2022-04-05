@@ -328,6 +328,9 @@ contract SWNFTUpgrade is
           require(amount >= 16 ether, "Must send at least 16 ETH");
           //TODO: Will add require for swDAO bond once there's price
         }
+        
+        bool operator;
+        if(validatorDeposits[pubKey] == 0 && !whiteList[pubKey]) operator = true;
 
         depositContract.deposit{value: amount}(
             pubKey,
@@ -347,7 +350,8 @@ contract SWNFTUpgrade is
             pubKey: pubKey,
             value: amount,
             baseTokenBalance: amount,
-            timeStamp: block.timestamp
+            timeStamp: block.timestamp,
+            operator: operator
         });
 
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
