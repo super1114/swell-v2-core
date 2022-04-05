@@ -769,6 +769,11 @@
         "internalType": "uint256",
         "name": "timeStamp",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "operator",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
