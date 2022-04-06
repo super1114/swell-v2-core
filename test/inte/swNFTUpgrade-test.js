@@ -344,7 +344,8 @@ describe("SWNFTUpgrade", async () => {
 
   it("can update OpRate", async function() {
     // await swNFT.connect(user).updateOpRate("10");
-    const opRate = await swNFT.opRate(zeroAddress);
+    const position = await swNFT.positions("1");
+    // const opRate = await swNFT.opRate(zeroAddress);
     // expect(opRate).to.be.equal("10");
   });
 });
