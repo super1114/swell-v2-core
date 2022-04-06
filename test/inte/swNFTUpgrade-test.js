@@ -74,10 +74,10 @@ describe("SWNFTUpgrade", async () => {
 
   it("can update OpRate", async function() {
     await swNFT.connect(user).updateOpRate("10");
-    // const opRate = await swNFT.opRate(user);
-    // expect(opRate).to.be.equal("10");
+    const opRate = await swNFT.opRate(user);
+    expect(opRate).to.be.equal("10");
   });
-  
+
   it("can stake 1 Ether", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
