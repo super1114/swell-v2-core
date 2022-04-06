@@ -72,6 +72,12 @@ describe("SWNFTUpgrade", async () => {
   //   ).to.be.revertedWith("First deposit must be from owner");
   // });
 
+  it("can update OpRate", async function() {
+    await swNFT.connect(user).updateOpRate("10");
+    // const opRate = await swNFT.opRate(user);
+    // expect(opRate).to.be.equal("10");
+  });
+  
   it("can stake 1 Ether", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
@@ -340,12 +346,5 @@ describe("SWNFTUpgrade", async () => {
     expect(swNFT.removeStrategy("1"))
       .to.emit(swNFT, "LogRemoveStrategy")
       .withArgs("1", strategy.address);
-  });
-
-  it("can update OpRate", async function() {
-    // await swNFT.connect(user).updateOpRate("10");
-    const position = await swNFT.positions("1");
-    // const opRate = await swNFT.opRate(zeroAddress);
-    // expect(opRate).to.be.equal("10");
   });
 });
