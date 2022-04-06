@@ -107,9 +107,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-
-    const whiteList = await swNFT.whiteList(pubKey);
-    expect(position.operator).to.be.equal(!whiteList);
+    expect(position.operator).to.be.equal(false); // non-whitelist first deposit
 
     const tvl = await swNFT.tvl();
     expect(tvl).to.be.equal("1000000000000000000");
@@ -118,7 +116,7 @@ describe("SWNFTUpgrade", async () => {
   it("cannot stake 1 Ether again", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
-      swNFT                                                
+      swNFT
         .connect(user)
         .stake([{ pubKey, signature, depositDataRoot, amount }], {
           value: amount
@@ -169,10 +167,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-
-    
-    const whiteList = await swNFT.whiteList(pubKey);
-    expect(position.operator).to.be.equal(!whiteList);
+    expect(position.operator).to.be.equal(false); // non-whitelist first deposit
 
     const tvl = await swNFT.tvl();
     expect(tvl).to.be.equal("2000000000000000000");

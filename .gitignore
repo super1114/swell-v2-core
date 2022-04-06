@@ -30,5 +30,3 @@ artifacts
 # Coverage
 coverage/
 coverage.json
-
-.husky/
