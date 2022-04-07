@@ -73,7 +73,7 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     kaleido: {
-      url: process.env.KALEIDO_RPC_RUL ? process.env.KALEIDO_RPC_RUL : "",
+      url: process.env.KALEIDO_RPC_URL ? process.env.KALEIDO_RPC_URL : "",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },
