@@ -10,9 +10,9 @@ require("./deploy/deploy");
 require("./deploy/upgrade");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
-  version: '0.8.9',
+  version: "0.8.9",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 2_000,
@@ -21,15 +21,15 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
       }
     },
     metadata: {
-      bytecodeHash: 'none',
-    },
-  },
-}
+      bytecodeHash: "none"
+    }
+  }
+};
 
 const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
-  version: '0.8.9',
+  version: "0.8.9",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 1_000,
@@ -38,15 +38,15 @@ const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
       }
     },
     metadata: {
-      bytecodeHash: 'none',
-    },
-  },
-}
+      bytecodeHash: "none"
+    }
+  }
+};
 
 const DEFAULT_COMPILER_SETTINGS = {
-  version: '0.8.9',
+  version: "0.8.9",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 200,
@@ -55,46 +55,49 @@ const DEFAULT_COMPILER_SETTINGS = {
       }
     },
     metadata: {
-      bytecodeHash: 'none',
-    },
-  },
-}
+      bytecodeHash: "none"
+    }
+  }
+};
 
 module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
+        url:
+          "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY
       }
     },
     goerli: {
       url: "https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     kaleido: {
-      url: "https://a0sv8enxlo:Kg4U1ZHfDPbe73AmOGrL1W5guN0ndXnUjcfZbfl5OqA@a0dvp0tprn-a0tyfit5m9-rpc.au0-aws.kaleido.io",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      // url: "https://a0sv8enxlo:Kg4U1ZHfDPbe73AmOGrL1W5guN0ndXnUjcfZbfl5OqA@a0dvp0tprn-a0tyfit5m9-rpc.au0-aws.kaleido.io",
+      url:
+        "https://a0ecsn70tn:3BR1DQV5Wwj2-LB9EXuFp88iuhWZ76NUkhBlrGko7Pg@a0gen4pcmz-a0ni4dzezs-rpc.au0-aws.kaleido.io",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },
   solidity: {
     compilers: [DEFAULT_COMPILER_SETTINGS],
     overrides: {
-      'contracts/libraries/NFTDescriptor.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
-    },
+      "contracts/libraries/NFTDescriptor.sol": LOWEST_OPTIMIZER_COMPILER_SETTINGS
+    }
   },
   abiExporter: {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"],
+    only: ["SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"]
   },
   gasReporter: {
     showTimeSpent: true,
     gasPrice: 100,
     // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
-    currency: "USD",
+    currency: "USD"
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY
   }
-}
+};

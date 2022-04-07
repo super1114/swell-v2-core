@@ -72,7 +72,7 @@ describe("SWNFTUpgrade", async () => {
   //   ).to.be.revertedWith("First deposit must be from owner");
   // });
 
-  it("can stake 1 Ether", async function() {
+  it("can stake 1 Ether as owner", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
       await swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
