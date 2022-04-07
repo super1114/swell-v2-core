@@ -73,9 +73,7 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     kaleido: {
-      // url: "https://a0sv8enxlo:Kg4U1ZHfDPbe73AmOGrL1W5guN0ndXnUjcfZbfl5OqA@a0dvp0tprn-a0tyfit5m9-rpc.au0-aws.kaleido.io",
-      url:
-        "https://a0ecsn70tn:3BR1DQV5Wwj2-LB9EXuFp88iuhWZ76NUkhBlrGko7Pg@a0gen4pcmz-a0ni4dzezs-rpc.au0-aws.kaleido.io",
+      url: process.env.KALEIDO_RPC_RUL,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },

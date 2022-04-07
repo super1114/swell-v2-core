@@ -220,7 +220,6 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-    
   });
 
   it("can add strategy", async function() {
