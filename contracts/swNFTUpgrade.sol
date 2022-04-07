@@ -65,8 +65,6 @@ contract SWNFTUpgrade is
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
 
-    mapping(address => uint) public opRate;
-
     address[] public strategies;
 
     /// @notice initialise the contract to issue the token
@@ -378,5 +376,6 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    uint256[50] private __gap;
+    uint256[49] private __gap;
+    mapping(address => uint) public opRate;
 }
