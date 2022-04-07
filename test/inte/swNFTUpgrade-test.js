@@ -72,12 +72,6 @@ describe("SWNFTUpgrade", async () => {
   //   ).to.be.revertedWith("First deposit must be from owner");
   // });
 
-  it("can update OpRate", async function() {
-    await swNFT.connect(user).updateOpRate("100");
-    const opRate = await swNFT.opRate(user.address);
-    expect(opRate).to.be.equal("100");
-  });
-
   it("can stake 1 Ether", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
