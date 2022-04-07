@@ -107,7 +107,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-    expect(position.operator).to.be.equal(true); 
+    expect(position.operator).to.be.equal(true); //non-whitelist first deposit
 
     const tvl = await swNFT.tvl();
     expect(tvl).to.be.equal("1000000000000000000");
@@ -167,7 +167,7 @@ describe("SWNFTUpgrade", async () => {
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
-    expect(position.operator).to.be.equal(false);
+    expect(position.operator).to.be.equal(false); //whitelist second deposit
 
     const tvl = await swNFT.tvl();
     expect(tvl).to.be.equal("2000000000000000000");
