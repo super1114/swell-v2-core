@@ -51,8 +51,10 @@ describe("SWNFT", async () => {
   });
 
   it("can update OpRate", async function() {
+    let opRate = await swNFT.opRate(user.address);
+    expect(opRate).to.be.equal("0");
     await swNFT.connect(user).updateOpRate("100");
-    const opRate = await swNFT.opRate(user.address);
+    opRate = await swNFT.opRate(user.address);
     expect(opRate).to.be.equal("100");
   });
 });
