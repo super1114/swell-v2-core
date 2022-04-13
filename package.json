@@ -41,7 +41,6 @@
     "solidity-coverage": "^0.7.18"
   },
   "dependencies": {
-    "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.4.2",
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
     "base64-sol": "^1.1.0",
