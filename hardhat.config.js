@@ -10,8 +10,6 @@ require("./deploy/deploy");
 require("./deploy/upgrade");
 require("./bin/task")();
 
-module.exports = {};
-
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.8.9",
   settings: {
