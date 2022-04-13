@@ -42,7 +42,7 @@ task("deploy", "Deploy the contracts")
     versions[newTag].network = network;
     versions[newTag].date = new Date().toUTCString();
 
-    if (network.chainId === 1191572815) {
+    if (network.chainId === 2077117572) {
       depositContractAddress = await deployDepositContract();
       versions[
         newTag
@@ -62,7 +62,7 @@ task("deploy", "Deploy the contracts")
           goerliDepositContract
         ));
         break;
-      case 1191572815:
+      case 2077117572:
         ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
           swDAO.address,
           depositContractAddress
