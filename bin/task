@@ -1,24 +1,20 @@
 require("@nomiclabs/hardhat-web3");
 
-const dispatchTask = async() => {
-    task("dispatch", "Dispatch ETH to testers")
-        .addParam("to", "The address to send ETH")
-        .addParam("value", "Amount of ETH")
-        .setAction(async (taskArgs) => {
-            const web3Obj = new Web3(process.env.KALEIDO_RPC_URL || 'ws://localhost:8545');
-            const signedTx = await web3Obj.eth.accounts.signTransaction({
-                to: taskArgs.to,
-                value: taskArgs.value*Math.pow(10, 18),
-                gas: 2000000,
-                chainId: 2077117572
-            }, process.env.PRIVATE_KEY);
-            const result = await web3Obj.eth.sendSignedTransaction(signedTx.rawTransaction);
-            if(result.transactionHash) {
-                console.log("Tx hash: ", result.transactionHash);
-            } else {
-                console.log("Dispatching ETH failed!");
-            }
-        });
-}
-
-module.exports = dispatchTask;
+task("dispatch", "Dispatch ETH to testers")
+    .addParam("to", "The address to send ETH")
+    .addParam("value", "Amount of ETH")
+    .setAction(async (taskArgs) => {
+        const web3Obj = new Web3(process.env.KALEIDO_RPC_URL || 'ws://localhost:8545');
+        const signedTx = await web3Obj.eth.accounts.signTransaction({
+            to: taskArgs.to,
+            value: taskArgs.value*Math.pow(10, 18),
+            gas: 2000000,
+            chainId: 2077117572
+        }, process.env.PRIVATE_KEY);
+        const result = await web3Obj.eth.sendSignedTransaction(signedTx.rawTransaction);
+        if(result.transactionHash) {
+            console.log("Tx hash: ", result.transactionHash);
+        } else {
+            console.log("Dispatching ETH failed!");
+        }
+    });

@@ -8,7 +8,7 @@ require("@openzeppelin/hardhat-upgrades");
 require("solidity-coverage");
 require("./deploy/deploy");
 require("./deploy/upgrade");
-require("./bin/task")();
+require("./bin/task");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.8.9",
