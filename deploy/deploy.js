@@ -2,10 +2,14 @@ const fs = require("fs");
 const { getTag } = require("./helpers");
 const {
   deployDepositContract,
-  deploySWNFTUpgradeTestnet
+  deploySWNFTUpgradeTestnet,
+  deployMultiSenderContract
 } = require("./deployTestnet");
 const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
-let depositContractAddress, swNFT, nftDescriptorLibrary;
+let depositContractAddress,
+  swNFT,
+  nftDescriptorLibrary,
+  multiSendContractAddress;
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
 
@@ -47,6 +51,10 @@ task("deploy", "Deploy the contracts")
       versions[
         newTag
       ].contracts.depositContractAddress = depositContractAddress;
+      multiSendContractAddress = await deployMultiSenderContract();
+      versions[
+        newTag
+      ].contracts.multiSendContractAddress = multiSendContractAddress;
     }
 
     const SWDAO = await ethers.getContractFactory("SWDAO");
@@ -109,12 +117,6 @@ task("deploy", "Deploy the contracts")
     versions[newTag].contracts.strategy = strategy.address;
 
     await swNFT.addStrategy(strategy.address);
-
-    const MultiSender = await ethers.getContractFactory("MultiSender");
-    const multisender = await MultiSender.deploy();
-    await multisender.deployed();
-    console.log("multisender:", multisender.address);
-    versions[newTag].contracts.multisender = multisender.address;
 
     // convert JSON object to string
     const data = JSON.stringify(versions, null, 2);
