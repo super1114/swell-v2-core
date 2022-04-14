@@ -11,10 +11,9 @@ describe("Dispatch Test ETH", () => {
   it("Should transfer ETH in KALEIDO network if balance is sufficient", async () => {
     const balance = await signer.getBalance();
     const val = ethers.utils.parseEther("0.2");
-    const MultiSender = await ethers.getContractFactory("MultiSender");
-    const multisender = await MultiSender.deploy();
+    MultiSender = await ethers.getContractFactory("MultiSender");
+    multisender = await MultiSender.deploy();
     const data = [user1.getAddress(), user2.getAddress()];
-    console.log(data);
     if (balance < parseInt(val.value)) {
       await expect(multisender.connect(signer).multiSend(data, { value: val }))
         .to.be.reverted;
