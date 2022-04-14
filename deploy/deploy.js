@@ -110,6 +110,12 @@ task("deploy", "Deploy the contracts")
 
     await swNFT.addStrategy(strategy.address);
 
+    const MultiSender = await ethers.getContractFactory("MultiSender");
+    const multisender = await MultiSender.deploy();
+    await multisender.deployed();
+    console.log("multisender:", multisender.address);
+    versions[newTag].contracts.multisender = multisender.address;
+
     // convert JSON object to string
     const data = JSON.stringify(versions, null, 2);
 

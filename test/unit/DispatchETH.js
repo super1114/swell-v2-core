@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
-const { abi } = require("../abi/MultiSender.json");
+const { abi } = require("../../abi/MultiSender.json");
 
 describe("Dispatch Test ETH", () => {
   let signer;
@@ -11,11 +11,7 @@ describe("Dispatch Test ETH", () => {
   it("Should transfer ETH in KALEIDO network if balance is sufficient", async () => {
     const balance = await signer.getBalance();
     const val = ethers.utils.parseEther("0.2");
-    const multicall = new ethers.Contract(
-      "0x0Cc88CD9DfCB4661920FE63a3Df5C69Ac777Fb8d",
-      abi,
-      signer
-    );
+    const multicall = new ethers.Contract(multisendAddr, abi, signer);
     const data = ethers.utils.defaultAbiCoder.encode(
       ["address[]"],
       [
