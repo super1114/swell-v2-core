@@ -1,13 +1,9 @@
-
+const { abi } = require("../abi/MultiSender.json");
 task("dispatch", "Dispatch ETH to testers")
-    .addParam("to", "Address to send ETH")
-    .addParam("value", "Amount of ETH")
+    .addParam("value", "Total amount of ETH")
     .setAction(async (taskArgs) => {
         const signer = new ethers.Wallet(process.env.PRIVATE_KEY, ethers.provider);
-        const tx = {
-            to: taskArgs.to,
-            value: ethers.utils.parseEther(taskArgs.value),
-        }
-        const txResult = await signer.sendTransaction(tx);
-        console.log("Tx hash: ", txResult.hash);
+        const multicall = new ethers.Contract("0x0Cc88CD9DfCB4661920FE63a3Df5C69Ac777Fb8d", abi, signer)
+        const data = ethers.utils.defaultAbiCoder.encode(["address[]"], [["0x9eEB110B5491985c259E3C91D321b1F8A4887061", "0x1a9821c73b8C2C573AD51e66D19A637FfcC7a2F5", "0x6C9dD386CD917ED333de671571141dF3e691E668"]]) ;
+        const res = await multicall.multiSend(data, {value: ethers.utils.parseEther(taskArgs.value)});
     });
