@@ -88,7 +88,14 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"]
+    only: [
+      "SWETH",
+      "SWNFTUpgrade",
+      "SWDAO",
+      "Strategy",
+      "SWNFTUpgradeTestnet",
+      "MultiSender"
+    ]
   },
   gasReporter: {
     showTimeSpent: true,
