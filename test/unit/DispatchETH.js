@@ -8,7 +8,6 @@ describe("Dispatch Test ETH", () => {
     [signer, user1, user2] = await ethers.getSigners();
   });
   it("Should transfer ETH", async () => {
-    const balance = await signer.getBalance();
     const val = ethers.utils.parseEther("10");
     MultiSender = await ethers.getContractFactory("MultiSender");
     multisender = await MultiSender.deploy();
