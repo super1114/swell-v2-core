@@ -4,7 +4,7 @@ task("dispatch", "Dispatch ETH to testers")
   .setAction(async taskArgs => {
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, ethers.provider);
     const multicall = new ethers.Contract(
-      "0x36dE991E7407e0140aEBd555C3Ff668D44a64F25",
+      "0xe37fb589D7eE3b180B5F360885A3c63cE650A59f",
       abi,
       signer
     );
