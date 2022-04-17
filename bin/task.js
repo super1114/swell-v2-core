@@ -1,18 +1,62 @@
 const { abi } = require("../abi/MultiSender.json");
+const { GoogleSpreadsheet } = require("google-spreadsheet");
+const creds = require("../credentials.json");
+const doc = new GoogleSpreadsheet(
+  "1XvxgPpewaytUgSBhfPszS1eeZ2t7golFFGTyi43WAVo"
+);
+let sheet;
+let rows;
+async function assessSpreadsheet() {
+  await doc.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SHEET_CLIETN_EMAIL,
+    private_key: process.env.GOOGLE_SHEET_PRIV_KEY
+  });
+  await doc.loadInfo();
+  sheet = doc.sheetsByIndex[0];
+  rows = await sheet.getRows();
+}
+async function getAddrs() {
+  let addrs = [];
+  rows.forEach(row => {
+    if (row.transferred != "TRUE" && row.address != undefined)
+      addrs.push(row.address);
+  });
+  return addrs;
+}
+async function updateSheet(transerredAddrs) {
+  for (var i = 0; i < rows.length; i++) {
+    if (transerredAddrs.indexOf(rows[i].address) >= 0) {
+      rows[i].transferred = "true";
+      await rows[i].save();
+    }
+  }
+}
 task("dispatch", "Dispatch ETH to testers")
   .addParam("value", "Total amount of ETH")
   .setAction(async taskArgs => {
+    await assessSpreadsheet();
+    let data = await getAddrs();
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, ethers.provider);
+    const balance = await signer.getBalance();
     const multicall = new ethers.Contract(
       "0xe37fb589D7eE3b180B5F360885A3c63cE650A59f",
       abi,
       signer
     );
-    const data = [
-      "0x9eEB110B5491985c259E3C91D321b1F8A4887061",
-      "0x1a9821c73b8C2C573AD51e66D19A637FfcC7a2F5"
-    ];
+    const amountToSend = taskArgs.value * data.length;
+    const totalETH = balance.toString() / Math.pow(10, 18);
+    if (totalETH < amountToSend) {
+      let arrLength = Math.floor(totalETH / taskArgs.value);
+      data = data.slice(0, arrLength);
+    }
+    data = data.length < 10 ? data : data.slice(0, 10);
     const res = await multicall.multiSend(data, {
-      value: ethers.utils.parseEther(taskArgs.value)
+      value: ethers.utils.parseEther(
+        (parseInt(taskArgs.value) * data.length).toString()
+      )
     });
+
+    if (res.hash) {
+      updateSheet(data);
+    }
   });

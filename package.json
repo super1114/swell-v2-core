@@ -45,7 +45,8 @@
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
     "base64-sol": "^1.1.0",
     "cypress": "^9.3.1",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "google-spreadsheet": "^3.0.14"
   },
   "lint-staged": {
     "*.js": "prettier --write test/**/*.js",

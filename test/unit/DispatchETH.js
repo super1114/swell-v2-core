@@ -14,7 +14,7 @@ describe("Dispatch Test ETH", () => {
     MultiSender = await ethers.getContractFactory("MultiSender");
     multisender = await MultiSender.deploy();
     const data = [user1.getAddress(), user2.getAddress()];
-    await expect(multisender.connect(signer).multiSend(data, { value: val }))
+    expect(multisender.connect(signer).multiSend(data, { value: val }))
       .to.emit(multisender, "MultiSend")
       .withArgs(signer.getAddress(), val);
   });
