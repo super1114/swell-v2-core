@@ -2,14 +2,10 @@ const fs = require("fs");
 const { getTag } = require("./helpers");
 const {
   deployDepositContract,
-  deploySWNFTUpgradeTestnet,
-  deployMultiSenderContract
+  deploySWNFTUpgradeTestnet
 } = require("./deployTestnet");
 const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
-let depositContractAddress,
-  swNFT,
-  nftDescriptorLibrary,
-  multiSendContractAddress;
+let depositContractAddress, swNFT, nftDescriptorLibrary;
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
 
@@ -51,10 +47,6 @@ task("deploy", "Deploy the contracts")
       versions[
         newTag
       ].contracts.depositContractAddress = depositContractAddress;
-      multiSendContractAddress = await deployMultiSenderContract();
-      versions[
-        newTag
-      ].contracts.multiSendContractAddress = multiSendContractAddress;
     }
 
     const SWDAO = await ethers.getContractFactory("SWDAO");

@@ -7,6 +7,7 @@ require("dotenv").config();
 require("@openzeppelin/hardhat-upgrades");
 require("solidity-coverage");
 require("./deploy/deploy");
+require("./deploy/deployMultisender");
 require("./deploy/upgrade");
 require("./bin/task");
 

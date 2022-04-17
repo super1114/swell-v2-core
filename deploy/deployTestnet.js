@@ -33,16 +33,7 @@ async function deploySWNFTUpgradeTestnet(swDAOAddress, depositContractAddress) {
   return { swNFT, nftDescriptorLibrary };
 }
 
-async function deployMultiSenderContract() {
-  const MultiSender = await ethers.getContractFactory("MultiSender");
-  const multisender = await MultiSender.deploy();
-  await multisender.deployed();
-  console.log("multisender:", multisender.address);
-  return multisender.address;
-}
-
 module.exports = {
   deployDepositContract,
-  deploySWNFTUpgradeTestnet,
-  deployMultiSenderContract
+  deploySWNFTUpgradeTestnet
 };
