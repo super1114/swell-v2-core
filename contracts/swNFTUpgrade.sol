@@ -272,11 +272,6 @@ contract SWNFTUpgrade is
         revert("Need to wait till LP is available");
     }
     
-    /// @notice Update opRate of msgsender
-    /// @param rate The amount of update rate
-    function updateOpRate(uint rate) public {
-        opRate[msg.sender] = rate;
-    }
     // ============ Public/External Getter functions ============
 
     /// @notice get length of validators
@@ -396,5 +391,5 @@ contract SWNFTUpgrade is
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
     uint256[49] private __gap;
-    mapping(address => uint) public opRate;
+    // mapping(address => uint) public opRate;
 }
