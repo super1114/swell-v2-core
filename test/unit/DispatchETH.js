@@ -6,7 +6,6 @@ describe("Dispatch Test ETH", () => {
   let signer, user1, user2, MultiSender, multisender;
   before(async () => {
     [signer, user1, user2] = await ethers.getSigners();
-    console.log(signer.getAddress(), user1.getAddress(), user2.getAddress());
   });
   it("Should transfer ETH", async () => {
     const balance = await signer.getBalance();
