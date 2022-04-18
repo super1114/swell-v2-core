@@ -18,15 +18,15 @@ async function assessSpreadsheet() {
 async function getAddrs() {
   let addrs = [];
   rows.forEach(row => {
-    if (row.transferred != "TRUE" && row.address != undefined)
+    if (row.transferred_amount == undefined && row.address != undefined)
       addrs.push(row.address);
   });
   return addrs;
 }
-async function updateSheet(transerredAddrs) {
+async function updateSheet(transerredAddrs, value) {
   for (var i = 0; i < rows.length; i++) {
     if (transerredAddrs.indexOf(rows[i].address) >= 0) {
-      rows[i].transferred = "true";
+      rows[i].transferred_amount = value;
       await rows[i].save();
     }
   }
@@ -39,7 +39,7 @@ task("dispatch", "Dispatch ETH to testers")
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, ethers.provider);
     const balance = await signer.getBalance();
     const multicall = new ethers.Contract(
-      "0xe37fb589D7eE3b180B5F360885A3c63cE650A59f",
+      "0x4205A420E8e80E465BA4dDEF33d4b670eA156aFE",
       abi,
       signer
     );
@@ -57,6 +57,6 @@ task("dispatch", "Dispatch ETH to testers")
     });
 
     if (res.hash) {
-      updateSheet(data);
+      await updateSheet(data, taskArgs.value);
     }
   });
