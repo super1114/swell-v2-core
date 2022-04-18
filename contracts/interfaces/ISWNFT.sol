@@ -83,6 +83,12 @@ interface ISWNFT
         bytes indexed pubKey
     );
 
+    event LogUpdateIsValidatorActive(
+        address user,
+        bytes indexed pubKey,
+        bool isActive
+    );
+
     event LogSetSWETHAddress(
         address swETHAddress
     );
