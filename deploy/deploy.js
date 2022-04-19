@@ -5,6 +5,7 @@ const {
   deploySWNFTUpgradeTestnet
 } = require("./deployTestnet");
 const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
+const kilnDepositContract = "0x4242424242424242424242424242424242424242";
 let depositContractAddress, swNFT, nftDescriptorLibrary;
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -60,6 +61,12 @@ task("deploy", "Deploy the contracts")
         ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
           swDAO.address,
           goerliDepositContract
+        ));
+        break;
+      case 1337802:
+        ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
+          swDAO.address,
+          kilnDepositContract
         ));
         break;
       case 2077117572:

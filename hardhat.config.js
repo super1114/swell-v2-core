@@ -75,6 +75,14 @@ module.exports = {
     kaleido: {
       url: process.env.KALEIDO_RPC_URL ? process.env.KALEIDO_RPC_URL : "",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    },
+    "kaleido-main": {
+      url: process.env.KALEIDO_RPC_URL ? process.env.KALEIDO_RPC_URL : "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    },
+    kiln: {
+      url: process.env.KILN_RPC_URL ? process.env.KILN_RPC_URL : "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },
   solidity: {
