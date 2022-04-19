@@ -391,5 +391,6 @@ contract SWNFTUpgrade is
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
     uint256[49] private __gap;
-    // mapping(address => uint) public opRate;
+    /// @notice this storage variable is deprecated. we won't use it anymore
+    mapping(address => uint) public opRate;
 }
