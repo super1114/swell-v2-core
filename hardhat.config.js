@@ -7,7 +7,9 @@ require("dotenv").config();
 require("@openzeppelin/hardhat-upgrades");
 require("solidity-coverage");
 require("./deploy/deploy");
+require("./deploy/deployMultisender");
 require("./deploy/upgrade");
+require("./bin/task");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.8.9",
