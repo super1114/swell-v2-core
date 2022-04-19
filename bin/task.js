@@ -45,8 +45,7 @@ task("dispatch", "Dispatch ETH to testers")
     const amountToSend = taskArgs.value * data.length;
     const totalETH = balance.toString() / Math.pow(10, 18);
     if (totalETH < amountToSend) {
-      console.log("Not enough ETH");
-      return;
+      throw "Not enough ETH";
     }
     data = data.length < 10 ? data : data.slice(0, 10);
     const res = await multicall.multiSend(data, {
