@@ -7,7 +7,6 @@
       "kind": "uups"
     },
     {
-
       "address": "0x0Be0fE93885bDc2C8459f04EdC0Df2e285b8d6DB",
       "txHash": "0x745aedfe7ff9b7c5c71890081e7a89f7cab70cecdd7aad55b4976594bff3468a",
       "kind": "uups"
@@ -330,7 +329,6 @@
         }
       }
     },
-
     "ef4a19f3985f63be2afce8f3edb9d36be2a302a102eb89a233ab339f5e9120f4": {
       "address": "0xDffa9BA65Eb4345BFF28b8e2F50A241024c9A7Ee",
       "txHash": "0x93baff24d9095864d976dad97c6c084ef55a1dac1bc36f38758c683cb2bfe1fc",
@@ -340,7 +338,6 @@
             "contract": "Initializable",
             "label": "_initialized",
             "type": "t_bool",
-
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
           },
           {

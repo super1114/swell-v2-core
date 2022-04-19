@@ -1,6 +1,5 @@
 const { abi } = require("../abi/MultiSender.json");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const creds = require("../credentials.json");
 const doc = new GoogleSpreadsheet(
   "1XvxgPpewaytUgSBhfPszS1eeZ2t7golFFGTyi43WAVo"
 );
@@ -18,7 +17,7 @@ async function assessSpreadsheet() {
 async function getAddrs() {
   let addrs = [];
   rows.forEach(row => {
-    if (row.transferred_amount == undefined && row.address != undefined)
+    if (row.tx_hash == undefined && row.address != undefined)
       addrs.push(row.address.trim());
   });
   return addrs;
@@ -26,7 +25,7 @@ async function getAddrs() {
 async function updateSheet(transerredAddrs, value) {
   for (var i = 0; i < rows.length; i++) {
     if (transerredAddrs.indexOf(rows[i].address) >= 0) {
-      rows[i].transferred_amount = value;
+      rows[i].tx_hash = value;
       await rows[i].save();
     }
   }
@@ -39,15 +38,15 @@ task("dispatch", "Dispatch ETH to testers")
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, ethers.provider);
     const balance = await signer.getBalance();
     const multicall = new ethers.Contract(
-      "0x4205A420E8e80E465BA4dDEF33d4b670eA156aFE",
+      process.env.MULTI_SENDER_CONTRACT,
       abi,
       signer
     );
     const amountToSend = taskArgs.value * data.length;
     const totalETH = balance.toString() / Math.pow(10, 18);
     if (totalETH < amountToSend) {
-      let arrLength = Math.floor(totalETH / taskArgs.value);
-      data = data.slice(0, arrLength);
+      console.log("Not enough ETH");
+      return;
     }
     data = data.length < 10 ? data : data.slice(0, 10);
     const res = await multicall.multiSend(data, {
@@ -57,6 +56,6 @@ task("dispatch", "Dispatch ETH to testers")
     });
 
     if (res.hash) {
-      await updateSheet(data, taskArgs.value);
+      await updateSheet(data, res.hash);
     }
   });
