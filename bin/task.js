@@ -19,7 +19,7 @@ async function getAddrs() {
   let addrs = [];
   rows.forEach(row => {
     if (row.transferred_amount == undefined && row.address != undefined)
-      addrs.push(row.address);
+      addrs.push(row.address.trim());
   });
   return addrs;
 }
