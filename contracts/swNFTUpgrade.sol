@@ -136,9 +136,9 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey, bool isActive) onlyOwner external{
-        isValidatorActive[pubKey] = isActive;
-        emit LogUpdateValidatorActive(msg.sender, pubKey, isActive);
+    function updateIsValidatorActive(bytes calldata pubKey) onlyOwner external{
+        isValidatorActive[pubKey] = !isValidatorActive[pubKey];
+        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }
 
     /// @notice Renonce ownership is not allowed
