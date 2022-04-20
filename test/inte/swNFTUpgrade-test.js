@@ -226,8 +226,6 @@ describe("SWNFTUpgrade", async () => {
     expect(swNFT.connect(user).deposit("2", ethers.utils.parseEther("1")))
       .to.emit(swNFT, "LogDeposit")
       .withArgs("2", user.address, ethers.utils.parseEther("1"));
-    console.log(await swNFT.positions("1"));
-    console.log(await swNFT.positions("2"));
     const position = await swNFT.positions("2");
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
