@@ -55,6 +55,7 @@ contract SWNFTUpgrade is
     uint public ETHER;
     address feePool;
     uint fee;
+    address public botAddress;
 
     IDepositContract public depositContract;
 
@@ -134,9 +135,18 @@ contract SWNFTUpgrade is
         emit LogAddWhiteList(msg.sender, pubKey);
     }
 
+    // @notice Update the cronjob bot address
+    /// @param _address The address of the cronjob bot
+    function updateBotAddress(address _address) onlyOwner external{
+        require(_address != address(0), "address cannot be 0");
+        botAddress = _address;
+        emit LogUpdateBotAddress(_address);
+    }
+
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) onlyOwner external{
+    function updateIsValidatorActive(bytes calldata pubKey) external{
+        require(msg.sender == botAddress, "sender is not the bot");
         isValidatorActive[pubKey] = !isValidatorActive[pubKey];
         emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }

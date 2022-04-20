@@ -3,19 +3,19 @@
   "proxies": [
     {
       "address": "0xddE78e6202518FF4936b5302cC2891ec180E8bFf",
-      "txHash": "0x27a8b05a4ccbdb5e293af7c2f41e6ffd2b1b35101acee91a2198670493723598",
+      "txHash": "0x5296d7687221c9c50f568f1701ab2e3eff392af78d425e10e09c5347e2302d90",
       "kind": "uups"
     },
     {
       "address": "0x26B862f640357268Bd2d9E95bc81553a2Aa81D7E",
-      "txHash": "0xbf06313a1f1a1d1de2a78803066a2f2249ba9a1d654b91379f82b19049ce5758",
+      "txHash": "0x6d7419dd763c492a5dc0c37a2ee0e4bd3fca3cfe20f614a47e6a282e679abb15",
       "kind": "uups"
     }
   ],
   "impls": {
-    "b9a1a6b3d967dfe55984273216b020b94537c189831fe6fa137eadc153f78e15": {
+    "3c3442942d7cb26967dd14f5249a8be56037380eff0eb29adb89d1f953be02de": {
       "address": "0x5D42EBdBBa61412295D7b0302d6F50aC449Ddb4F",
-      "txHash": "0xbd3d9d29444cdcb9d327575965df2e291e301e52375c02ade4f6eaa282b0ea12",
+      "txHash": "0xf2d897a5d51a4d72abb5446d56fb5d9c8efd2d7cdd61906a1595a5c1b2b4963f",
       "layout": {
         "storage": [
           {
@@ -188,57 +188,63 @@
           },
           {
             "contract": "SWNFTUpgrade",
+            "label": "botAddress",
+            "type": "t_address",
+            "src": "contracts/swNFTUpgrade.sol:58"
+          },
+          {
+            "contract": "SWNFTUpgrade",
             "label": "depositContract",
-            "type": "t_contract(IDepositContract)5584",
-            "src": "contracts/swNFTUpgrade.sol:59"
+            "type": "t_contract(IDepositContract)5588",
+            "src": "contracts/swNFTUpgrade.sol:60"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validators",
             "type": "t_array(t_bytes_storage)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:61"
+            "src": "contracts/swNFTUpgrade.sol:62"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validatorDeposits",
             "type": "t_mapping(t_bytes_memory_ptr,t_uint256)",
-            "src": "contracts/swNFTUpgrade.sol:62"
+            "src": "contracts/swNFTUpgrade.sol:63"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "whiteList",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
-            "src": "contracts/swNFTUpgrade.sol:63"
+            "src": "contracts/swNFTUpgrade.sol:64"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "isValidatorActive",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
-            "src": "contracts/swNFTUpgrade.sol:64"
+            "src": "contracts/swNFTUpgrade.sol:65"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "positions",
             "type": "t_mapping(t_uint256,t_struct(Position)4353_storage)",
-            "src": "contracts/swNFTUpgrade.sol:67"
+            "src": "contracts/swNFTUpgrade.sol:68"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "strategies",
             "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:69"
+            "src": "contracts/swNFTUpgrade.sol:70"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "__gap",
             "type": "t_array(t_uint256)49_storage",
-            "src": "contracts/swNFTUpgrade.sol:388"
+            "src": "contracts/swNFTUpgrade.sol:398"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "opRate",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "contracts/swNFTUpgrade.sol:389"
+            "src": "contracts/swNFTUpgrade.sol:399"
           },
           {
             "contract": "TestswNFTUpgrade",
@@ -266,7 +272,7 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_contract(IDepositContract)5584": {
+          "t_contract(IDepositContract)5588": {
             "label": "contract IDepositContract"
           },
           "t_array(t_bytes_storage)dyn_storage": {
@@ -351,9 +357,9 @@
         }
       }
     },
-    "4d23677d020f4e5039e2e8ae853078300e15251db951a9962f0d1d2f7cee3485": {
+    "7c725ab3231a679ccbc6bf2817652f887a89feb2bf568f1ac9f73062ee1b5c66": {
       "address": "0x70bDA08DBe07363968e9EE53d899dFE48560605B",
-      "txHash": "0xd736b637fe509470cde69765efe80a9eae1bfb39814d2c6f8320f29dd1473604",
+      "txHash": "0xcf0e985f3eb2d190c41445d5f1afdabf92db4ba038a07cab56f4640e0d4b6654",
       "layout": {
         "storage": [
           {
@@ -526,57 +532,63 @@
           },
           {
             "contract": "SWNFTUpgrade",
+            "label": "botAddress",
+            "type": "t_address",
+            "src": "contracts/swNFTUpgrade.sol:58"
+          },
+          {
+            "contract": "SWNFTUpgrade",
             "label": "depositContract",
-            "type": "t_contract(IDepositContract)5584",
-            "src": "contracts/swNFTUpgrade.sol:59"
+            "type": "t_contract(IDepositContract)5588",
+            "src": "contracts/swNFTUpgrade.sol:60"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validators",
             "type": "t_array(t_bytes_storage)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:61"
+            "src": "contracts/swNFTUpgrade.sol:62"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "validatorDeposits",
             "type": "t_mapping(t_bytes_memory_ptr,t_uint256)",
-            "src": "contracts/swNFTUpgrade.sol:62"
+            "src": "contracts/swNFTUpgrade.sol:63"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "whiteList",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
-            "src": "contracts/swNFTUpgrade.sol:63"
+            "src": "contracts/swNFTUpgrade.sol:64"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "isValidatorActive",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
-            "src": "contracts/swNFTUpgrade.sol:64"
+            "src": "contracts/swNFTUpgrade.sol:65"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "positions",
             "type": "t_mapping(t_uint256,t_struct(Position)4353_storage)",
-            "src": "contracts/swNFTUpgrade.sol:67"
+            "src": "contracts/swNFTUpgrade.sol:68"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "strategies",
             "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/swNFTUpgrade.sol:69"
+            "src": "contracts/swNFTUpgrade.sol:70"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "__gap",
             "type": "t_array(t_uint256)49_storage",
-            "src": "contracts/swNFTUpgrade.sol:388"
+            "src": "contracts/swNFTUpgrade.sol:398"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "opRate",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "contracts/swNFTUpgrade.sol:389"
+            "src": "contracts/swNFTUpgrade.sol:399"
           },
           {
             "contract": "TestswNFTUpgrade",
@@ -604,7 +616,7 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_contract(IDepositContract)5584": {
+          "t_contract(IDepositContract)5588": {
             "label": "contract IDepositContract"
           },
           "t_array(t_bytes_storage)dyn_storage": {

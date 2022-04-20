@@ -83,6 +83,10 @@ interface ISWNFT
         bytes indexed pubKey
     );
 
+    event LogUpdateBotAddress(
+        address _address
+    );
+
     event LogUpdateIsValidatorActive(
         address user,
         bytes indexed pubKey,
