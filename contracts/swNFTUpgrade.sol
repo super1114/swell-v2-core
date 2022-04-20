@@ -158,7 +158,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to withdraw
     /// @return success Whether the withdraw was successful
     function withdraw(uint tokenId, uint amount) public returns (bool success) {
-        require(positions[tokenId].operator==false, "Operator can not withdraw");
         require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
