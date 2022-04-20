@@ -203,7 +203,7 @@ describe("SWNFTUpgrade", async () => {
   it("can withdraw 1 swETH", async function() {
     expect(swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1")))
       .to.emit(swNFT, "LogWithdraw")
-      .withArgs("2", signer.address, ethers.utils.parseEther("1"));
+      .withArgs("2", user.address, ethers.utils.parseEther("1"));
 
     const position = await swNFT.positions("2");
     expect(position.pubKey).to.be.equal(pubKey);
