@@ -229,7 +229,7 @@ describe("SWNFTUpgrade", async () => {
     const position = await swNFT.positions("2");
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
-    expect(position.baseTokenBalance).to.be.equal("1000000000000000000");
+    expect(position.baseTokenBalance).to.be.equal("0");
   });
 
   it("can add strategy", async function() {
