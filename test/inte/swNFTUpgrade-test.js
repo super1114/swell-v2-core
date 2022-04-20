@@ -51,6 +51,24 @@ describe("SWNFTUpgrade", async () => {
     await strategy.deployed();
   });
 
+  it("cannot stake when validator is not active", async function() {
+    amount = ethers.utils.parseEther("1");
+    expect(
+      swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
+        value: amount
+      })
+    ).to.be.revertedWith("validator is not active");
+  });
+
+  it("owner sets the validator to active", async function() {
+    const owner = await swNFT.owner();
+    expect(owner).to.be.equal(signer.address);
+
+    expect(swNFT.updateIsValidatorActive(pubKey))
+      .to.emit(swNFT, "LogUpdateIsValidatorActive")
+      .withArgs(signer.address, pubKey, true);
+  });
+
   it("cannot stake less than 1 Ether", async function() {
     amount = ethers.utils.parseEther("0.1");
     expect(
