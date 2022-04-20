@@ -185,22 +185,27 @@ describe("SWNFTUpgrade", async () => {
     ).to.be.revertedWith("cannot stake more than 32 ETH");
   });
 
+  it("cannot withdraw as operator", async function() {
+    expect(
+      swNFT.withdraw("1", ethers.utils.parseEther("1"))
+    ).to.be.revertedWith("cannot withdraw more than the position balance");
+  });
+
   it("cannot withdraw 2 swETH", async function() {
     expect(
-      swNFT.withdraw("1", ethers.utils.parseEther("2"))
+      swNFT.withdraw("2", ethers.utils.parseEther("2"))
     ).to.be.revertedWith("cannot withdraw more than the position balance");
-
     expect(
-      swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
+      swNFT.withdraw("2", ethers.utils.parseEther("1"))
     ).to.be.revertedWith("Only owner can withdraw");
   });
 
   it("can withdraw 1 swETH", async function() {
-    expect(swNFT.withdraw("1", ethers.utils.parseEther("1")))
+    expect(swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1")))
       .to.emit(swNFT, "LogWithdraw")
-      .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+      .withArgs("2", signer.address, ethers.utils.parseEther("1"));
 
-    const position = await swNFT.positions("1");
+    const position = await swNFT.positions("2");
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
     expect(position.baseTokenBalance).to.be.equal("0");
