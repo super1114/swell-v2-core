@@ -193,7 +193,7 @@ describe("SWNFTUpgrade", async () => {
 
   it("cannot withdraw 2 swETH", async function() {
     expect(
-      swNFT.withdraw("2", ethers.utils.parseEther("2"))
+      swNFT.connect(user).withdraw("2", ethers.utils.parseEther("2"))
     ).to.be.revertedWith("cannot withdraw more than the position balance");
     expect(
       swNFT.withdraw("2", ethers.utils.parseEther("1"))
@@ -201,7 +201,9 @@ describe("SWNFTUpgrade", async () => {
   });
 
   it("can withdraw 1 swETH", async function() {
-    expect(swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1")))
+    expect(
+      await swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1"))
+    )
       .to.emit(swNFT, "LogWithdraw")
       .withArgs("2", user.address, ethers.utils.parseEther("1"));
 
@@ -223,7 +225,7 @@ describe("SWNFTUpgrade", async () => {
     expect(swNFT.deposit("1", ethers.utils.parseEther("1")))
       .to.emit(swNFT, "LogDeposit")
       .withArgs("1", signer.address, ethers.utils.parseEther("1"));
-
+    console.log(await swNFT.positions("1"));
     const position = await swNFT.positions("1");
     expect(position.pubKey).to.be.equal(pubKey);
     expect(position.value).to.be.equal("1000000000000000000");
