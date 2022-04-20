@@ -354,7 +354,7 @@ contract SWNFTUpgrade is
         positions[newItemId] = Position({
             pubKey: pubKey,
             value: amount,
-            baseTokenBalance: amount,
+            baseTokenBalance: operator?0:amount,
             timeStamp: block.timestamp,
             operator: operator
         });
@@ -362,7 +362,7 @@ contract SWNFTUpgrade is
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
 
         _safeMint(msg.sender, newItemId);
-        ISWETH(swETHAddress).mint(amount);
+        if(!operator) ISWETH(swETHAddress).mint(amount);
     }
 
     /// @notice Convert public key from bytes to string output
