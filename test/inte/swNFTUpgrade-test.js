@@ -341,22 +341,15 @@ describe("SWNFTUpgrade", async () => {
       .withArgs("2", signer.address, ethers.utils.parseEther("1"));
   });
 
-  // it("can remove strategy", async function() {
-  //   await expect(swNFT.connect(user).removeStrategy("0")).to.be.revertedWith(
-  //     "Ownable: caller is not the owner"
-  //   );
-  //   console.log(await swNFT.strategies("0"));
-  //   console.log("depositADDR:",depositAddress);
-  //   console.log(await swNFT.strategies("1"));
-  //   console.log("Strategy:",strategy.address);
-  //   await expect(swNFT.removeStrategy("0"))
-  //     .to.emit(swNFT, "LogRemoveStrategy")
-  //     .withArgs("0", depositAddress);
-  //   // await expect(swNFT.removeStrategy("1"))
-  //   //   .to.emit(swNFT, "LogRemoveStrategy")
-  //   //   .withArgs("1", strategy.address);
-
-  //   // await expect(swNFT.removeStrategy("0"))
-  //   //   .to.be.revertedWith("Index out of range");
-  // });
+  it("can remove strategy", async function() {
+    expect(swNFT.connect(user).removeStrategy("0")).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+    expect(swNFT.removeStrategy("0"))
+      .to.emit(swNFT, "LogRemoveStrategy")
+      .withArgs("0", depositAddress);
+    expect(swNFT.removeStrategy("1"))
+      .to.emit(swNFT, "LogRemoveStrategy")
+      .withArgs("1", strategy.address);
+  });
 });
