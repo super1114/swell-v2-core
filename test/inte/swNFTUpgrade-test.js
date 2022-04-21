@@ -14,7 +14,7 @@ describe("SWNFTUpgrade", async () => {
   let swNFT, swETH, signer, user, strategy;
 
   before(async () => {
-    [signer, user] = await ethers.getSigners();
+    [signer, user, bot] = await ethers.getSigners();
 
     const SWDAO = await ethers.getContractFactory("SWDAO");
     swDAO = await SWDAO.deploy();
@@ -49,6 +49,33 @@ describe("SWNFTUpgrade", async () => {
     const Strategy = await ethers.getContractFactory("Strategy");
     strategy = await Strategy.deploy(swNFT.address);
     await strategy.deployed();
+  });
+
+  it("cannot stake when validator is not active", async function() {
+    amount = ethers.utils.parseEther("1");
+    expect(
+      swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
+        value: amount
+      })
+    ).to.be.revertedWith("validator is not active");
+  });
+
+  it("owner sets the bot address", async function() {
+    const owner = await swNFT.owner();
+    expect(owner).to.be.equal(signer.address);
+
+    expect(swNFT.updateBotAddress(bot.address))
+      .to.emit(swNFT, "LogUpdateBotAddress")
+      .withArgs(bot.address);
+  });
+
+  it("bot sets the validator to active", async function() {
+    const address = await swNFT.botAddress();
+    expect(address).to.be.equal(bot.address);
+
+    expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
+      .to.emit(swNFT, "LogUpdateIsValidatorActive")
+      .withArgs(bot.address, pubKey, true);
   });
 
   it("cannot stake less than 1 Ether", async function() {

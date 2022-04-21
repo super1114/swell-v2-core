@@ -55,12 +55,14 @@ contract SWNFTUpgrade is
     uint public ETHER;
     address feePool;
     uint fee;
+    address public botAddress;
 
     IDepositContract public depositContract;
 
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
     mapping(bytes => bool) public whiteList;
+    mapping(bytes => bool) public isValidatorActive;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -131,6 +133,22 @@ contract SWNFTUpgrade is
     function addWhiteList(bytes calldata pubKey) onlyOwner external{
         whiteList[pubKey] = true;
         emit LogAddWhiteList(msg.sender, pubKey);
+    }
+
+    // @notice Update the cronjob bot address
+    /// @param _address The address of the cronjob bot
+    function updateBotAddress(address _address) onlyOwner external{
+        require(_address != address(0), "address cannot be 0");
+        botAddress = _address;
+        emit LogUpdateBotAddress(_address);
+    }
+
+    // @notice Update the validator active status
+    /// @param pubKey The public key of the validator
+    function updateIsValidatorActive(bytes calldata pubKey) external{
+        require(msg.sender == botAddress, "sender is not the bot");
+        isValidatorActive[pubKey] = !isValidatorActive[pubKey];
+        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }
 
     /// @notice Renonce ownership is not allowed
@@ -322,6 +340,7 @@ contract SWNFTUpgrade is
         bytes32 depositDataRoot,
         uint amount
     ) private returns (uint256 newItemId) {
+        require(isValidatorActive[pubKey], 'validator is not active');
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
         require(amount % ETHER == 0, "stake value not multiple of Ether");
