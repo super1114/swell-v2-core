@@ -51,14 +51,6 @@ describe("SWNFT", async () => {
     await strategy.deployed();
   });
 
-  it("can update OpRate", async function() {
-    let opRate = await swNFT.opRate(user.address);
-    expect(opRate).to.be.equal("0");
-    await swNFT.connect(user).updateOpRate("100");
-    opRate = await swNFT.opRate(user.address);
-    expect(opRate).to.be.equal("100");
-  });
-
   it("cannot stake when validator is not active", async function() {
     amount = ethers.utils.parseEther("1");
     expect(
