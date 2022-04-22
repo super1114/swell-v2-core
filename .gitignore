@@ -30,3 +30,5 @@ artifacts
 # Coverage
 coverage/
 coverage.json
+
+.vscode/

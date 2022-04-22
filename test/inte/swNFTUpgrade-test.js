@@ -15,7 +15,7 @@ let swNFT, swETH, signer, user, strategy;
 describe("SWNFTUpgrade", () => {
   describe("If not operator", () => {
     before(async () => {
-      [signer, user] = await ethers.getSigners();
+      [signer, user, bot] = await ethers.getSigners();
 
       const SWDAO = await ethers.getContractFactory("SWDAO");
       swDAO = await SWDAO.deploy();
@@ -50,6 +50,33 @@ describe("SWNFTUpgrade", () => {
       const Strategy = await ethers.getContractFactory("Strategy");
       strategy = await Strategy.deploy(swNFT.address);
       await strategy.deployed();
+    });
+
+    it("cannot stake when validator is not active", async function() {
+      amount = ethers.utils.parseEther("1");
+      await expect(
+        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
+          value: amount
+        })
+      ).to.be.revertedWith("validator is not active");
+    });
+
+    it("owner sets the bot address", async function() {
+      const owner = await swNFT.owner();
+      await expect(owner).to.be.equal(signer.address);
+
+      await expect(swNFT.updateBotAddress(bot.address))
+        .to.emit(swNFT, "LogUpdateBotAddress")
+        .withArgs(bot.address);
+    });
+
+    it("bot sets the validator to active", async function() {
+      const address = await swNFT.botAddress();
+      await expect(address).to.be.equal(bot.address);
+
+      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
+        .to.emit(swNFT, "LogUpdateIsValidatorActive")
+        .withArgs(bot.address, pubKey, true);
     });
 
     it("cannot stake less than 1 Ether", async function() {
@@ -335,7 +362,7 @@ describe("SWNFTUpgrade", () => {
 
 describe("If operator", async () => {
   before(async () => {
-    [signer, user] = await ethers.getSigners();
+    [signer, user, bot] = await ethers.getSigners();
 
     const SWDAO = await ethers.getContractFactory("SWDAO");
     swDAO = await SWDAO.deploy();
@@ -372,6 +399,24 @@ describe("If operator", async () => {
     await strategy.deployed();
   });
 
+  it("owner sets the bot address", async function() {
+    const owner = await swNFT.owner();
+    await expect(owner).to.be.equal(signer.address);
+
+    await expect(swNFT.updateBotAddress(bot.address))
+      .to.emit(swNFT, "LogUpdateBotAddress")
+      .withArgs(bot.address);
+  });
+
+  it("bot sets the validator to active", async function() {
+    const address = await swNFT.botAddress();
+    await expect(address).to.be.equal(bot.address);
+
+    await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
+      .to.emit(swNFT, "LogUpdateIsValidatorActive")
+      .withArgs(bot.address, pubKey, true);
+  });
+
   it("should not mint any swETH as operator", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
@@ -380,27 +425,8 @@ describe("If operator", async () => {
       })
     ).to.emit(swNFT, "LogStake");
 
-    const tokenURI = await swNFT.tokenURI("1");
-    const decodeTokenURI = extractJSONFromURI(tokenURI);
-    await expect(decodeTokenURI.name).to.be.equal(
-      "Swell Network Validator - swETH - " + pubKey + " <> 1 Ether"
-    );
-    await expect(decodeTokenURI.description).to.be.equal(
-      "This NFT represents a liquidity position in a Swell Network Validator. The owner of this NFT can modify or redeem the position.\n" +
-        "swETH Address: " +
-        swETH.address.toLowerCase() +
-        "\n" +
-        "Token ID: 1\n\n" +
-        "⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated."
-    );
-
     const owner = await swNFT.ownerOf("1");
     await expect(owner).to.be.equal(signer.address);
-
-    const validatorsLength = await swNFT.validatorsLength();
-    const validator = await swNFT.validators("0");
-    await expect(validatorsLength).to.be.equal("1");
-    await expect(validator).to.be.equal(pubKey);
 
     const position = await swNFT.positions("1");
     await expect(position.pubKey).to.be.equal(pubKey);
