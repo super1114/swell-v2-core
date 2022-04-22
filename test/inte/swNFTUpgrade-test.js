@@ -59,13 +59,13 @@ describe("SWNFTUpgrade", () => {
           value: amount
         })
       ).to.be.revertedWith("Must send at least 1 ETH");
-    }).timeout(1000000000);
+    });
 
     it("can add validator into whiteList to not be operator", async () => {
       await expect(await swNFT.addWhiteList(pubKey))
         .to.emit(swNFT, "LogAddWhiteList")
         .withArgs(signer.address, pubKey);
-    }).timeout(1000000000);
+    });
 
     it("can stake 1 Ether as owner", async function() {
       amount = ethers.utils.parseEther("1");
@@ -108,7 +108,7 @@ describe("SWNFTUpgrade", () => {
 
       const tvl = await swNFT.tvl();
       await expect(tvl).to.be.equal("1000000000000000000");
-    }).timeout(1000000000);
+    });
 
     it("can stake 1 Ether again", async function() {
       amount = ethers.utils.parseEther("1");
@@ -153,7 +153,7 @@ describe("SWNFTUpgrade", () => {
 
       const tvl = await swNFT.tvl();
       await expect(tvl).to.be.equal("2000000000000000000");
-    }).timeout(1000000000);
+    });
 
     it("cannot stake more than 32 Ether", async function() {
       amount = ethers.utils.parseEther("32");
@@ -162,7 +162,7 @@ describe("SWNFTUpgrade", () => {
           value: amount
         })
       ).to.be.revertedWith("cannot stake more than 32 ETH");
-    }).timeout(1000000000);
+    });
 
     it("cannot withdraw 2 swETH", async function() {
       await expect(
@@ -172,7 +172,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Only owner can withdraw");
-    }).timeout(1000000000);
+    });
 
     it("can withdraw 1 swETH", async function() {
       await expect(swNFT.withdraw("1", ethers.utils.parseEther("1")))
@@ -183,14 +183,14 @@ describe("SWNFTUpgrade", () => {
       await expect(position.pubKey).to.be.equal(pubKey);
       await expect(position.value).to.be.equal("1000000000000000000");
       await expect(position.baseTokenBalance).to.be.equal("0");
-    }).timeout(1000000000);
+    });
 
     it("cannot deposit if not owner", async function() {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
       ).to.be.revertedWith("Only owner can deposit");
-    }).timeout(1000000000);
+    });
 
     it("can deposit 1 swETH", async function() {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("1"));
@@ -204,7 +204,7 @@ describe("SWNFTUpgrade", () => {
       await expect(position.baseTokenBalance).to.be.equal(
         "1000000000000000000"
       );
-    }).timeout(1000000000);
+    });
 
     it("can add strategy", async function() {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
@@ -226,7 +226,7 @@ describe("SWNFTUpgrade", () => {
         .withArgs(strategy.address);
       strategyAddress = await swNFT.strategies("1");
       await expect(strategyAddress).to.be.equal(strategy.address);
-    }).timeout(1000000000);
+    });
 
     it("can enter strategy", async function() {
       await expect(
@@ -252,7 +252,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("reverted with panic code 0x11");
-    }).timeout(1000000000);
+    });
 
     it("can exit strategy", async function() {
       await expect(
@@ -272,7 +272,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.exitStrategy("1", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Not enough position to exit");
-    }).timeout(1000000000);
+    });
 
     it("can batch actions", async function() {
       await expect(
@@ -315,7 +315,7 @@ describe("SWNFTUpgrade", () => {
         )
         .to.emit(swNFT, "LogWithdraw")
         .withArgs("2", user.address, ethers.utils.parseEther("1"));
-    }).timeout(1000000000);
+    });
 
     it("can remove strategy", async function() {
       await expect(swNFT.connect(user).removeStrategy("0")).to.be.revertedWith(
@@ -329,7 +329,7 @@ describe("SWNFTUpgrade", () => {
       await expect(swNFT.removeStrategy("0"))
         .to.emit(swNFT, "LogRemoveStrategy")
         .withArgs("0", depositAddress);
-    }).timeout(1000000000);
+    });
   });
 });
 
@@ -407,5 +407,5 @@ describe("If operator", async () => {
     await expect(position.value).to.be.equal("1000000000000000000");
     await expect(position.baseTokenBalance).to.be.equal("0");
     await expect(position.operator).to.be.equal(true); //non-whitelist first deposit
-  }).timeout(1000000000);
+  });
 });
