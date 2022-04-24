@@ -10,7 +10,7 @@ require("./deploy/deploy");
 require("./deploy/deployMultisender");
 require("./deploy/upgrade");
 require("./bin/dispatchETH");
-require("./bin/addWhiteList");
+require("./bin/addWhiteLists");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.8.9",
