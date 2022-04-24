@@ -55,14 +55,12 @@ contract SWNFTUpgrade is
     uint public ETHER;
     address feePool;
     uint fee;
-    address public botAddress;
 
     IDepositContract public depositContract;
 
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
     mapping(bytes => bool) public whiteList;
-    mapping(bytes => bool) public isValidatorActive;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -398,7 +396,8 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    uint256[49] private __gap;
-    /// @notice this storage variable is deprecated. we won't use it anymore
-    mapping(address => uint) public opRate;
+    uint256[47] private __gap;
+    mapping(address => uint) public opRate; // deprecated
+    address public botAddress;
+    mapping(bytes => bool) public isValidatorActive;
 }
