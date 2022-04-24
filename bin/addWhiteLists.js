@@ -1,4 +1,4 @@
-task("addWhiteList", "Add validators to white list").setAction(
+task("addWhiteLists", "Add validators to white list").setAction(
   async taskArgs => {
     let network = await ethers.provider.getNetwork();
     console.log("network:", network);
