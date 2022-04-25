@@ -1295,6 +1295,19 @@
   {
     "inputs": [
       {
+        "internalType": "bytes[]",
+        "name": "pubKeys",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "updateIsValidatorsActive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newImplementation",
         "type": "address"
