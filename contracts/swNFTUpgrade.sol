@@ -151,10 +151,18 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) external{
+    function updateIsValidatorActive(bytes calldata pubKey) public{
         require(msg.sender == botAddress, "sender is not the bot");
-        isValidatorActive[pubKey] = !isValidatorActive[pubKey];
+        isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
+    }
+
+    // @notice Update the validators active status
+    /// @param pubKeys Array of public key of the validators
+    function updateIsValidatorsActive(bytes[] calldata pubKeys) external{
+        for(uint i = 0; i < pubKeys.length; i++){
+            updateIsValidatorActive(pubKeys[i]);
+        }
     }
 
     /// @notice Renonce ownership is not allowed
