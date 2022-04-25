@@ -5,6 +5,10 @@ const { it } = require("mocha");
 describe("SWNFT", async () => {
   const pubKey =
     "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
+  const pubKey1 =
+    "0xac07caeafcf198bf31280d60f62f918e814e440c5247bcc75dddae7ec099e9d76a2a429a80a81ee119e6abe887193480";
+  const pubKey2 =
+    "0xb916ca44a8708da6951172e30bda40f14082ca16cd29dbd7a123a38821ddaf0c8bd79bec21be1c44ce00c2c5e6379d8d068c6157f66aeecc5f5bf11265ff86b3ced16fa1cc1819d96a68e25518d11cc839773f905bcac784f8679655943b98bd";
   const signature =
     "0xb224d558d829c245fe56bff9d28c7fd0d348d6795eb8faef8ce220c3657e373f8dc0a0c8512be589ecaa749fe39fc0371380a97aab966606ba7fa89c78dc1703858dfc5d3288880a813e7743f1ff379192e1f6b01a6a4a3affee1d50e5b3c849";
   const depositDataRoot =
@@ -51,17 +55,9 @@ describe("SWNFT", async () => {
     await strategy.deployed();
   });
 
-  it("can update OpRate", async function() {
-    let opRate = await swNFT.opRate(user.address);
-    expect(opRate).to.be.equal("0");
-    await swNFT.connect(user).updateOpRate("100");
-    opRate = await swNFT.opRate(user.address);
-    expect(opRate).to.be.equal("100");
-  });
-
   it("cannot stake when validator is not active", async function() {
     amount = ethers.utils.parseEther("1");
-    expect(
+    await expect(
       swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
         value: amount
       })
@@ -70,28 +66,37 @@ describe("SWNFT", async () => {
 
   it("owner sets the bot address", async function() {
     const owner = await swNFT.owner();
-    expect(owner).to.be.equal(signer.address);
+    await expect(owner).to.be.equal(signer.address);
 
-    expect(swNFT.updateBotAddress(bot.address))
+    await expect(swNFT.updateBotAddress(bot.address))
       .to.emit(swNFT, "LogUpdateBotAddress")
       .withArgs(bot.address);
   });
 
   it("bot sets the validator to active", async function() {
     const address = await swNFT.botAddress();
-    expect(address).to.be.equal(bot.address);
+    await expect(address).to.be.equal(bot.address);
 
-    expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
+    await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
       .to.emit(swNFT, "LogUpdateIsValidatorActive")
       .withArgs(bot.address, pubKey, true);
   });
 
-  it("can stake after validator is set to active", async function() {
-    amount = ethers.utils.parseEther("1");
-    expect(
-      swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-        value: amount
-      })
-    ).to.emit(swNFT, "LogStake");
+  it("can add validator into white list", async function() {
+    await expect(swNFT.addWhiteList(pubKey1)).to.emit(
+      swNFT,
+      "LogAddWhiteList",
+      signer.address,
+      pubKey1
+    );
+  });
+
+  it("can add validator into white lists", async function() {
+    await expect(swNFT.addWhiteLists([pubKey2])).to.emit(
+      swNFT,
+      "LogAddWhiteList",
+      signer.address,
+      pubKey2
+    );
   });
 });

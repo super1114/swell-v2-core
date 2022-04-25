@@ -55,14 +55,12 @@ contract SWNFTUpgrade is
     uint public ETHER;
     address feePool;
     uint fee;
-    address public botAddress;
 
     IDepositContract public depositContract;
 
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
     mapping(bytes => bool) public whiteList;
-    mapping(bytes => bool) public isValidatorActive;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -130,9 +128,17 @@ contract SWNFTUpgrade is
 
     /// @notice Add a new validator into whiteList
     /// @param pubKey The public key of the validator
-    function addWhiteList(bytes calldata pubKey) onlyOwner external{
+    function addWhiteList(bytes calldata pubKey) onlyOwner public{
         whiteList[pubKey] = true;
         emit LogAddWhiteList(msg.sender, pubKey);
+    }
+
+    /// @notice Add validators into whiteList
+    /// @param pubKeys Array of public keys of the validator
+    function addWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
+        for(uint i = 0; i < pubKeys.length; i++){
+            addWhiteList(pubKeys[i]);
+        }
     }
 
     // @notice Update the cronjob bot address
@@ -272,11 +278,6 @@ contract SWNFTUpgrade is
         revert("Need to wait till LP is available");
     }
     
-    /// @notice Update opRate of msgsender
-    /// @param rate The amount of update rate
-    function updateOpRate(uint rate) public {
-        opRate[msg.sender] = rate;
-    }
     // ============ Public/External Getter functions ============
 
     /// @notice get length of validators
@@ -373,7 +374,7 @@ contract SWNFTUpgrade is
         positions[newItemId] = Position({
             pubKey: pubKey,
             value: amount,
-            baseTokenBalance: amount,
+            baseTokenBalance: operator ? 0 : amount,
             timeStamp: block.timestamp,
             operator: operator
         });
@@ -381,7 +382,7 @@ contract SWNFTUpgrade is
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
 
         _safeMint(msg.sender, newItemId);
-        ISWETH(swETHAddress).mint(amount);
+        if(!operator) ISWETH(swETHAddress).mint(amount);
     }
 
     /// @notice Convert public key from bytes to string output
@@ -395,6 +396,8 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    uint256[49] private __gap;
-    mapping(address => uint) public opRate;
+    uint256[47] private __gap;
+    mapping(address => uint) public opRate; // deprecated
+    address public botAddress;
+    mapping(bytes => bool) public isValidatorActive;
 }
