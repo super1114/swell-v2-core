@@ -208,7 +208,6 @@ contract SWNFTUpgrade is
     function enterStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
-        require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
@@ -231,7 +230,6 @@ contract SWNFTUpgrade is
     function exitStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
-        require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
         require(amount > 0, "cannot exit strategy with 0 amount");
         positions[tokenId].baseTokenBalance += amount;
