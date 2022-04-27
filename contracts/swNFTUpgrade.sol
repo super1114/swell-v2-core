@@ -177,7 +177,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to deposit
     /// @return success Whether the deposit was successful
     function deposit(uint tokenId, uint amount) public returns (bool success) {
-        require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
         positions[tokenId].baseTokenBalance += amount;
@@ -190,7 +189,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to withdraw
     /// @return success Whether the withdraw was successful
     function withdraw(uint tokenId, uint amount) public returns (bool success) {
-        require(_exists(tokenId), "Query for nonexistent token");
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
@@ -206,7 +204,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
     function enterStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
-        require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
@@ -229,7 +226,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to exit
     /// @return success Whether the strategy exit was successful
     function exitStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
-        require(_exists(tokenId), "Query for nonexistent token");
         require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
