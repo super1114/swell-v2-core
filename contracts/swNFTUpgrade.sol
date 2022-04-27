@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -46,6 +47,7 @@ contract SWNFTUpgrade is
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     CountersUpgradeable.Counter public tokenIds;
 
@@ -65,7 +67,7 @@ contract SWNFTUpgrade is
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
 
-    address[] public strategies;
+    address[] public deprecatedStrategies; // deprecated
 
     /// @notice initialise the contract to issue the token
     /// @param _swDAOAddress The address of the swDAO contract
@@ -108,22 +110,21 @@ contract SWNFTUpgrade is
     /// @param strategy The strategy address to add
     function addStrategy(address strategy) onlyOwner external{
         require(strategy != address(0), "address cannot be 0");
-        strategies.push(strategy);
+        strategiesSet.add(strategy);
         emit LogAddStrategy(strategy);
     }
 
     /// @notice Remove a strategy
-    /// @param strategy The strategy index to remove
-    function removeStrategy(uint strategy) onlyOwner external{
-        uint length = strategies.length;
-        require(strategy < length, "Index out of range");
-        require(strategies[strategy] != address(0), "strategy does not exist");
+    /// @param strategyIndex The strategy index to remove
+    function removeStrategy(uint strategyIndex) onlyOwner external{
+        uint length = strategiesSet.length();
+        require(strategyIndex < length, "Index out of range");
+        address strategyToRemove = strategiesSet.at(strategyIndex);
+        require(strategyToRemove != address(0), "strategy does not exist");
         //TODO: Need to check balance before removing
         require(length >= 1, "no strategy to remove");
-        address last = strategies[length-1];
-        emit LogRemoveStrategy(strategy, strategies[strategy]);
-        strategies[strategy] = last;
-        strategies.pop();
+        strategiesSet.remove(strategyToRemove);
+        emit LogRemoveStrategy(strategyIndex, strategyToRemove);
     }
 
     /// @notice Add a new validator into whiteList
@@ -202,47 +203,49 @@ contract SWNFTUpgrade is
 
     /// @notice Enter strategy for a token
     /// @param tokenId The token ID
-    /// @param strategy The strategy index to enter
+    /// @param strategyIndex The strategy index to enter
     /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
-    function enterStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
+    function enterStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
-        require(strategy < strategies.length, "Index out of range");
-        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(strategyIndex < strategiesSet.length(), "Index out of range");
+        address strategy = strategiesSet.at(strategyIndex);
+        require(strategy != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(
         tokenId,
+        strategyIndex,
         strategy,
-        strategies[strategy],
         msg.sender,
         amount
         );
-        ISWETH(swETHAddress).approve(strategies[strategy], amount);
-        success = IStrategy(strategies[strategy]).enter(tokenId, amount);
+        ISWETH(swETHAddress).approve(strategy, amount);
+        success = IStrategy(strategy).enter(tokenId, amount);
     }
 
     /// @notice Exit strategy for a token
     /// @param tokenId The token ID
-    /// @param strategy The strategy index to exit
+    /// @param strategyIndex The strategy index to exit
     /// @param amount The amount of swETH to exit
     /// @return success Whether the strategy exit was successful
-    function exitStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
+    function exitStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
         require(_exists(tokenId), "Query for nonexistent token");
-        require(strategy < strategies.length, "Index out of range");
-        require(strategies[strategy] != address(0), "strategy does not exist");
+        require(strategyIndex < strategiesSet.length(), "Index out of range");
+        address strategy = strategiesSet.at(strategyIndex);
+        require(strategy != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
         require(amount > 0, "cannot exit strategy with 0 amount");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(
         tokenId,
+        strategyIndex,
         strategy,
-        strategies[strategy],
         msg.sender,
         amount
         );
-        success = IStrategy(strategies[strategy]).exit(tokenId, amount);
+        success = IStrategy(strategy).exit(tokenId, amount);
     }
 
     /// @notice Able to bactch action for multiple tokens
@@ -332,7 +335,14 @@ contract SWNFTUpgrade is
     /// @notice Get the length of the strategies
     /// @return length The length of the strategies
     function getStrategyLength() view external returns (uint length) {
-        length = strategies.length;
+        length = strategiesSet.length();
+    }
+
+    /// @notice Get the strategy with index
+    /// @return length The length of the strategies
+    function strategies(uint256 strategyIndex) view external returns (address) {
+        require(strategyIndex < strategiesSet.length(), "Index out of range");
+        return strategiesSet.at(strategyIndex);
     }
 
     // ============ Private functions ============
@@ -408,4 +418,5 @@ contract SWNFTUpgrade is
     mapping(address => uint) public opRate; // deprecated
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
+    EnumerableSetUpgradeable.AddressSet private strategiesSet;
 }

@@ -605,12 +605,31 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "deprecatedStrategies",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "strategy",
+        "name": "strategyIndex",
         "type": "uint256"
       },
       {
@@ -639,7 +658,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "strategy",
+        "name": "strategyIndex",
         "type": "uint256"
       },
       {
@@ -880,7 +899,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "strategy",
+        "name": "strategyIndex",
         "type": "uint256"
       }
     ],
@@ -1036,7 +1055,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "strategyIndex",
         "type": "uint256"
       }
     ],
