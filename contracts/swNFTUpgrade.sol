@@ -339,7 +339,7 @@ contract SWNFTUpgrade is
     }
 
     /// @notice Get the strategy with index
-    /// @return length The length of the strategies
+    /// @return Strategy address
     function strategies(uint256 strategyIndex) view external returns (address) {
         require(strategyIndex < strategiesSet.length(), "Index out of range");
         return strategiesSet.at(strategyIndex);
