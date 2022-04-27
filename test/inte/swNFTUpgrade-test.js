@@ -262,6 +262,10 @@ describe("SWNFTUpgrade", () => {
           .enterStrategy("1", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Only owner can enter strategy");
 
+      await expect(
+        swNFT.enterStrategy("3", "1", ethers.utils.parseEther("1"))
+      ).to.be.revertedWith("Only owner can enter strategy");
+
       await expect(swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1")))
         .to.emit(swNFT, "LogEnterStrategy")
         .withArgs(
