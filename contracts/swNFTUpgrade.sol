@@ -204,9 +204,9 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
     function enterStrategy(uint tokenId, uint strategy, uint amount) public returns (bool success){
+        require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(strategy < strategies.length, "Index out of range");
         require(strategies[strategy] != address(0), "strategy does not exist");
-        require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(
