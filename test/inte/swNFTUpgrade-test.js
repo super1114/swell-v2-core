@@ -264,7 +264,7 @@ describe("SWNFTUpgrade", () => {
 
       await expect(
         swNFT.enterStrategy("3", "1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Query for nonexistent token");
+      ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
       await expect(swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1")))
         .to.emit(swNFT, "LogEnterStrategy")
