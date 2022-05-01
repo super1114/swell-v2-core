@@ -17,7 +17,7 @@ describe("SWNFTUpgrade", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const SWDAO = await ethers.getContractFactory("SWDAO");
+      const SWDAO = await ethers.getContractFactory("SWELL");
       swDAO = await SWDAO.deploy();
       await swDAO.deployed();
 
@@ -364,7 +364,7 @@ describe("If operator", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const SWDAO = await ethers.getContractFactory("SWDAO");
+    const SWDAO = await ethers.getContractFactory("SWELL");
     swDAO = await SWDAO.deploy();
     await swDAO.deployed();
 

@@ -20,7 +20,7 @@ describe("SWNFT", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const SWDAO = await ethers.getContractFactory("SWDAO");
+    const SWDAO = await ethers.getContractFactory("SWELL");
     swDAO = await SWDAO.deploy();
     await swDAO.deployed();
 
