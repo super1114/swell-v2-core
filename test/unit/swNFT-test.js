@@ -15,14 +15,14 @@ describe("SWNFT", async () => {
     "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-  let swNFT, swETH, signer, user, strategy, swDAO;
+  let swNFT, swETH, signer, user, strategy, swell;
 
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const SWDAO = await ethers.getContractFactory("SWELL");
-    swDAO = await SWDAO.deploy();
-    await swDAO.deployed();
+    const Swell = await ethers.getContractFactory("SWELL");
+    swell = await Swell.deploy();
+    await swell.deployed();
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -36,7 +36,7 @@ describe("SWNFT", async () => {
     });
     swNFT = await upgrades.deployProxy(
       SWNFTUpgrade,
-      [swDAO.address, depositAddress],
+      [swell.address, depositAddress],
       {
         kind: "uups",
         initializer: "initialize(address, address)",
