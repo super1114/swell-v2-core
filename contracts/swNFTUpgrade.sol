@@ -50,7 +50,9 @@ contract SWNFTUpgrade is
     CountersUpgradeable.Counter public tokenIds;
 
     address public swETHAddress;
-    string public swETHSymbol;
+    string constant swETHSymbol = "swETH";
+    string constant swNFTName = "Swell NFT";
+    string constant swNFTSymbol = "swNFT";
     address public swDAOAddress;
     uint public ETHER; // Not used
     address public feePool;
@@ -78,12 +80,11 @@ contract SWNFTUpgrade is
         initializer
     {
         require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
-        __ERC721_init("Swell NFT", "swNFT");
+        __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swDAOAddress = _swDAOAddress;
-        swETHSymbol = "swETH";
         fee = 1e17; // default 10 %
         feePool = msg.sender;
     }
@@ -189,6 +190,7 @@ contract SWNFTUpgrade is
     function deposit(uint tokenId, uint amount) public returns (bool success) {
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
+        require(msg.sender != address(this), "Contract cannot deposit/withdraw");
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
         success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
@@ -201,6 +203,7 @@ contract SWNFTUpgrade is
     function withdraw(uint tokenId, uint amount) public returns (bool success) {
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
+        require(msg.sender != address(this), "Contract cannot deposit/withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount <= baseTokenBalance, "cannot withdraw more than the position balance");
         positions[tokenId].baseTokenBalance -= amount;
