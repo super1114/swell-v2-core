@@ -100,4 +100,8 @@ interface ISWNFT
     event LogSetFeePool(
         address feePool
     );
+
+    event LogSetFee(
+        uint fee
+    );
 }

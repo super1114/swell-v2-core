@@ -42,7 +42,7 @@ contract SWNFTUpgrade is
     OwnableUpgradeable,
     ISWNFT
 {
-    uint256 public GWEI;
+    uint256 public GWEI; // Not used
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;
@@ -52,9 +52,9 @@ contract SWNFTUpgrade is
     address public swETHAddress;
     string public swETHSymbol;
     address public swDAOAddress;
-    uint public ETHER;
-    address feePool;
-    uint fee;
+    uint public ETHER; // Not used
+    address public feePool;
+    uint public fee;
 
     IDepositContract public depositContract;
 
@@ -67,6 +67,9 @@ contract SWNFTUpgrade is
 
     address[] public strategies;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     /// @notice initialise the contract to issue the token
     /// @param _swDAOAddress The address of the swDAO contract
     function initialize(address _swDAOAddress)
@@ -77,7 +80,6 @@ contract SWNFTUpgrade is
         require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
         __ERC721_init("Swell NFT", "swNFT");
         __Ownable_init();
-        ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swDAOAddress = _swDAOAddress;
@@ -102,6 +104,14 @@ contract SWNFTUpgrade is
         require(_feePool != address(0), "Address cannot be 0");
         feePool = _feePool;
         emit LogSetFeePool(feePool);
+    }
+
+    /// @notice set fee
+    /// @param _fee The fee that's going to be paid to the fee pool
+    function setFee(uint _fee) onlyOwner external {
+        require(_fee > 0, "Fee needs to be more than 0");
+        fee = _fee;
+        emit LogSetFee(_fee);
     }
 
     /// @notice Add a new strategy
@@ -262,8 +272,6 @@ contract SWNFTUpgrade is
     /// @param stakes The stakes to perform
     /// @return ids The token IDs that were minted
     function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
-        require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         ids = new uint[](stakes.length);
         uint totalAmount = msg.value;
         for(uint i = 0; i < stakes.length; i++){
@@ -309,7 +317,7 @@ contract SWNFTUpgrade is
             quoteTokenSymbol: swETHSymbol,
             baseTokenSymbol: swETHSymbol,
             baseTokenBalance: position.baseTokenBalance,
-            baseTokenDecimals: ETHER,
+            baseTokenDecimals: 1 ether,
             pubKey: _pubKeyToString(position.pubKey),
             value: position.value
         }));
@@ -346,7 +354,7 @@ contract SWNFTUpgrade is
         require(isValidatorActive[pubKey], 'validator is not active');
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
-        require(amount % ETHER == 0, "stake value not multiple of Ether");
+        require(amount % 1 ether == 0, "stake value not multiple of Ether");
         require(
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
@@ -383,8 +391,8 @@ contract SWNFTUpgrade is
 
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
 
-        _safeMint(msg.sender, newItemId);
         if(!operator) ISWETH(swETHAddress).mint(amount);
+        _safeMint(msg.sender, newItemId);
     }
 
     /// @notice Convert public key from bytes to string output
