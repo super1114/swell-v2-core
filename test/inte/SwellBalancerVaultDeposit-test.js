@@ -12,7 +12,7 @@ const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 /*///////////////////////////////////////////////////////////////
                     BALANCER VAULT TEST SUITE
     //////////////////////////////////////////////////////////////*/
-describe("Swell Balancer Vault: deposit", function() {
+describe("Swell Balancer Vault", function() {
   let swellBalancerVault,
     swETH,
     balancerVault,
@@ -636,5 +636,44 @@ describe("Swell Balancer Vault: deposit", function() {
     await expect(
       swellBalancerVault.connect(account1).deposit(amount, account1.address)
     ).to.be.revertedWith("TRANSFER_FROM_FAILED");
+  });
+
+  /*///////////////////////////////////////////////////////////////
+                    WITHDRAWL TESTS
+    //////////////////////////////////////////////////////////////*/
+  it("should return the correct amount of swETH when redeeming shares", async () => {
+    const amount = ethers.utils.parseEther("100");
+    const estimatedRecovery = await swellBalancerVault
+      .connect(account1)
+      .previewRedeem(amount);
+    const shares = await swellBalancerVault.balanceOf(account1.address);
+    const balanceBefore = await swETH.balanceOf(account1.address);
+    await swellBalancerVault
+      .connect(account1)
+      .redeem(amount, account1.address, account1.address);
+    expect(await swETH.balanceOf(account1.address)).to.closeTo(
+      balanceBefore.add(estimatedRecovery),
+      balanceBefore.add(estimatedRecovery).div(100)
+    );
+    expect(await swellBalancerVault.balanceOf(account1.address)).to.eq(
+      shares.sub(amount)
+    );
+  });
+
+  it("should return the correct amount of swETH when withdrawing assets ", async () => {
+    // Deposit into the vault
+    const assets = await swellBalancerVault
+      .connect(account2)
+      .previewRedeem(await swellBalancerVault.balanceOf(account2.address));
+    const balanceBefore = await swETH.balanceOf(account2.address);
+
+    await swellBalancerVault
+      .connect(account2)
+      .withdraw(assets, account2.address, account2.address);
+    expect(await swETH.balanceOf(account2.address)).to.be.closeTo(
+      balanceBefore.add(assets),
+      balanceBefore.add(assets).div(100)
+    );
+    expect(await swellBalancerVault.balanceOf(account2.address)).to.eq(0);
   });
 });
