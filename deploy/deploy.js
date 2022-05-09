@@ -50,7 +50,7 @@ task("deploy", "Deploy the contracts")
       ].contracts.depositContractAddress = depositContractAddress;
     }
 
-    const SWDAO = await ethers.getContractFactory("SWDAO");
+    const SWDAO = await ethers.getContractFactory("SWELL");
     const swDAO = await SWDAO.deploy();
     await swDAO.deployed();
     console.log("swDAO:", swDAO.address);

@@ -99,7 +99,7 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWETH", "SWNFTUpgrade", "SWDAO", "Strategy", "SWNFTUpgradeTestnet"]
+    only: ["SWETH", "SWNFTUpgrade", "SWELL", "Strategy", "SWNFTUpgradeTestnet"]
   },
   gasReporter: {
     showTimeSpent: true,

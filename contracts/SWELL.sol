@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ISWETH.sol";
 
 /// @title Contract for SWNFT
-contract SWDAO is ISWETH, ERC20, Ownable {
+contract SWELL is ISWETH, ERC20, Ownable {
 
     /// @notice initialise the contract to issue the token
-    constructor() ERC20("Swell DAO", "swDAO") {}
+    constructor() ERC20("Swell DAO", "SWELL") {}
 
     function burn(uint256 amount) external onlyOwner{
         _burn(msg.sender, amount);
