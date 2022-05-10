@@ -1,7 +1,7 @@
 {
   "v1.0.0": {
     "contracts": {
-      "swDAO": "0xb7F7b64eeA324994A53B563A8eBc9B0671A83264",
+      "swell": "0xb7F7b64eeA324994A53B563A8eBc9B0671A83264",
       "swNFT": "0x6f6607563A018CD5068aEa3d5623b7ecAfFD0c47",
       "swETH": "0x3029480EC807130408e3CFdf63E255Bc3FA7cbED",
       "strategy": "0x877E1ACd86a19dF969E51e375A17dcBe8271d7ad"
@@ -15,7 +15,7 @@
   },
   "v1.2.0": {
     "contracts": {
-      "swDAO": "0x39c235F4307A997Aef89fEdC81062DA73BFa82E1",
+      "swell": "0x39c235F4307A997Aef89fEdC81062DA73BFa82E1",
       "swNFT": "0x304c9dEb9Aa63fdD4232EeA9661c466B40301621",
       "swETH": "0x3ff82BDaF3bfB41b8e38A876d0913513947c57B6",
       "strategy": "0xc12c5098b490c84E44B3c28ccCa50B42fBE361cA"
@@ -29,7 +29,7 @@
   },
   "v1.2.2": {
     "contracts": {
-      "swDAO": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
+      "swell": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
       "nftDescriptorLibrary": "0x751a15890C11feA088a4FAd65E5128589C57172F",
       "swNFT": "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414",
       "swETH": "0xe438a1ad5C5f29B6346e92eefdEAb8B4A1a8B3Cf",
@@ -44,7 +44,7 @@
   },
   "v1.3.0": {
     "contracts": {
-      "swDAO": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
+      "swell": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
       "nftDescriptorLibrary": "0x751a15890C11feA088a4FAd65E5128589C57172F",
       "swNFT": "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414",
       "swETH": "0xe438a1ad5C5f29B6346e92eefdEAb8B4A1a8B3Cf",
@@ -59,7 +59,7 @@
   },
   "v1.4.0": {
     "contracts": {
-      "swDAO": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
+      "swell": "0xe86C95a703EFB925c6C8a7bC3AFec47dd5dcdDAa",
       "nftDescriptorLibrary": "0x751a15890C11feA088a4FAd65E5128589C57172F",
       "swNFT": "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414",
       "swETH": "0xe438a1ad5C5f29B6346e92eefdEAb8B4A1a8B3Cf",

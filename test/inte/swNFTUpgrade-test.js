@@ -17,9 +17,9 @@ describe("SWNFTUpgrade", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const SWDAO = await ethers.getContractFactory("SWDAO");
-      swDAO = await SWDAO.deploy();
-      await swDAO.deployed();
+      const Swell = await ethers.getContractFactory("SWELL");
+      swell = await Swell.deploy();
+      await swell.deployed();
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -33,7 +33,7 @@ describe("SWNFTUpgrade", () => {
       });
       swNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swDAO.address, depositAddress],
+        [swell.address, depositAddress],
         {
           kind: "uups",
           initializer: "initialize(address, address)",
@@ -264,7 +264,7 @@ describe("SWNFTUpgrade", () => {
 
       await expect(
         swNFT.enterStrategy("3", "1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Query for nonexistent token");
+      ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
       await expect(swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1")))
         .to.emit(swNFT, "LogEnterStrategy")
@@ -364,9 +364,9 @@ describe("If operator", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const SWDAO = await ethers.getContractFactory("SWDAO");
-    swDAO = await SWDAO.deploy();
-    await swDAO.deployed();
+    const Swell = await ethers.getContractFactory("SWELL");
+    swell = await Swell.deploy();
+    await swell.deployed();
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -380,7 +380,7 @@ describe("If operator", async () => {
     });
     swNFT = await upgrades.deployProxy(
       SWNFTUpgrade,
-      [swDAO.address, depositAddress],
+      [swell.address, depositAddress],
       {
         kind: "uups",
         initializer: "initialize(address, address)",
