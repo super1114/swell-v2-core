@@ -52,13 +52,13 @@ describe("SWNFTUpgrade", () => {
       await strategy.deployed();
     });
 
-    it("cannot stake when validator is not active", async function() {
+    it("Must send 16 ETH bond as first deposit", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
           value: amount
         })
-      ).to.be.revertedWith("validator is not active");
+      ).to.be.revertedWith("Must send 16 ETH bond");
     });
 
     it("owner sets the bot address", async function() {
@@ -94,7 +94,7 @@ describe("SWNFTUpgrade", () => {
         .withArgs(signer.address, pubKey);
     });
 
-    it("can stake 1 Ether as owner", async function() {
+    it("can stake 1 Ether when whitelisted", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
         await swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
@@ -128,10 +128,8 @@ describe("SWNFTUpgrade", () => {
       const position = await swNFT.positions("1");
       await expect(position.pubKey).to.be.equal(pubKey);
       await expect(position.value).to.be.equal("1000000000000000000");
-      await expect(position.baseTokenBalance).to.be.equal(
-        "1000000000000000000"
-      );
-      await expect(position.operator).to.be.equal(false);
+      await expect(position.baseTokenBalance).to.be.equal("0");
+      await expect(position.operator).to.be.equal(true);
 
       const tvl = await swNFT.tvl();
       await expect(tvl).to.be.equal("1000000000000000000");
@@ -201,12 +199,23 @@ describe("SWNFTUpgrade", () => {
       ).to.be.revertedWith("Only owner can withdraw");
     });
 
-    it("can withdraw 1 swETH", async function() {
-      await expect(swNFT.withdraw("1", ethers.utils.parseEther("1")))
-        .to.emit(swNFT, "LogWithdraw")
-        .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+    it("can not withdraw with no balance", async function() {
+      await expect(
+        swNFT.withdraw("1", ethers.utils.parseEther("1"))
+      ).to.be.revertedWith("cannot withdraw more than the position balance");
 
       const position = await swNFT.positions("1");
+      await expect(position.pubKey).to.be.equal(pubKey);
+      await expect(position.value).to.be.equal("1000000000000000000");
+      await expect(position.baseTokenBalance).to.be.equal("0");
+    });
+
+    it("can withdraw 1 swETH", async function() {
+      await expect(
+        swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1"))
+      ).to.emit(swNFT, "LogWithdraw");
+
+      const position = await swNFT.positions("2");
       await expect(position.pubKey).to.be.equal(pubKey);
       await expect(position.value).to.be.equal("1000000000000000000");
       await expect(position.baseTokenBalance).to.be.equal("0");
@@ -220,12 +229,16 @@ describe("SWNFTUpgrade", () => {
     });
 
     it("can deposit 1 swETH", async function() {
-      await swETH.approve(swNFT.address, ethers.utils.parseEther("1"));
-      await expect(swNFT.deposit("1", ethers.utils.parseEther("1")))
+      await swETH
+        .connect(user)
+        .approve(swNFT.address, ethers.utils.parseEther("1"));
+      await expect(
+        swNFT.connect(user).deposit("2", ethers.utils.parseEther("1"))
+      )
         .to.emit(swNFT, "LogDeposit")
-        .withArgs("1", signer.address, ethers.utils.parseEther("1"));
+        .withArgs("2", user.address, ethers.utils.parseEther("1"));
 
-      const position = await swNFT.positions("1");
+      const position = await swNFT.positions("2");
       await expect(position.pubKey).to.be.equal(pubKey);
       await expect(position.value).to.be.equal("1000000000000000000");
       await expect(position.baseTokenBalance).to.be.equal(
@@ -255,7 +268,7 @@ describe("SWNFTUpgrade", () => {
       await expect(strategyAddress).to.be.equal(strategy.address);
     });
 
-    it("can enter strategy", async function() {
+    it("can not enter strategy without position balance", async function() {
       await expect(
         swNFT
           .connect(user)
@@ -266,35 +279,15 @@ describe("SWNFTUpgrade", () => {
         swNFT.enterStrategy("3", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
-      await expect(swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1")))
-        .to.emit(swNFT, "LogEnterStrategy")
-        .withArgs(
-          "1",
-          "1",
-          strategy.address,
-          signer.address,
-          ethers.utils.parseEther("1")
-        );
-
       await expect(
         swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("reverted with panic code 0x11");
     });
 
-    it("can exit strategy", async function() {
+    it("can not exit strategy without entering it", async function() {
       await expect(
         swNFT.connect(user).exitStrategy("1", "1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Only owner can exit strategy");
-
-      await expect(swNFT.exitStrategy("1", "1", ethers.utils.parseEther("1")))
-        .to.emit(swNFT, "LogExitStrategy")
-        .withArgs(
-          "1",
-          "1",
-          strategy.address,
-          signer.address,
-          ethers.utils.parseEther("1")
-        );
 
       await expect(
         swNFT.exitStrategy("1", "1", ethers.utils.parseEther("1"))
@@ -399,26 +392,8 @@ describe("If operator", async () => {
     await strategy.deployed();
   });
 
-  it("owner sets the bot address", async function() {
-    const owner = await swNFT.owner();
-    await expect(owner).to.be.equal(signer.address);
-
-    await expect(swNFT.updateBotAddress(bot.address))
-      .to.emit(swNFT, "LogUpdateBotAddress")
-      .withArgs(bot.address);
-  });
-
-  it("bot sets the validator to active", async function() {
-    const address = await swNFT.botAddress();
-    await expect(address).to.be.equal(bot.address);
-
-    await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
-      .to.emit(swNFT, "LogUpdateIsValidatorActive")
-      .withArgs(bot.address, pubKey, true);
-  });
-
   it("should not mint any swETH as operator", async function() {
-    amount = ethers.utils.parseEther("1");
+    amount = ethers.utils.parseEther("16");
     await expect(
       await swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
         value: amount
