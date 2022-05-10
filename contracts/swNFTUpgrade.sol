@@ -120,9 +120,6 @@ contract SWNFTUpgrade is
         uint length = strategiesSet.length();
         require(strategyIndex < length, "Index out of range");
         address strategyToRemove = strategiesSet.at(strategyIndex);
-        require(strategyToRemove != address(0), "strategy does not exist");
-        //TODO: Need to check balance before removing
-        require(length >= 1, "no strategy to remove");
         strategiesSet.remove(strategyToRemove);
         emit LogRemoveStrategy(strategyIndex, strategyToRemove);
     }
@@ -207,10 +204,8 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
     function enterStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
-        require(_exists(tokenId), "Query for nonexistent token");
         require(strategyIndex < strategiesSet.length(), "Index out of range");
         address strategy = strategiesSet.at(strategyIndex);
-        require(strategy != address(0), "strategy does not exist");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
@@ -231,7 +226,6 @@ contract SWNFTUpgrade is
     /// @param amount The amount of swETH to exit
     /// @return success Whether the strategy exit was successful
     function exitStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
-        require(_exists(tokenId), "Query for nonexistent token");
         require(strategyIndex < strategiesSet.length(), "Index out of range");
         address strategy = strategiesSet.at(strategyIndex);
         require(strategy != address(0), "strategy does not exist");
