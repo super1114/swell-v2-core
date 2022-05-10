@@ -16,7 +16,7 @@ contract TestswNFTUpgrade is SWNFTUpgrade {
         ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
-        swDAOAddress = _swellAddress;
+        swellAddress = _swellAddress;
     }
 
     function getWithdrawalCredentials() public override view returns (bytes memory) {

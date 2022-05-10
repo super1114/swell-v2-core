@@ -13,6 +13,6 @@ contract SWNFTUpgradeTestnet is SWNFTUpgrade {
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(_depositContract);
-        swDAOAddress = _swellAddress;
+        swellAddress = _swellAddress;
     }
 }
