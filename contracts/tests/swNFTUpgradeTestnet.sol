@@ -6,13 +6,13 @@ import "../swNFTUpgrade.sol";
 
 contract SWNFTUpgradeTestnet is SWNFTUpgrade {
 
-    function initialize(address _swDAOAddress, address _depositContract) external initializer {
-        require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
+    function initialize(address _swellAddress, address _depositContract) external initializer {
+        require(_swellAddress != address(0), "SwellAddress cannot be 0");
         require(_depositContract != address(0), "depositContract cannot be 0");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(_depositContract);
-        swDAOAddress = _swDAOAddress;
+        swDAOAddress = _swellAddress;
     }
 }

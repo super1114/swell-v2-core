@@ -17,9 +17,9 @@ describe("SWNFTUpgrade", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const SWDAO = await ethers.getContractFactory("SWDAO");
-      swDAO = await SWDAO.deploy();
-      await swDAO.deployed();
+      const Swell = await ethers.getContractFactory("SWELL");
+      swell = await Swell.deploy();
+      await swell.deployed();
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -33,7 +33,7 @@ describe("SWNFTUpgrade", () => {
       });
       swNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swDAO.address, depositAddress],
+        [swell.address, depositAddress],
         {
           kind: "uups",
           initializer: "initialize(address, address)",
@@ -364,9 +364,9 @@ describe("If operator", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const SWDAO = await ethers.getContractFactory("SWDAO");
-    swDAO = await SWDAO.deploy();
-    await swDAO.deployed();
+    const Swell = await ethers.getContractFactory("SWELL");
+    swell = await Swell.deploy();
+    await swell.deployed();
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -380,7 +380,7 @@ describe("If operator", async () => {
     });
     swNFT = await upgrades.deployProxy(
       SWNFTUpgrade,
-      [swDAO.address, depositAddress],
+      [swell.address, depositAddress],
       {
         kind: "uups",
         initializer: "initialize(address, address)",

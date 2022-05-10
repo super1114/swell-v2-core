@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ISWETH.sol";
 
 /// @title Contract for SWNFT
-contract SWDAO is ISWETH, ERC20, Ownable {
+contract SWELL is ISWETH, ERC20, Ownable {
     string constant swDAOName = "Swell DAO Token";
     string constant swDAOSymbol = "SWELL";
 

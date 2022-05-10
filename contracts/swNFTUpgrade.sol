@@ -52,6 +52,7 @@ contract SWNFTUpgrade is
     string constant swETHSymbol = "swETH";
     string constant swNFTName = "Swell NFT";
     string constant swNFTSymbol = "swNFT";
+    string public swETHSymbolOld; // Not used
     address public swDAOAddress;
     uint public ETHER; // Not used
     address public feePool;
@@ -72,18 +73,18 @@ contract SWNFTUpgrade is
     constructor() initializer {}
 
     /// @notice initialise the contract to issue the token
-    /// @param _swDAOAddress The address of the swDAO contract
-    function initialize(address _swDAOAddress)
+    /// @param _swellAddress The address of the swell contract
+    function initialize(address _swellAddress)
         virtual
         external
         initializer
     {
-        require(_swDAOAddress != address(0), "swDAOAddress cannot be 0");
+        require(_swDAOAddress != address(0), "SwellAddress cannot be 0");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
-        swDAOAddress = _swDAOAddress;
+        swDAOAddress = _swellAddress;
         fee = 1e17; // default 10 %
         feePool = msg.sender;
     }
@@ -363,7 +364,7 @@ contract SWNFTUpgrade is
         );
         if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
           require(amount >= 16 ether, "Must send at least 16 ETH");
-          //TODO: Will add require for swDAO bond once there's price
+          //TODO: Will add require for swell bond once there's price
         }
         
         bool operator;
