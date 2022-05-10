@@ -23,6 +23,9 @@ describe("Swell Balancer Vault", function() {
     poolId,
     initialTestTokenPoolBalance;
 
+  const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
+  const nftAddress = "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414";
+
   /**
    * before each test:
    * - deploy the test token contract, initialise the WETH/SWETH token pool and deploy the swell balancer vault contract
@@ -63,6 +66,7 @@ describe("Swell Balancer Vault", function() {
     );
     swellBalancerVault = await SwellBalancerVault.deploy(
       swETH.address,
+      nftAddress,
       "Test Swell Balancer Vault Token",
       "TSBVT",
       VAULT,
