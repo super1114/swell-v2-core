@@ -41,7 +41,8 @@ task("upgrade", "Upgrade the contracts")
       libraries: {
         NFTDescriptor: contracts.nftDescriptorLibrary
       },
-      unsafeAllowLinkedLibraries: true
+      unsafeAllowLinkedLibraries: true,
+      unsafeAllowRenames: true
     });
     versions[newTag].contracts.swNFT = swNFT.address;
 

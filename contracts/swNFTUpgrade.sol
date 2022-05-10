@@ -115,13 +115,12 @@ contract SWNFTUpgrade is
     }
 
     /// @notice Remove a strategy
-    /// @param strategyIndex The strategy index to remove
-    function removeStrategy(uint strategyIndex) onlyOwner external{
-        uint length = strategiesSet.length();
-        require(strategyIndex < length, "Index out of range");
-        address strategyToRemove = strategiesSet.at(strategyIndex);
-        strategiesSet.remove(strategyToRemove);
-        emit LogRemoveStrategy(strategyIndex, strategyToRemove);
+    /// @param strategy The strategy address to remove
+    function removeStrategy(address strategy) onlyOwner external returns (bool removed) {
+        removed = strategiesSet.remove(strategy);
+        if(removed) {
+            emit LogRemoveStrategy(strategy);
+        }
     }
 
     /// @notice Add a new validator into whiteList
@@ -200,18 +199,16 @@ contract SWNFTUpgrade is
 
     /// @notice Enter strategy for a token
     /// @param tokenId The token ID
-    /// @param strategyIndex The strategy index to enter
+    /// @param strategy The strategy address to enter
     /// @param amount The amount of swETH to enter
     /// @return success Whether the strategy enter was successful
-    function enterStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
-        require(strategyIndex < strategiesSet.length(), "Index out of range");
-        address strategy = strategiesSet.at(strategyIndex);
+    function enterStrategy(uint tokenId, address strategy, uint amount) public returns (bool success){
+        require(strategiesSet.contains(strategy), "Invalid strategy address");
         require(ownerOf(tokenId) == msg.sender, "Only owner can enter strategy");
         require(amount > 0, "cannot enter strategy with 0 amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(
         tokenId,
-        strategyIndex,
         strategy,
         msg.sender,
         amount
@@ -222,19 +219,16 @@ contract SWNFTUpgrade is
 
     /// @notice Exit strategy for a token
     /// @param tokenId The token ID
-    /// @param strategyIndex The strategy index to exit
+    /// @param strategy The strategy address to exit
     /// @param amount The amount of swETH to exit
     /// @return success Whether the strategy exit was successful
-    function exitStrategy(uint tokenId, uint strategyIndex, uint amount) public returns (bool success){
-        require(strategyIndex < strategiesSet.length(), "Index out of range");
-        address strategy = strategiesSet.at(strategyIndex);
-        require(strategy != address(0), "strategy does not exist");
+    function exitStrategy(uint tokenId, address strategy, uint amount) public returns (bool success){
+        require(strategiesSet.contains(strategy), "Invalid strategy address");
         require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
         require(amount > 0, "cannot exit strategy with 0 amount");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(
         tokenId,
-        strategyIndex,
         strategy,
         msg.sender,
         amount
