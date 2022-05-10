@@ -94,7 +94,7 @@ describe("SWNFTUpgrade", () => {
         .withArgs(signer.address, pubKey);
     });
 
-    it("can stake 1 Ether when whitelisted", async function() {
+    it("can stake 1 Ether when whitelisted and operator should not mint any swETH", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
         await swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
@@ -350,63 +350,5 @@ describe("SWNFTUpgrade", () => {
         .to.emit(swNFT, "LogRemoveStrategy")
         .withArgs("0", depositAddress);
     });
-  });
-});
-
-describe("If operator", async () => {
-  before(async () => {
-    [signer, user, bot] = await ethers.getSigners();
-
-    const Swell = await ethers.getContractFactory("SWELL");
-    swell = await Swell.deploy();
-    await swell.deployed();
-
-    // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-    const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-      "NFTDescriptor"
-    );
-    const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-    const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
-      libraries: {
-        NFTDescriptor: nftDescriptorLibrary.address
-      }
-    });
-    swNFT = await upgrades.deployProxy(
-      SWNFTUpgrade,
-      [swell.address, depositAddress],
-      {
-        kind: "uups",
-        initializer: "initialize(address, address)",
-        unsafeAllowLinkedLibraries: true
-      }
-    );
-    await swNFT.deployed();
-
-    const SWETH = await ethers.getContractFactory("SWETH");
-    swETH = await SWETH.deploy(swNFT.address);
-    await swETH.deployed();
-    await swNFT.setswETHAddress(swETH.address);
-
-    const Strategy = await ethers.getContractFactory("Strategy");
-    strategy = await Strategy.deploy(swNFT.address);
-    await strategy.deployed();
-  });
-
-  it("should not mint any swETH as operator", async function() {
-    amount = ethers.utils.parseEther("16");
-    await expect(
-      await swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-        value: amount
-      })
-    ).to.emit(swNFT, "LogStake");
-
-    const owner = await swNFT.ownerOf("1");
-    await expect(owner).to.be.equal(signer.address);
-
-    const position = await swNFT.positions("1");
-    await expect(position.pubKey).to.be.equal(pubKey);
-    await expect(position.value).to.be.equal("1000000000000000000");
-    await expect(position.baseTokenBalance).to.be.equal("0");
-    await expect(position.operator).to.be.equal(true); //non-whitelist first deposit
   });
 });

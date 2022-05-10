@@ -55,13 +55,13 @@ describe("SWNFT", async () => {
     await strategy.deployed();
   });
 
-  it("cannot stake when validator is not active", async function() {
+  it("cannot stake 1 ETH when validator is not active", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
       swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
         value: amount
       })
-    ).to.be.revertedWith("validator is not active");
+    ).to.be.revertedWith("Must send 16 ETH bond");
   });
 
   it("owner sets the bot address", async function() {
