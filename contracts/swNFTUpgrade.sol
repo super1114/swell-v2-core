@@ -53,7 +53,7 @@ contract SWNFTUpgrade is
     string constant swNFTName = "Swell NFT";
     string constant swNFTSymbol = "swNFT";
     string public swETHSymbolOld; // Not used
-    address public swDAOAddress;
+    address public swellAddress;
     uint public ETHER; // Not used
     address public feePool;
     uint public fee;
@@ -79,12 +79,12 @@ contract SWNFTUpgrade is
         external
         initializer
     {
-        require(_swDAOAddress != address(0), "SwellAddress cannot be 0");
+        require(_swellAddress != address(0), "SwellAddress cannot be 0");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
-        swDAOAddress = _swellAddress;
+        swellAddress = _swellAddress;
         fee = 1e17; // default 10 %
         feePool = msg.sender;
     }
