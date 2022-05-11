@@ -401,9 +401,9 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    uint256[47] private __gap;
     mapping(address => uint) public opRate; // deprecated
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;
+    uint256[46] private __gap;
 }
