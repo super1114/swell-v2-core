@@ -354,7 +354,6 @@ contract SWNFTUpgrade is
         bytes32 depositDataRoot,
         uint amount
     ) private returns (uint256 newItemId) {
-        require(isValidatorActive[pubKey], 'validator is not active');
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
         require(amount % 1 ether == 0, "stake value not multiple of Ether");
@@ -362,14 +361,21 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
-        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
-          require(amount >= 16 ether, "Must send at least 16 ETH");
-          //TODO: Will add require for swell bond once there's price
+        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
+            require(amount == 16 ether, "Must send 16 ETH bond");
+            //TODO: Will add require for swDAO bond once there's price
+        }
+        if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
+            require(amount == 1 ether, "Must send 1 ETH bond"); 
+            //TODO: Will add require for swDAO bond once there's price 
         }
         
         bool operator;
-        if(validatorDeposits[pubKey] == 0 && !whiteList[pubKey]) operator = true;
-
+        if(validatorDeposits[pubKey] == 0) {
+            operator = true;
+        } else {
+            require(isValidatorActive[pubKey], 'validator is not active');
+        }
         depositContract.deposit{value: amount}(
             pubKey,
             getWithdrawalCredentials(),
