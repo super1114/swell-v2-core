@@ -19,7 +19,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     address public immutable swNFT;
 
     /// @dev The token ID position data
-    mapping(uint256 => uint) public positions;
+    mapping(uint256 => uint256) public positions;
 
     constructor(
         ERC20 _asset,
@@ -31,7 +31,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     ) ERC4626(_asset, _name, _symbol) {
         require(_swNFT != address(0), "Address cannot be 0");
         swNFT = _swNFT;
-        
+
         balancerVault = _vault;
         poolId = _poolId;
 
@@ -39,7 +39,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         _asset.approve(address(_vault), type(uint256).max);
     }
 
-    modifier onlyswNFT {
+    modifier onlyswNFT() {
         require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
         _;
     }
@@ -52,7 +52,11 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function enter(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
+    function enter(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
         require(amount > 0, "cannot enter strategy with 0 amount");
         deposit(amount, msg.sender);
         positions[tokenId] += amount;
@@ -64,7 +68,11 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function exit(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
+    function exit(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
         require(amount > 0, "No position to exit");
         require(amount <= positions[tokenId], "Not enough position to exit");
         withdraw(amount, msg.sender, msg.sender);

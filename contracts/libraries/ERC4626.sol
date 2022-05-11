@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 
-import {ERC20} from "./ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeTransferLib} from "./SafeTransferLib.sol";
 import {FixedPointMathLib} from "./FixedPointMathLib.sol";
 
