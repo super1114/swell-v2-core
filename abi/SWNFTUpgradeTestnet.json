@@ -1156,7 +1156,7 @@
   },
   {
     "inputs": [],
-    "name": "swETHSymbol",
+    "name": "swETHSymbolOld",
     "outputs": [
       {
         "internalType": "string",
