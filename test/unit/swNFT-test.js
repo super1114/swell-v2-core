@@ -17,13 +17,6 @@ describe("SWNFT", async () => {
   const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   let swNFT, swETH, signer, user, strategy, swell;
-  // 16 ETH
-  const pubKey2 =
-    "0x8b6819ec8c0a14b8173f3134c18af012d45ba946f07d3d88f2c7787bf79c352f6b7132e14120974103c6ba6f44f00f7f";
-  const signature2 =
-    "0xa16818eec390e04076589ecf2b1b065cd664c9cc791f16b1ad841b7b18727d87b9fbcdc1dbfde7a848b805e71ecd353006b8f1763538fe7946420880dd7d1f4e47a6ec2e6192da30db77349909c944d695a346069d6bce8fe6ee695386840b6e";
-  const depositDataRoot2 =
-    "0xc846f5e5ff1f6748a980747bc00bdfa75c2c2631201561fad976c2e167206e07";
 
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
@@ -63,26 +56,7 @@ describe("SWNFT", async () => {
     await strategy.deployed();
   });
 
-  it("can stake 16 ETH for unverified node operator", async function() {
-    amount = ethers.utils.parseEther("16");
-    await expect(
-      swNFT.stake(
-        [
-          {
-            pubKey: pubKey2,
-            signature: signature2,
-            depositDataRoot: depositDataRoot2,
-            amount: amount
-          }
-        ],
-        {
-          value: amount
-        }
-      )
-    ).to.emit(swNFT, "LogStake");
-  });
-
-  it("cannot stake when validator is not active", async function() {
+  it("cannot stake 1 ETH when validator is not active", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
       swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
