@@ -131,7 +131,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
 
         uint256 bptShareAmount = ERC20(pool).balanceOf(address(this)).mulDivUp(
             shares,
-            totalSupply
+            totalSupply()
         );
 
         (IERC20[] memory tokens, , ) = balancerVault.getPoolTokens(poolId);
