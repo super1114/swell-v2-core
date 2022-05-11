@@ -709,7 +709,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_swDAOAddress",
+        "name": "_swellAddress",
         "type": "address"
       },
       {
@@ -727,7 +727,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_swDAOAddress",
+        "name": "_swellAddress",
         "type": "address"
       }
     ],
@@ -1091,19 +1091,6 @@
   },
   {
     "inputs": [],
-    "name": "swDAOAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "swETHAddress",
     "outputs": [
       {
@@ -1123,6 +1110,19 @@
         "internalType": "string",
         "name": "",
         "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "swellAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

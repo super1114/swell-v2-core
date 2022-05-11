@@ -6,7 +6,7 @@ async function deployDepositContract() {
   return depositContract.address;
 }
 
-async function deploySWNFTUpgradeTestnet(swDAOAddress, depositContractAddress) {
+async function deploySWNFTUpgradeTestnet(swellAddress, depositContractAddress) {
   const nftDescriptorLibraryFactory = await ethers.getContractFactory(
     "NFTDescriptor"
   );
@@ -23,7 +23,7 @@ async function deploySWNFTUpgradeTestnet(swDAOAddress, depositContractAddress) {
   );
   swNFT = await upgrades.deployProxy(
     SWNFTUpgradeTestnet,
-    [swDAOAddress, depositContractAddress],
+    [swellAddress, depositContractAddress],
     {
       kind: "uups",
       initializer: "initialize(address,address)",
