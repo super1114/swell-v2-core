@@ -73,6 +73,24 @@ describe("SWNFT", async () => {
       .withArgs(bot.address);
   });
 
+  it("owner sets fee pool address", async function() {
+    const owner = await swNFT.owner();
+    await expect(owner).to.be.equal(signer.address);
+
+    await expect(swNFT.setFeePool(bot.address))
+      .to.emit(swNFT, "LogSetFeePool")
+      .withArgs(bot.address);
+  });
+
+  it("owner sets fee", async function() {
+    const owner = await swNFT.owner();
+    await expect(owner).to.be.equal(signer.address);
+
+    await expect(swNFT.setFee((5e17).toString()))
+      .to.emit(swNFT, "LogSetFee")
+      .withArgs((5e17).toString());
+  });
+
   it("bot sets the validator to active", async function() {
     const address = await swNFT.botAddress();
     await expect(address).to.be.equal(bot.address);

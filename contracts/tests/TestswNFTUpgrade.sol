@@ -11,13 +11,12 @@ contract TestswNFTUpgrade is SWNFTUpgrade {
         require(_swellAddress != address(0), "SwellAddress cannot be 0");
         require(_eth1WithdrawalAddress != address(0), "eth1WithdrawalAddress cannot be 0");
         eth1WithdrawalAddress = _eth1WithdrawalAddress;
-        __ERC721_init("Swell NFT", "swNFT");
+        __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swellAddress = _swellAddress;
-        swETHSymbol = "swETH";
     }
 
     function getWithdrawalCredentials() public override view returns (bytes memory) {
