@@ -9,10 +9,12 @@ import "./interfaces/ISWETH.sol";
 contract SWETH is ISWETH, ERC20 {
 
     address public immutable minter;
+    string constant swETHName = "Swell Ether";
+    string constant swETHSymbol = "swETH";
 
     /// @notice initialise the contract to issue the token
     /// @param _minter address of the minter
-    constructor(address _minter) ERC20("Swell Ether", "swETH") {
+    constructor(address _minter) ERC20(swETHName, swETHSymbol) {
         require(_minter != address(0), "Address cannot be 0");
         minter = _minter;
     }

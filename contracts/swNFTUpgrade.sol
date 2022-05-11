@@ -43,7 +43,7 @@ contract SWNFTUpgrade is
     OwnableUpgradeable,
     ISWNFT
 {
-    uint256 public GWEI;
+    uint256 public GWEI; // Not used
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;
@@ -52,11 +52,14 @@ contract SWNFTUpgrade is
     CountersUpgradeable.Counter public tokenIds;
 
     address public swETHAddress;
-    string public swETHSymbol;
+    string constant swETHSymbol = "swETH";
+    string constant swNFTName = "Swell NFT";
+    string constant swNFTSymbol = "swNFT";
+    string public swETHSymbolOld; // Not used
     address public swellAddress;
-    uint public ETHER;
-    address feePool;
-    uint fee;
+    uint public ETHER; // Not used
+    address public feePool;
+    uint public fee;
 
     IDepositContract public depositContract;
 
@@ -69,6 +72,9 @@ contract SWNFTUpgrade is
 
     address[] public deprecatedStrategies; // deprecated
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     /// @notice initialise the contract to issue the token
     /// @param _swellAddress The address of the swell contract
     function initialize(address _swellAddress)
@@ -77,13 +83,11 @@ contract SWNFTUpgrade is
         initializer
     {
         require(_swellAddress != address(0), "SwellAddress cannot be 0");
-        __ERC721_init("Swell NFT", "swNFT");
+        __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
-        ETHER = 1e18;
         depositContract = IDepositContract(
         0x00000000219ab540356cBB839Cbe05303d7705Fa);
         swellAddress = _swellAddress;
-        swETHSymbol = "swETH";
         fee = 1e17; // default 10 %
         feePool = msg.sender;
     }
@@ -104,6 +108,14 @@ contract SWNFTUpgrade is
         require(_feePool != address(0), "Address cannot be 0");
         feePool = _feePool;
         emit LogSetFeePool(feePool);
+    }
+
+    /// @notice set fee
+    /// @param _fee The fee that's going to be paid to the fee pool
+    function setFee(uint _fee) onlyOwner external {
+        require(_fee > 0, "Fee needs to be more than 0");
+        fee = _fee;
+        emit LogSetFee(_fee);
     }
 
     /// @notice Add a new strategy
@@ -176,6 +188,7 @@ contract SWNFTUpgrade is
     function deposit(uint tokenId, uint amount) public returns (bool success) {
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
+        require(msg.sender != address(this), "Contract cannot deposit/withdraw");
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
         success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
@@ -188,6 +201,7 @@ contract SWNFTUpgrade is
     function withdraw(uint tokenId, uint amount) public returns (bool success) {
         require(amount > 0, "Amount must be greater than 0");
         require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
+        require(msg.sender != address(this), "Contract cannot deposit/withdraw");
         uint baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(amount <= baseTokenBalance, "cannot withdraw more than the position balance");
         positions[tokenId].baseTokenBalance -= amount;
@@ -257,8 +271,6 @@ contract SWNFTUpgrade is
     /// @param stakes The stakes to perform
     /// @return ids The token IDs that were minted
     function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
-        require(msg.value >= 1 ether, "Must send at least 1 ETH");
-        require(msg.value % ETHER == 0, "stake value not multiple of Ether");
         ids = new uint[](stakes.length);
         uint totalAmount = msg.value;
         for(uint i = 0; i < stakes.length; i++){
@@ -304,7 +316,7 @@ contract SWNFTUpgrade is
             quoteTokenSymbol: swETHSymbol,
             baseTokenSymbol: swETHSymbol,
             baseTokenBalance: position.baseTokenBalance,
-            baseTokenDecimals: ETHER,
+            baseTokenDecimals: 1 ether,
             pubKey: _pubKeyToString(position.pubKey),
             value: position.value
         }));
@@ -344,22 +356,28 @@ contract SWNFTUpgrade is
         bytes32 depositDataRoot,
         uint amount
     ) private returns (uint256 newItemId) {
-        require(isValidatorActive[pubKey], 'validator is not active');
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
-        require(amount % ETHER == 0, "stake value not multiple of Ether");
+        require(amount % 1 ether == 0, "stake value not multiple of Ether");
         require(
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
-        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ether && msg.sender != owner()){
-          require(amount >= 16 ether, "Must send at least 16 ETH");
-          //TODO: Will add require for swell bond once there's price
+        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
+            require(amount == 16 ether, "Must send 16 ETH bond");
+            //TODO: Will add require for swDAO bond once there's price
+        }
+        if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
+            require(amount == 1 ether, "Must send 1 ETH bond"); 
+            //TODO: Will add require for swDAO bond once there's price 
         }
         
         bool operator;
-        if(validatorDeposits[pubKey] == 0 && !whiteList[pubKey]) operator = true;
-
+        if(validatorDeposits[pubKey] == 0) {
+            operator = true;
+        } else {
+            require(isValidatorActive[pubKey], 'validator is not active');
+        }
         depositContract.deposit{value: amount}(
             pubKey,
             getWithdrawalCredentials(),
@@ -384,8 +402,8 @@ contract SWNFTUpgrade is
 
         emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
 
-        _safeMint(msg.sender, newItemId);
         if(!operator) ISWETH(swETHAddress).mint(amount);
+        _safeMint(msg.sender, newItemId);
     }
 
     /// @notice Convert public key from bytes to string output

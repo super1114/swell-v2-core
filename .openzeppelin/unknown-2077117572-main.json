@@ -169,7 +169,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "swDAOAddress",
+            "label": "swellAddress",
             "type": "t_address",
             "src": "contracts/swNFTUpgrade.sol:54"
           },
@@ -485,7 +485,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "swDAOAddress",
+            "label": "swellAddress",
             "type": "t_address",
             "src": "contracts/swNFTUpgrade.sol:54"
           },
@@ -811,7 +811,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "swDAOAddress",
+            "label": "swellAddress",
             "type": "t_address",
             "src": "contracts/swNFTUpgrade.sol:54"
           },
@@ -1137,7 +1137,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "swDAOAddress",
+            "label": "swellAddress",
             "type": "t_address",
             "src": "contracts/swNFTUpgrade.sol:54"
           },
