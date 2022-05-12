@@ -7,8 +7,7 @@ import "./interfaces/ISWETH.sol";
 
 /// @title Contract for SWNFT
 contract SWETH is ISWETH, ERC20 {
-
-    address public immutable minter;
+    address public minter;
     string constant swETHName = "Swell Ether";
     string constant swETHSymbol = "swETH";
 
@@ -19,16 +18,21 @@ contract SWETH is ISWETH, ERC20 {
         minter = _minter;
     }
 
-    modifier onlyMinter {
+    modifier onlyMinter() {
         require(msg.sender == minter, "SWETH: caller is not the minter");
         _;
     }
 
-    function mint(uint256 amount) external onlyMinter{
+    function updateMinter(address _minter) external onlyMinter {
+        require(_minter != address(0), "Address cannot be 0");
+        minter = _minter;
+    }
+
+    function mint(uint256 amount) external onlyMinter {
         _mint(minter, amount);
     }
 
-    function burn(uint256 amount) external onlyMinter{
+    function burn(uint256 amount) external onlyMinter {
         _burn(minter, amount);
     }
 }
