@@ -37,8 +37,8 @@ describe("SWNFTUpgrade", () => {
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
         libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
-        }
+          NFTDescriptor: nftDescriptorLibrary.address,
+        },
       });
       swNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
@@ -46,7 +46,7 @@ describe("SWNFTUpgrade", () => {
         {
           kind: "uups",
           initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true
+          unsafeAllowLinkedLibraries: true,
         }
       );
       await swNFT.deployed();
@@ -64,7 +64,7 @@ describe("SWNFTUpgrade", () => {
       amount = ethers.utils.parseEther("0.1");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.be.revertedWith("Must send at least 1 ETH");
     });
@@ -73,7 +73,7 @@ describe("SWNFTUpgrade", () => {
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.be.revertedWith("Must send 16 ETH bond");
       amount = ethers.utils.parseEther("16");
@@ -84,11 +84,11 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
@@ -131,11 +131,11 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("validator is not active");
@@ -158,11 +158,11 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
@@ -196,11 +196,11 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("cannot stake more than 32 ETH");
@@ -346,20 +346,20 @@ describe("SWNFTUpgrade", () => {
             tokenId: "2",
             action: "2",
             amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address
+            strategy: strategy.address,
           },
           {
             tokenId: "2",
             action: "3",
             amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address
+            strategy: strategy.address,
           },
           {
             tokenId: "2",
             action: "1",
             amount: ethers.utils.parseEther("1"),
-            strategy: depositAddress
-          }
+            strategy: depositAddress,
+          },
         ])
       )
         .to.emit(swNFT, "LogEnterStrategy")
@@ -410,8 +410,8 @@ describe("SWNFTUpgrade", () => {
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
         libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
-        }
+          NFTDescriptor: nftDescriptorLibrary.address,
+        },
       });
       swNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
@@ -419,7 +419,7 @@ describe("SWNFTUpgrade", () => {
         {
           kind: "uups",
           initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true
+          unsafeAllowLinkedLibraries: true,
         }
       );
       await swNFT.deployed();
@@ -444,14 +444,14 @@ describe("SWNFTUpgrade", () => {
       amount = ethers.utils.parseEther("2");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.be.revertedWith("Must send 1 ETH bond");
 
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.emit(swNFT, "LogStake");
     });
@@ -460,7 +460,7 @@ describe("SWNFTUpgrade", () => {
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.be.revertedWith("validator is not active");
 
@@ -479,7 +479,7 @@ describe("SWNFTUpgrade", () => {
       // Can stake when validator is activated
       await expect(
         swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
+          value: amount,
         })
       ).to.emit(swNFT, "LogStake");
     });

@@ -22,7 +22,7 @@ const depositDataRoot2 =
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-let swNFT, swETH, signer, user, strategy;
+let swNFT, swETH, wethToken, signer, user, strategy;
 
 describe("SWNFTUpgrade with BalancerVault", () => {
   describe("If not operator", () => {
@@ -55,40 +55,18 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
-      swETH = await SWETH.deploy(signer.address);
+      swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
-      await swETH.connect(signer).mint(ethers.utils.parseEther("1000"));
-      await swETH.connect(signer).updateMinter(swNFT.address);
-
       // get the test token and wrapped ether contracts
-      const wethToken = await ethers.getContractAt("IWETH", wethAddress);
+      wethToken = await ethers.getContractAt("IWETH", wethAddress);
       // deposit one thousand ether from the deployer account into the wrapped ether contract
       await wethToken
         .connect(signer)
         .deposit({ value: ethers.utils.parseEther("1000") });
-
-      // create a WETH/TEST balancer pool
-      poolId = await createBalancerPool(
-        signer.address,
-        swETH.address,
-        wethToken.address
-      );
-
-      const SwellBalancerVault = await ethers.getContractFactory(
-        "SwellBalancerVault"
-      );
-      strategy = await SwellBalancerVault.deploy(
-        swETH.address,
-        swNFT.address,
-        "Test Swell Balancer Vault Token",
-        "TSBVT",
-        VAULT,
-        poolId
-      );
-      await strategy.deployed();
     });
+
     it("cannot stake less than 1 Ether", async function() {
       amount = ethers.utils.parseEther("0.1");
       await expect(
@@ -216,6 +194,35 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(tvl).to.be.equal("32000000000000000000");
     });
 
+    it("creates the balancer pool", async function() {
+      await swNFT.connect(user).withdraw("2", ethers.utils.parseEther("10"));
+      await swETH
+        .connect(user)
+        .transfer(signer.address, ethers.utils.parseEther("10"));
+
+      // create a WETH/TEST balancer pool
+      poolId = await createBalancerPool(
+        signer.address,
+        swETH.address,
+        wethToken.address
+      );
+    });
+
+    it("create the strategy", async function() {
+      const SwellBalancerVault = await ethers.getContractFactory(
+        "SwellBalancerVault"
+      );
+      strategy = await SwellBalancerVault.deploy(
+        swETH.address,
+        swNFT.address,
+        "Test Swell Balancer Vault Token",
+        "TSBVT",
+        VAULT,
+        poolId
+      );
+      await strategy.deployed();
+    });
+
     it("cannot stake more than 32 Ether", async function() {
       amount = ethers.utils.parseEther("32");
       await expect(
@@ -265,7 +272,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(position.pubKey).to.be.equal(pubKey2);
       await expect(position.value).to.be.equal("16000000000000000000");
       await expect(position.baseTokenBalance).to.be.equal(
-        "15000000000000000000"
+        "5000000000000000000"
       );
     });
 
@@ -290,7 +297,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(position.pubKey).to.be.equal(pubKey2);
       await expect(position.value).to.be.equal("16000000000000000000");
       await expect(position.baseTokenBalance).to.be.equal(
-        "16000000000000000000"
+        "6000000000000000000"
       );
     });
 
@@ -458,39 +465,16 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
-      swETH = await SWETH.deploy(signer.address);
+      swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
-      await swETH.connect(signer).mint(ethers.utils.parseEther("1000"));
-      await swETH.connect(signer).updateMinter(swNFT.address);
-
       // get the test token and wrapped ether contracts
-      const wethToken = await ethers.getContractAt("IWETH", wethAddress);
+      wethToken = await ethers.getContractAt("IWETH", wethAddress);
       // deposit one thousand ether from the deployer account into the wrapped ether contract
       await wethToken
         .connect(signer)
         .deposit({ value: ethers.utils.parseEther("1000") });
-
-      // create a WETH/TEST balancer pool
-      poolId = await createBalancerPool(
-        signer.address,
-        swETH.address,
-        wethToken.address
-      );
-
-      const SwellBalancerVault = await ethers.getContractFactory(
-        "SwellBalancerVault"
-      );
-      strategy = await SwellBalancerVault.deploy(
-        swETH.address,
-        swNFT.address,
-        "Test Swell Balancer Vault Token",
-        "TSBVT",
-        VAULT,
-        poolId
-      );
-      await strategy.deployed();
     });
 
     it("can add validator into whiteList", async () => {
