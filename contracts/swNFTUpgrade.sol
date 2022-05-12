@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Interfaces
@@ -120,10 +119,12 @@ contract SWNFTUpgrade is
 
     /// @notice Add a new strategy
     /// @param strategy The strategy address to add
-    function addStrategy(address strategy) onlyOwner external{
+    function addStrategy(address strategy) onlyOwner external returns(bool added){
         require(strategy != address(0), "address cannot be 0");
-        strategiesSet.add(strategy);
-        emit LogAddStrategy(strategy);
+        added = strategiesSet.add(strategy);
+        if(added) {
+            emit LogAddStrategy(strategy);
+        }
     }
 
     /// @notice Remove a strategy

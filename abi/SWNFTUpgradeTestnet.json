@@ -444,7 +444,13 @@
       }
     ],
     "name": "addStrategy",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "added",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
