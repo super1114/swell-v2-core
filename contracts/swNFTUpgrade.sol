@@ -339,7 +339,14 @@ contract SWNFTUpgrade is
 
     /// @notice Get the strategy with index
     /// @return Strategy address
-    function strategies() view external returns (address[] memory) {
+    function strategies(uint256 strategyIndex) view external returns (address) {
+        require(strategyIndex < strategiesSet.length(), "Index out");
+        return strategiesSet.at(strategyIndex);
+    }
+
+    /// @notice Get all strategies
+    /// @return All strategy address
+    function allStrategies() view external returns (address[] memory) {
         return strategiesSet.values();
     }
 
