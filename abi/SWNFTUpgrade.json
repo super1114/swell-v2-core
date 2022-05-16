@@ -154,12 +154,6 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "strategyIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "strategy",
         "type": "address"
@@ -191,12 +185,6 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "strategyIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "strategy",
         "type": "address"
@@ -220,12 +208,6 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "strategyIndex",
-        "type": "uint256"
-      },
       {
         "indexed": true,
         "internalType": "address",
@@ -467,7 +449,13 @@
       }
     ],
     "name": "addStrategy",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "added",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -495,6 +483,19 @@
     "name": "addWhiteLists",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "allStrategies",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -554,9 +555,9 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "address",
             "name": "strategy",
-            "type": "uint256"
+            "type": "address"
           }
         ],
         "internalType": "struct ISWNFT.Action[]",
@@ -623,13 +624,32 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "deprecatedStrategies",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "strategy",
-        "type": "uint256"
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -656,9 +676,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "strategy",
-        "type": "uint256"
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -923,13 +943,19 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "strategy",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "name": "removeStrategy",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "removed",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1093,7 +1119,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "strategyIndex",
         "type": "uint256"
       }
     ],
@@ -1142,7 +1168,7 @@
   },
   {
     "inputs": [],
-    "name": "swETHSymbol",
+    "name": "swETHSymbolOld",
     "outputs": [
       {
         "internalType": "string",

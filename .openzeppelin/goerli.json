@@ -213,7 +213,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "strategies",
+            "label": "deprecatedStrategies",
             "type": "t_array(t_address)dyn_storage",
             "src": "contracts/swNFTUpgrade.sol:68"
           },
@@ -529,7 +529,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "strategies",
+            "label": "deprecatedStrategies",
             "type": "t_array(t_address)dyn_storage",
             "src": "contracts/swNFTUpgrade.sol:68"
           },
@@ -845,7 +845,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "strategies",
+            "label": "deprecatedStrategies",
             "type": "t_array(t_address)dyn_storage",
             "src": "contracts/swNFTUpgrade.sol:68"
           },
@@ -1161,21 +1161,21 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "strategies",
+            "label": "deprecatedStrategies",
             "type": "t_array(t_address)dyn_storage",
             "src": "contracts/swNFTUpgrade.sol:68"
-          },
-          {
-            "contract": "SWNFTUpgrade",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "contracts/swNFTUpgrade.sol:379"
           },
           {
             "contract": "SWNFTUpgrade",
             "label": "opRate",
             "type": "t_mapping(t_address,t_uint256)",
             "src": "contracts/swNFTUpgrade.sol:380"
+          },
+          {
+            "contract": "SWNFTUpgrade",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "contracts/swNFTUpgrade.sol:379"
           }
         ],
         "types": {

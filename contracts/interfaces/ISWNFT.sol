@@ -17,7 +17,7 @@ interface ISWNFT
         uint tokenId;
         uint action;
         uint amount;
-        uint strategy;
+        address strategy;
     }
 
     struct Stake {
@@ -58,13 +58,11 @@ interface ISWNFT
     );
 
     event LogRemoveStrategy(
-        uint strategyIndex,
         address indexed strategy
     );
 
     event LogEnterStrategy(
         uint indexed tokenId,
-        uint strategyIndex,
         address strategy,
         address user,
         uint amount
@@ -72,7 +70,6 @@ interface ISWNFT
 
     event LogExitStrategy(
         uint indexed tokenId,
-        uint strategyIndex,
         address strategy,
         address user,
         uint amount
@@ -105,3 +102,4 @@ interface ISWNFT
         uint fee
     );
 }
+
