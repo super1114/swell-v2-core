@@ -319,7 +319,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(swNFT.addStrategy(strategy.address))
         .to.emit(swNFT, "LogAddStrategy")
         .withArgs(strategy.address);
-      strategyAddress = await swNFT.strategies("1");
+      strategyAddress = await swNFT.strategies(1);
       await expect(strategyAddress).to.be.equal(strategy.address);
     });
 
@@ -327,53 +327,55 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("1", "1", ethers.utils.parseEther("1"))
+          .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Only owner can enter strategy");
 
       await expect(
-        swNFT.enterStrategy("3", "1", ethers.utils.parseEther("1"))
+        swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
       ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("2", "1", ethers.utils.parseEther("1"))
+          .enterStrategy("2", strategy.address, ethers.utils.parseEther("1"))
       )
         .to.emit(swNFT, "LogEnterStrategy")
         .withArgs(
           "2",
-          "1",
           strategy.address,
           user.address,
           ethers.utils.parseEther("1")
         );
 
       await expect(
-        swNFT.enterStrategy("1", "1", ethers.utils.parseEther("1"))
+        swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
       ).to.be.revertedWith("reverted with panic code 0x11");
     });
 
     it("can exit strategy", async function() {
       await expect(
-        swNFT.exitStrategy("2", "1", ethers.utils.parseEther("1"))
+        swNFT.exitStrategy(
+          "2",
+          strategy.address,
+          ethers.utils.parseEther("0.5")
+        )
       ).to.be.revertedWith("Only owner can exit strategy");
 
       await expect(
         swNFT
           .connect(user)
-          .exitStrategy("2", "1", ethers.utils.parseEther("0.5"))
+          .exitStrategy("2", strategy.address, ethers.utils.parseEther("0.5"))
       )
         .to.emit(swNFT, "LogExitStrategy")
         .withArgs(
           "2",
-          "1",
           strategy.address,
           user.address,
           ethers.utils.parseEther("0.5")
         );
 
       await expect(
-        swNFT.exitStrategy("1", "1", ethers.utils.parseEther("1"))
+        swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Not enough position to exit");
     });
 
@@ -384,26 +386,25 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             tokenId: "2",
             action: "2",
             amount: ethers.utils.parseEther("1"),
-            strategy: "1"
+            strategy: strategy.address
           },
           {
             tokenId: "2",
             action: "3",
             amount: ethers.utils.parseEther("1"),
-            strategy: "1"
+            strategy: strategy.address
           },
           {
             tokenId: "2",
             action: "1",
             amount: ethers.utils.parseEther("1"),
-            strategy: "0"
+            strategy: depositAddress
           }
         ])
       )
         .to.emit(swNFT, "LogEnterStrategy")
         .withArgs(
           "2",
-          "1",
           strategy.address,
           user.address,
           ethers.utils.parseEther("1")
@@ -411,7 +412,6 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         .to.emit(swNFT, "LogExitStrategy")
         .withArgs(
           "2",
-          "1",
           strategy.address,
           user.address,
           ethers.utils.parseEther("1")
@@ -421,17 +421,17 @@ describe("SWNFTUpgrade with BalancerVault", () => {
     });
 
     it("can remove strategy", async function() {
-      await expect(swNFT.connect(user).removeStrategy("0")).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      );
+      await expect(
+        swNFT.connect(user).removeStrategy(strategy.address)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
 
-      await expect(swNFT.removeStrategy("1"))
+      await expect(swNFT.removeStrategy(strategy.address))
         .to.emit(swNFT, "LogRemoveStrategy")
-        .withArgs("1", strategy.address);
+        .withArgs(strategy.address);
 
-      await expect(swNFT.removeStrategy("0"))
+      await expect(swNFT.removeStrategy(depositAddress))
         .to.emit(swNFT, "LogRemoveStrategy")
-        .withArgs("0", depositAddress);
+        .withArgs(depositAddress);
     });
   });
 
