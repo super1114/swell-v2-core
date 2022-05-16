@@ -288,7 +288,7 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "referralCode",
+        "name": "referral",
         "type": "string"
       }
     ],
