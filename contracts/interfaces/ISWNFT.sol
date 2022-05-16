@@ -39,7 +39,7 @@ interface ISWNFT
         bytes indexed pubKey,
         uint deposit,
         uint timeStamp,
-        string referralCode
+        string referral
     );
 
     event LogDeposit(
