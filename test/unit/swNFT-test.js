@@ -59,9 +59,13 @@ describe("SWNFT", async () => {
   it("cannot stake 1 ETH when validator is not active", async function() {
     amount = ethers.utils.parseEther("1");
     await expect(
-      swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-        value: amount
-      })
+      swNFT.stake(
+        [{ pubKey, signature, depositDataRoot, amount }],
+        "test-referral",
+        {
+          value: amount
+        }
+      )
     ).to.be.revertedWith("Must send 16 ETH bond");
   });
 

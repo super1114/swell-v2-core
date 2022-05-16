@@ -63,18 +63,26 @@ describe("SWNFTUpgrade", () => {
     it("cannot stake less than 1 Ether", async function() {
       amount = ethers.utils.parseEther("0.1");
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.be.revertedWith("Must send at least 1 ETH");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.be.revertedWith("Must send 16 ETH bond");
       amount = ethers.utils.parseEther("16");
       await expect(
@@ -87,6 +95,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
+          "test-referral",
           {
             value: amount
           }
@@ -134,6 +143,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
+          "test-referral",
           {
             value: amount
           }
@@ -161,6 +171,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
+          "test-referral",
           {
             value: amount
           }
@@ -199,6 +210,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
+          "test-referral",
           {
             value: amount
           }
@@ -443,25 +455,37 @@ describe("SWNFTUpgrade", () => {
     it("Must send 1 ETH bond as first deposit (Operator)", async function() {
       amount = ethers.utils.parseEther("2");
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.be.revertedWith("Must send 1 ETH bond");
 
       amount = ethers.utils.parseEther("1");
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.emit(swNFT, "LogStake");
     });
 
     it("Validator should be activated for second deposit", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.be.revertedWith("validator is not active");
 
       // Owner makes the validator active by bot
@@ -478,9 +502,13 @@ describe("SWNFTUpgrade", () => {
 
       // Can stake when validator is activated
       await expect(
-        swNFT.stake([{ pubKey, signature, depositDataRoot, amount }], {
-          value: amount
-        })
+        swNFT.stake(
+          [{ pubKey, signature, depositDataRoot, amount }],
+          "test-referral",
+          {
+            value: amount
+          }
+        )
       ).to.emit(swNFT, "LogStake");
     });
   });

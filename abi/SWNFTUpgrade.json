@@ -289,6 +289,12 @@
         "internalType": "uint256",
         "name": "timeStamp",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "referralCode",
+        "type": "string"
       }
     ],
     "name": "LogStake",
@@ -1102,6 +1108,11 @@
         "internalType": "struct ISWNFT.Stake[]",
         "name": "stakes",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "string",
+        "name": "referral",
+        "type": "string"
       }
     ],
     "name": "stake",

@@ -271,11 +271,11 @@ contract SWNFTUpgrade is
     /// @notice batch stake for multiple validators
     /// @param stakes The stakes to perform
     /// @return ids The token IDs that were minted
-    function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
+    function stake(Stake[] calldata stakes, string calldata referral) external payable returns (uint[] memory ids) {
         ids = new uint[](stakes.length);
         uint totalAmount = msg.value;
         for(uint i = 0; i < stakes.length; i++){
-            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount);
+            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount, referral);
             totalAmount -= stakes[i].amount;
         }
         payable(msg.sender).transfer(totalAmount); // refund the extra ETH
@@ -357,12 +357,14 @@ contract SWNFTUpgrade is
     /// @param signature The signature of the withdrawal
     /// @param depositDataRoot The root of the deposit data
     /// @param amount The amount of ETH to deposit
+    /// @param referral The referral code sent from the frontend
     /// @return newItemId The token ID of the new token
     function _stake(
         bytes calldata pubKey,
         bytes calldata signature,
         bytes32 depositDataRoot,
-        uint amount
+        uint amount,
+        string calldata referral
     ) private returns (uint256 newItemId) {
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
@@ -408,7 +410,7 @@ contract SWNFTUpgrade is
             operator: operator
         });
 
-        emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
+        emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp, referral);
 
         if(!operator) ISWETH(swETHAddress).mint(amount);
         _safeMint(msg.sender, newItemId);
