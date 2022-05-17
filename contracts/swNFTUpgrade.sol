@@ -429,5 +429,4 @@ contract SWNFTUpgrade is
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;
-    uint256[46] private __gap;
 }
