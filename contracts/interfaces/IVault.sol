@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 
 /*///////////////////////////////////////////////////////////////
                        STRUCTS
@@ -90,7 +90,7 @@ interface IVault {
         external
         view
         returns (
-            IERC20[] memory tokens,
+            IERC20Permit[] memory tokens,
             uint256[] memory balances,
             uint256 lastChangeBlock
         );
@@ -112,7 +112,7 @@ interface IVault {
      *
      * `assetManager` is the Pool's token Asset Manager.
      */
-    function getPoolTokenInfo(bytes32 poolId, IERC20 token)
+    function getPoolTokenInfo(bytes32 poolId, IERC20Permit token)
         external
         view
         returns (

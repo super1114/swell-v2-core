@@ -22,7 +22,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     mapping(uint256 => uint256) public positions;
 
     constructor(
-        ERC20 _asset,
+        ERC20Permit _asset,
         address _swNFT,
         string memory _name,
         string memory _symbol,
@@ -98,8 +98,11 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         }
 
         // Convert to swETH
-        (IERC20[] memory tokens, uint256[] memory balances, ) = balancerVault
-            .getPoolTokens(poolId);
+        (
+            IERC20Permit[] memory tokens,
+            uint256[] memory balances,
+
+        ) = balancerVault.getPoolTokens(poolId);
 
         uint256[] memory weights = IWeightedPool(pool).getNormalizedWeights();
         uint256 assetIndex;
@@ -134,7 +137,9 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
             totalSupply()
         );
 
-        (IERC20[] memory tokens, , ) = balancerVault.getPoolTokens(poolId);
+        (IERC20Permit[] memory tokens, , ) = balancerVault.getPoolTokens(
+            poolId
+        );
 
         IAsset[] memory assetList = new IAsset[](tokens.length);
         uint256[] memory amountsOut = new uint256[](tokens.length);
@@ -166,9 +171,8 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     }
 
     function afterDeposit(uint256 assets, uint256) internal override {
-        (IERC20[] memory tokensFromPool, , ) = balancerVault.getPoolTokens(
-            poolId
-        );
+        (IERC20Permit[] memory tokensFromPool, , ) = balancerVault
+            .getPoolTokens(poolId);
 
         IAsset[] memory tokens = new IAsset[](2);
         uint256[] memory tokenAmounts = new uint256[](2);
