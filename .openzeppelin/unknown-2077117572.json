@@ -1551,12 +1551,6 @@
             "label": "isValidatorActive",
             "type": "t_mapping(t_bytes_memory_ptr,t_bool)",
             "src": "contracts/swNFTUpgrade.sol:410"
-          },
-          {
-            "contract": "SWNFTUpgrade",
-            "label": "__gap",
-            "type": "t_array(t_uint256)47_storage",
-            "src": "contracts/swNFTUpgrade.sol:407"
           }
         ],
         "types": {
