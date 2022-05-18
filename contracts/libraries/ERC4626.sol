@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {SafeTransferLib} from "./SafeTransferLib.sol";
 import {FixedPointMathLib} from "./FixedPointMathLib.sol";
 
 /// @notice Minimal ERC4626 tokenized Vault implementation.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/mixins/ERC4626.sol)
-abstract contract ERC4626 is ERC20 {
-    using SafeTransferLib for ERC20;
+abstract contract ERC4626 is ERC20Permit {
+    using SafeTransferLib for ERC20Permit;
     using FixedPointMathLib for uint256;
 
     /*///////////////////////////////////////////////////////////////
@@ -34,13 +34,13 @@ abstract contract ERC4626 is ERC20 {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-    ERC20 public immutable asset;
+    ERC20Permit public immutable asset;
 
     constructor(
-        ERC20 _asset,
+        ERC20Permit _asset,
         string memory _name,
         string memory _symbol
-    ) ERC20(_name, _symbol) {
+    ) ERC20(_name, _symbol) ERC20Permit(_name) {
         asset = _asset;
     }
 

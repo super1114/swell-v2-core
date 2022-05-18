@@ -22,7 +22,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     mapping(uint256 => uint256) public positions;
 
     constructor(
-        ERC20 _asset,
+        ERC20Permit _asset,
         address _swNFT,
         string memory _name,
         string memory _symbol,
