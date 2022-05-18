@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IBalancerWeightedPoolFactory {
     event PoolCreated(address indexed pool);
@@ -9,7 +9,7 @@ interface IBalancerWeightedPoolFactory {
     function create(
         string memory name,
         string memory symbol,
-        IERC20Permit[] memory tokens,
+        IERC20[] memory tokens,
         uint256[] memory weights,
         uint256 swapFeePercentage,
         address owner

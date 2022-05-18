@@ -15,7 +15,7 @@
 // Adjusted pragma version so it compiles. Previous version was ^0.7.0
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // solhint-disable
 
@@ -1009,7 +1009,7 @@ library InputHelpers {
         _require(a == b && b == c, Errors.INPUT_LENGTH_MISMATCH);
     }
 
-    function ensureArrayIsSorted(IERC20Permit[] memory array) internal pure {
+    function ensureArrayIsSorted(IERC20[] memory array) internal pure {
         address[] memory addressArray;
         // solhint-disable-next-line no-inline-assembly
         assembly {
