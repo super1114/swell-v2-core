@@ -17,12 +17,16 @@ task("deploy", "Deploy the contracts")
     false,
     types.boolean
   )
-  .setAction(async taskArgs => {
+  .setAction(async (taskArgs, hre) => {
+    const isMain = hre.network.name.includes("-main");
+
     let network = await ethers.provider.getNetwork();
     console.log("network:", network);
 
     // Init tag
-    const path = `./deployments/${network.chainId}_versions.json`;
+    const path = `./deployments/${network.chainId}_versions${
+      isMain ? "-main" : ""
+    }.json`;
     const versions = require("." + path);
 
     const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
