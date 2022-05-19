@@ -1131,7 +1131,7 @@
           },
           {
             "contract": "SWNFTUpgrade",
-            "label": "swETHSymbol",
+            "label": "swETHSymbolOld",
             "type": "t_string_storage",
             "src": "contracts/swNFTUpgrade.sol:53"
           },
