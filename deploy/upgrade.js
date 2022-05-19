@@ -19,14 +19,20 @@ task("upgrade", "Upgrade the contracts")
       ? networkNames[network.chainId]
       : `unknown-${network.chainId}`;
 
-    fs.renameSync(
-      `.openzeppelin/${manifestFile}.json`,
-      `.openzeppelin/${manifestFile}-orig.json`
-    );
-    fs.renameSync(
-      `.openzeppelin/${manifestFile}-main.json`,
-      `.openzeppelin/${manifestFile}.json`
-    );
+    if (isMain) {
+      if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+        fs.renameSync(
+          `.openzeppelin/${manifestFile}.json`,
+          `.openzeppelin/${manifestFile}-orig.json`
+        );
+      }
+      if (fs.existsSync(`.openzeppelin/${manifestFile}-main.json`)) {
+        fs.renameSync(
+          `.openzeppelin/${manifestFile}-main.json`,
+          `.openzeppelin/${manifestFile}.json`
+        );
+      }
+    }
 
     try {
       // Init tag
@@ -72,16 +78,22 @@ task("upgrade", "Upgrade the contracts")
     } catch (e) {
       console.log("error", e);
     } finally {
-      // restore network manifest file
-      fs.renameSync(
-        `.openzeppelin/${manifestFile}.json`,
-        `.openzeppelin/${manifestFile}-main.json`
-      );
+      if (isMain) {
+        // restore network manifest file
+        if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+          fs.renameSync(
+            `.openzeppelin/${manifestFile}.json`,
+            `.openzeppelin/${manifestFile}-main.json`
+          );
+        }
 
-      fs.renameSync(
-        `.openzeppelin/${manifestFile}-orig.json`,
-        `.openzeppelin/${manifestFile}.json`
-      );
+        if (fs.existsSync(`.openzeppelin/${manifestFile}-orig.json`)) {
+          fs.renameSync(
+            `.openzeppelin/${manifestFile}-orig.json`,
+            `.openzeppelin/${manifestFile}.json`
+          );
+        }
+      }
     }
   });
 
