@@ -2,33 +2,35 @@
 
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/ISWETH.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 /// @title Contract for SWNFT
-contract SWETH is ISWETH, ERC20 {
-
+contract SWETH is ISWETH, ERC20Permit {
     address public immutable minter;
     string constant swETHName = "Swell Ether";
     string constant swETHSymbol = "swETH";
 
     /// @notice initialise the contract to issue the token
     /// @param _minter address of the minter
-    constructor(address _minter) ERC20(swETHName, swETHSymbol) {
+    constructor(address _minter)
+        ERC20(swETHName, swETHSymbol)
+        ERC20Permit(swETHName)
+    {
         require(_minter != address(0), "Address cannot be 0");
         minter = _minter;
     }
 
-    modifier onlyMinter {
+    modifier onlyMinter() {
         require(msg.sender == minter, "SWETH: caller is not the minter");
         _;
     }
 
-    function mint(uint256 amount) external onlyMinter{
+    function mint(uint256 amount) external onlyMinter {
         _mint(minter, amount);
     }
 
-    function burn(uint256 amount) external onlyMinter{
+    function burn(uint256 amount) external onlyMinter {
         _burn(minter, amount);
     }
 }
