@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { networkNames } = require("@openzeppelin/upgrades-core");
 const { getTag } = require("./helpers");
 const {
   deployDepositContract,
@@ -17,111 +18,155 @@ task("deploy", "Deploy the contracts")
     false,
     types.boolean
   )
-  .setAction(async taskArgs => {
+  .setAction(async (taskArgs, hre) => {
+    const isMain = hre.network.name.includes("-main");
+
     let network = await ethers.provider.getNetwork();
     console.log("network:", network);
+    // if Main env, change network manifest file name temporarily
+    const manifestFile = networkNames[network.chainId]
+      ? networkNames[network.chainId]
+      : `unknown-${network.chainId}`;
 
-    // Init tag
-    const path = `./deployments/${network.chainId}_versions.json`;
-    const versions = require("." + path);
-
-    const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
-    let newTag;
-    if (taskArgs.keepVersion) {
-      newTag = oldTag;
-    } else {
-      // update to latest release version
-      newTag = await getTag();
-    }
-    console.log(`Old Version: ${oldTag}`);
-    console.log(`New Version: ${newTag}`);
-
-    // const contracts = versions[oldTag].contracts;
-    versions[newTag] = new Object();
-    // versions[newTag].contracts = { ...contracts };
-    versions[newTag].contracts = new Object();
-    versions[newTag].network = network;
-    versions[newTag].date = new Date().toUTCString();
-
-    if (network.chainId === 2077117572) {
-      depositContractAddress = await deployDepositContract();
-      versions[
-        newTag
-      ].contracts.depositContractAddress = depositContractAddress;
-    }
-
-    const SWDAO = await ethers.getContractFactory("SWELL");
-    const swDAO = await SWDAO.deploy();
-    await swDAO.deployed();
-    console.log("swDAO:", swDAO.address);
-    versions[newTag].contracts.swDAO = swDAO.address;
-
-    switch (network.chainId) {
-      case 5:
-        ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
-          swDAO.address,
-          goerliDepositContract
-        ));
-        break;
-      case 1337802:
-        ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
-          swDAO.address,
-          kilnDepositContract
-        ));
-        break;
-      case 2077117572:
-        ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
-          swDAO.address,
-          depositContractAddress
-        ));
-        break;
-      default:
-        const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-          "NFTDescriptor"
+    if (isMain) {
+      if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+        fs.renameSync(
+          `.openzeppelin/${manifestFile}.json`,
+          `.openzeppelin/${manifestFile}-orig.json`
         );
-        nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-        console.log("nftDescriptorLibrary:", nftDescriptorLibrary.address);
-
-        const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          }
-        });
-        swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swDAO.address], {
-          kind: "uups",
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          },
-          unsafeAllowLinkedLibraries: true
-        });
+      }
+      if (fs.existsSync(`.openzeppelin/${manifestFile}-main.json`)) {
+        fs.renameSync(
+          `.openzeppelin/${manifestFile}-main.json`,
+          `.openzeppelin/${manifestFile}.json`
+        );
+      }
     }
-    await swNFT.deployed();
-    console.log("swNFT:", swNFT.address);
-    await swNFT.addWhiteList(pubKey);
-    versions[newTag].contracts.nftDescriptorLibrary =
-      nftDescriptorLibrary.address;
-    versions[newTag].contracts.swNFT = swNFT.address;
 
-    const SWETH = await ethers.getContractFactory("SWETH");
-    const swETH = await SWETH.deploy(swNFT.address);
-    await swETH.deployed();
-    await swNFT.setswETHAddress(swETH.address);
-    console.log("swETH:", swETH.address);
-    versions[newTag].contracts.swETH = swETH.address;
+    try {
+      // Init tag
+      const path = `./deployments/${network.chainId}_versions${
+        isMain ? "-main" : ""
+      }.json`;
+      const versions = require("." + path);
 
-    const Strategy = await ethers.getContractFactory("Strategy");
-    const strategy = await Strategy.deploy(swNFT.address);
-    await strategy.deployed();
-    console.log("strategy:", strategy.address);
-    versions[newTag].contracts.strategy = strategy.address;
+      const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
+      let newTag;
+      if (taskArgs.keepVersion) {
+        newTag = oldTag;
+      } else {
+        // update to latest release version
+        newTag = await getTag();
+      }
+      console.log(`Old Version: ${oldTag}`);
+      console.log(`New Version: ${newTag}`);
 
-    await swNFT.addStrategy(strategy.address);
+      // const contracts = versions[oldTag].contracts;
+      versions[newTag] = new Object();
+      // versions[newTag].contracts = { ...contracts };
+      versions[newTag].contracts = new Object();
+      versions[newTag].network = network;
+      versions[newTag].date = new Date().toUTCString();
 
-    // convert JSON object to string
-    const data = JSON.stringify(versions, null, 2);
+      if (network.chainId === 2077117572) {
+        depositContractAddress = await deployDepositContract();
+        versions[
+          newTag
+        ].contracts.depositContractAddress = depositContractAddress;
+      }
 
-    // write to version file
-    fs.writeFileSync(path, data);
+      const SWDAO = await ethers.getContractFactory("SWELL");
+      const swDAO = await SWDAO.deploy();
+      await swDAO.deployed();
+      console.log("swDAO:", swDAO.address);
+      versions[newTag].contracts.swDAO = swDAO.address;
+
+      switch (network.chainId) {
+        case 5:
+          ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
+            swDAO.address,
+            goerliDepositContract
+          ));
+          break;
+        case 1337802:
+          ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
+            swDAO.address,
+            kilnDepositContract
+          ));
+          break;
+        case 2077117572:
+          ({ swNFT, nftDescriptorLibrary } = await deploySWNFTUpgradeTestnet(
+            swDAO.address,
+            depositContractAddress
+          ));
+          break;
+        default:
+          const nftDescriptorLibraryFactory = await ethers.getContractFactory(
+            "NFTDescriptor"
+          );
+          nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
+          console.log("nftDescriptorLibrary:", nftDescriptorLibrary.address);
+
+          const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
+            libraries: {
+              NFTDescriptor: nftDescriptorLibrary.address
+            }
+          });
+          swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swDAO.address], {
+            kind: "uups",
+            libraries: {
+              NFTDescriptor: nftDescriptorLibrary.address
+            },
+            unsafeAllowLinkedLibraries: true
+          });
+      }
+      await swNFT.deployed();
+      console.log("swNFT:", swNFT.address);
+      await swNFT.addWhiteList(pubKey);
+      versions[newTag].contracts.nftDescriptorLibrary =
+        nftDescriptorLibrary.address;
+      versions[newTag].contracts.swNFT = swNFT.address;
+
+      const SWETH = await ethers.getContractFactory("SWETH");
+      const swETH = await SWETH.deploy(swNFT.address);
+      await swETH.deployed();
+      await swNFT.setswETHAddress(swETH.address);
+      console.log("swETH:", swETH.address);
+      versions[newTag].contracts.swETH = swETH.address;
+
+      const Strategy = await ethers.getContractFactory("Strategy");
+      const strategy = await Strategy.deploy(swNFT.address);
+      await strategy.deployed();
+      console.log("strategy:", strategy.address);
+      versions[newTag].contracts.strategy = strategy.address;
+
+      await swNFT.addStrategy(strategy.address);
+
+      // convert JSON object to string
+      const data = JSON.stringify(versions, null, 2);
+
+      // write to version file
+      fs.writeFileSync(path, data);
+    } catch (e) {
+      console.log("error", e);
+    } finally {
+      if (isMain) {
+        // restore network manifest file
+        if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+          fs.renameSync(
+            `.openzeppelin/${manifestFile}.json`,
+            `.openzeppelin/${manifestFile}-main.json`
+          );
+        }
+
+        if (fs.existsSync(`.openzeppelin/${manifestFile}-orig.json`)) {
+          fs.renameSync(
+            `.openzeppelin/${manifestFile}-orig.json`,
+            `.openzeppelin/${manifestFile}.json`
+          );
+        }
+      }
+    }
   });
 
 module.exports = {};
