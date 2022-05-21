@@ -1,4 +1,5 @@
-task("updateIsValidatorsActive", "Add validators to white list").setAction(
+task("updateIsValidatorsActive", "Add validators to white list").addParam("rate", "The rate for each validator")
+.setAction(
   async taskArgs => {
     [signer, user, bot] = await ethers.getSigners();
 
@@ -26,7 +27,7 @@ task("updateIsValidatorsActive", "Add validators to white list").setAction(
     if (botAddress !== signer.address)
       throw new Error("botAddress is not signer.address");
 
-    const res = await swNFT.updateIsValidatorsActive(validators);
+    const res = await swNFT.updateIsValidatorsActive(validators, taskArgs.rate);
     console.log(res);
   }
 );

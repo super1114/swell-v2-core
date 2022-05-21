@@ -87,7 +87,8 @@ interface ISWNFT
     event LogUpdateIsValidatorActive(
         address user,
         bytes indexed pubKey,
-        bool isActive
+        bool isActive,
+        uint rate
     );
 
     event LogSetSWETHAddress(

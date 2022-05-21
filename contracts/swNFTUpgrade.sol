@@ -161,17 +161,18 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) public{
+    function updateIsValidatorActive(bytes calldata pubKey, uint rate) public{
         require(msg.sender == botAddress, "sender is not the bot");
         isValidatorActive[pubKey] = true;
-        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
+        opRate[pubKey] = rate;
+        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey], opRate[pubKey]);
     }
 
     // @notice Update the validators active status
     /// @param pubKeys Array of public key of the validators
-    function updateIsValidatorsActive(bytes[] calldata pubKeys) external{
+    function updateIsValidatorsActive(bytes[] calldata pubKeys, uint rate) external{
         for(uint i = 0; i < pubKeys.length; i++){
-            updateIsValidatorActive(pubKeys[i]);
+            updateIsValidatorActive(pubKeys[i], rate);
         }
     }
 
@@ -425,7 +426,7 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    mapping(address => uint) public opRate; // deprecated
+    mapping(bytes => uint) public opRate;
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;

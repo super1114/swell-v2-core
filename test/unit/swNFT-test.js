@@ -96,18 +96,18 @@ describe("SWNFT", async () => {
     const address = await swNFT.botAddress();
     await expect(address).to.be.equal(bot.address);
 
-    await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
+    await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey, 2))
       .to.emit(swNFT, "LogUpdateIsValidatorActive")
-      .withArgs(bot.address, pubKey, true);
+      .withArgs(bot.address, pubKey, true, 2);
   });
 
   it("bot sets validators to active", async function() {
     const address = await swNFT.botAddress();
     await expect(address).to.be.equal(bot.address);
 
-    await expect(swNFT.connect(bot).updateIsValidatorsActive([pubKey, pubKey1]))
+    await expect(swNFT.connect(bot).updateIsValidatorsActive([pubKey, pubKey1], 2))
       .to.emit(swNFT, "LogUpdateIsValidatorActive")
-      .withArgs(bot.address, pubKey1, true);
+      .withArgs(bot.address, pubKey1, true, 2);
   });
 
   it("can add validator into white list", async function() {

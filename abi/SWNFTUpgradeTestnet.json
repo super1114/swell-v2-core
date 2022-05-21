@@ -322,6 +322,12 @@
         "internalType": "bool",
         "name": "isActive",
         "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
       }
     ],
     "name": "LogUpdateIsValidatorActive",
@@ -853,9 +859,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "bytes",
         "name": "",
-        "type": "address"
+        "type": "bytes"
       }
     ],
     "name": "opRate",
@@ -1381,6 +1387,11 @@
         "internalType": "bytes",
         "name": "pubKey",
         "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
       }
     ],
     "name": "updateIsValidatorActive",
@@ -1394,6 +1405,11 @@
         "internalType": "bytes[]",
         "name": "pubKeys",
         "type": "bytes[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
       }
     ],
     "name": "updateIsValidatorsActive",
