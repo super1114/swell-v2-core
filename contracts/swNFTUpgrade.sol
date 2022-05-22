@@ -163,6 +163,7 @@ contract SWNFTUpgrade is
     /// @param pubKey The public key of the validator
     function updateIsValidatorActive(bytes calldata pubKey, uint rate) public{
         require(msg.sender == botAddress, "sender is not the bot");
+        require(rate > 0, "rate should be bigger than zero");
         isValidatorActive[pubKey] = true;
         opRate[pubKey] = rate;
         emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey], opRate[pubKey]);
