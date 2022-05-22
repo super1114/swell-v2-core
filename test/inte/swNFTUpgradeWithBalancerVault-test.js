@@ -153,9 +153,9 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         .withArgs(bot.address);
       const address = await swNFT.botAddress();
       await expect(address).to.be.equal(bot.address);
-      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey2, 2))
+      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey2))
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
-        .withArgs(bot.address, pubKey2, true, 2);
+        .withArgs(bot.address, pubKey2, true);
 
       // Can stake when validator is activated
       await expect(
@@ -515,9 +515,9 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         .withArgs(bot.address);
       const address = await swNFT.botAddress();
       await expect(address).to.be.equal(bot.address);
-      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey, 2))
+      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
-        .withArgs(bot.address, pubKey, true, 2);
+        .withArgs(bot.address, pubKey, true);
 
       // Can stake when validator is activated
       await expect(

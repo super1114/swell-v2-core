@@ -250,6 +250,31 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogSetRate",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "swETHAddress",
         "type": "address"
       }
@@ -327,12 +352,6 @@
         "internalType": "bool",
         "name": "isActive",
         "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
       }
     ],
     "name": "LogUpdateIsValidatorActive",
@@ -1070,6 +1089,24 @@
   {
     "inputs": [
       {
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_swETHAddress",
         "type": "address"
@@ -1374,11 +1411,6 @@
         "internalType": "bytes",
         "name": "pubKey",
         "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
       }
     ],
     "name": "updateIsValidatorActive",
@@ -1397,6 +1429,19 @@
         "internalType": "uint256",
         "name": "rate",
         "type": "uint256"
+      }
+    ],
+    "name": "updateIsValidatorActiveAndSetRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "pubKeys",
+        "type": "bytes[]"
       }
     ],
     "name": "updateIsValidatorsActive",

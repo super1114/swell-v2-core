@@ -146,9 +146,9 @@ describe("SWNFTUpgrade", () => {
         .withArgs(bot.address);
       const address = await swNFT.botAddress();
       await expect(address).to.be.equal(bot.address);
-      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey2, 2))
+      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey2))
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
-        .withArgs(bot.address, pubKey2, true, 2);
+        .withArgs(bot.address, pubKey2, true);
 
       // Can stake when validator is activated
       await expect(
@@ -472,9 +472,9 @@ describe("SWNFTUpgrade", () => {
         .withArgs(bot.address);
       const address = await swNFT.botAddress();
       await expect(address).to.be.equal(bot.address);
-      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey, 2))
+      await expect(swNFT.connect(bot).updateIsValidatorActive(pubKey))
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
-        .withArgs(bot.address, pubKey, true, 2);
+        .withArgs(bot.address, pubKey, true);
 
       // Can stake when validator is activated
       await expect(
@@ -482,6 +482,17 @@ describe("SWNFTUpgrade", () => {
           value: amount
         })
       ).to.emit(swNFT, "LogStake");
+    });
+    it("Bot can set the validator rate", async function() {
+      await expect(swNFT.connect(user).updateIsValidatorActiveAndSetRate([pubKey], 2))
+        .to.be.revertedWith("sender is not the bot")
+  
+      await expect(swNFT.connect(bot).updateIsValidatorActiveAndSetRate([pubKey], 0))
+        .to.be.revertedWith("rate should be bigger than zero")
+  
+      await expect(swNFT.connect(bot).updateIsValidatorActiveAndSetRate([pubKey], 2))
+        .to.emit(swNFT, "LogUpdateIsValidatorActive")
+        .withArgs(bot.address, pubKey, true);
     });
   });
 });

@@ -71,6 +71,11 @@ contract SWNFTUpgrade is
 
     address[] public deprecatedStrategies; // deprecated
 
+    modifier onlyBot() {
+        require(msg.sender == botAddress, "sender is not the bot");
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -161,21 +166,37 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey, uint rate) public{
-        require(msg.sender == botAddress, "sender is not the bot");
-        require(rate > 0, "rate should be bigger than zero");
+    function updateIsValidatorActive(bytes calldata pubKey) onlyBot public {
         isValidatorActive[pubKey] = true;
-        opRate[pubKey] = rate;
-        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey], opRate[pubKey]);
+        emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }
 
     // @notice Update the validators active status
     /// @param pubKeys Array of public key of the validators
-    function updateIsValidatorsActive(bytes[] calldata pubKeys, uint rate) external{
+    function updateIsValidatorsActive(bytes[] calldata pubKeys) external{
         for(uint i = 0; i < pubKeys.length; i++){
-            updateIsValidatorActive(pubKeys[i], rate);
+            updateIsValidatorActive(pubKeys[i]);
         }
     }
+
+    // @notice Update validator rate
+    /// @param pubKey The public key of the validator
+    function setRate(bytes calldata pubKey, uint rate) onlyBot public {
+        require(rate > 0, "rate should be bigger than zero");
+        opRate[pubKey] = rate;
+        emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
+    }
+
+    // @notice Update the validators active status and set rate
+    /// @param pubKeys Array of public key of the validators
+    /// @param rate Validator rate
+    function updateIsValidatorActiveAndSetRate(bytes[] calldata pubKeys, uint rate) external{
+        for(uint i = 0; i < pubKeys.length; i++){
+            updateIsValidatorActive(pubKeys[i]);
+            setRate(pubKeys[i], rate);
+        }
+    }
+
 
     /// @notice Renonce ownership is not allowed
     function renounceOwnership() view public override onlyOwner {

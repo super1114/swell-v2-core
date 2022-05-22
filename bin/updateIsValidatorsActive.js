@@ -27,7 +27,9 @@ task("updateIsValidatorsActive", "Add validators to white list").addParam("rate"
     if (botAddress !== signer.address)
       throw new Error("botAddress is not signer.address");
 
-    const res = await swNFT.updateIsValidatorsActive(validators, taskArgs.rate);
+    let res;
+    if(taskArgs.rate>0) res = await swNFT.updateIsValidatorActiveAndSetRate(validators, taskArgs.rate);
+    else  res = await swNFT.updateIsValidatorsActive(validators);
     console.log(res);
   }
 );
