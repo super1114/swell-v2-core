@@ -190,7 +190,7 @@ contract SWNFTUpgrade is
     // @notice Update the validator active status and set rate
     /// @param pubKey Public key of the validator
     /// @param rate Validator rate
-    function updateIsValidatorActiveAndSetRate(bytes calldata pubKey, uint rate) external{
+    function updateIsValidatorActiveAndSetRate(bytes calldata pubKey, uint rate) onlyBot external {
         updateIsValidatorActive(pubKey);
         setRate(pubKey, rate);
     }
