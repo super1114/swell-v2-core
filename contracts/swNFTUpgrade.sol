@@ -65,6 +65,7 @@ contract SWNFTUpgrade is
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
     mapping(bytes => bool) public whiteList;
+    mapping(bytes => bool) public superWhiteList;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -371,13 +372,15 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
-        if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
-            require(amount == 16 ether, "Must send 16 ETH bond");
-            //TODO: Will add require for swDAO bond once there's price
-        }
-        if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
-            require(amount == 1 ether, "Must send 1 ETH bond"); 
-            //TODO: Will add require for swDAO bond once there's price 
+        if(!superWhiteList[pubKey]) {
+            if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
+                require(amount == 16 ether, "Must send 16 ETH bond");
+                //TODO: Will add require for swDAO bond once there's price
+            }
+            if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
+                require(amount == 1 ether, "Must send 1 ETH bond"); 
+                //TODO: Will add require for swDAO bond once there's price 
+            }
         }
         
         bool operator;
