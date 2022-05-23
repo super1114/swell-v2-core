@@ -187,16 +187,13 @@ contract SWNFTUpgrade is
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
     }
 
-    // @notice Update the validators active status and set rate
-    /// @param pubKeys Array of public key of the validators
+    // @notice Update the validator active status and set rate
+    /// @param pubKey Public key of the validator
     /// @param rate Validator rate
-    function updateIsValidatorActiveAndSetRate(bytes[] calldata pubKeys, uint rate) external{
-        for(uint i = 0; i < pubKeys.length; i++){
-            updateIsValidatorActive(pubKeys[i]);
-            setRate(pubKeys[i], rate);
-        }
+    function updateIsValidatorActiveAndSetRate(bytes calldata pubKey, uint rate) external{
+        updateIsValidatorActive(pubKey);
+        setRate(pubKey, rate);
     }
-
 
     /// @notice Renonce ownership is not allowed
     function renounceOwnership() view public override onlyOwner {

@@ -1421,9 +1421,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes[]",
-        "name": "pubKeys",
-        "type": "bytes[]"
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
