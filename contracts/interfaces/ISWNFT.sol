@@ -101,5 +101,11 @@ interface ISWNFT
     event LogSetFee(
         uint fee
     );
+
+    event LogSetRate(
+        address user,
+        bytes indexed pubKey,
+        uint rate
+    );
 }
 

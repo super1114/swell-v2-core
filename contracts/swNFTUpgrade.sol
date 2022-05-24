@@ -71,6 +71,11 @@ contract SWNFTUpgrade is
 
     address[] public deprecatedStrategies; // deprecated
 
+    modifier onlyBot() {
+        require(msg.sender == botAddress, "sender is not the bot");
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -161,8 +166,7 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) public{
-        require(msg.sender == botAddress, "sender is not the bot");
+    function updateIsValidatorActive(bytes calldata pubKey) onlyBot public {
         isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }
@@ -173,6 +177,22 @@ contract SWNFTUpgrade is
         for(uint i = 0; i < pubKeys.length; i++){
             updateIsValidatorActive(pubKeys[i]);
         }
+    }
+
+    // @notice Update validator rate
+    /// @param pubKey The public key of the validator
+    function setRate(bytes calldata pubKey, uint rate) onlyBot public {
+        require(rate > 0, "rate should be bigger than zero");
+        opRate[pubKey] = rate;
+        emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
+    }
+
+    // @notice Update the validator active status and set rate
+    /// @param pubKey Public key of the validator
+    /// @param rate Validator rate
+    function updateIsValidatorActiveAndSetRate(bytes calldata pubKey, uint rate) onlyBot external {
+        updateIsValidatorActive(pubKey);
+        setRate(pubKey, rate);
     }
 
     /// @notice Renonce ownership is not allowed
@@ -425,7 +445,7 @@ contract SWNFTUpgrade is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    mapping(address => uint) public opRate; // deprecated
+    mapping(bytes => uint) public opRate;
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;
