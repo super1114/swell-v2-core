@@ -250,6 +250,31 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogSetRate",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "swETHAddress",
         "type": "address"
       }
@@ -840,9 +865,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "bytes",
         "name": "",
-        "type": "address"
+        "type": "bytes"
       }
     ],
     "name": "opRate",
@@ -1057,6 +1082,24 @@
       }
     ],
     "name": "setFeePool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1371,6 +1414,24 @@
       }
     ],
     "name": "updateIsValidatorActive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateIsValidatorActiveAndSetRate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
