@@ -159,14 +159,14 @@ contract SWNFTUpgrade is
 
     /// @notice Add a new validator into superWhiteList
     /// @param pubKey The public key of the validator
-    function addSuperWhiteList(bytes calldata pubKey) onlyBot public{
+    function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
         superWhiteList[pubKey] = true;
         emit LogAddSuperWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into superWhiteList
     /// @param pubKeys Array of public keys of the validator
-    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyBot external{
+    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
         for(uint i = 0; i < pubKeys.length; i++){
             addSuperWhiteList(pubKeys[i]);
         }
