@@ -157,6 +157,21 @@ contract SWNFTUpgrade is
         }
     }
 
+    /// @notice Add a new validator into superWhiteList
+    /// @param pubKey The public key of the validator
+    function addSuperWhiteList(bytes calldata pubKey) onlyBot public{
+        superWhiteList[pubKey] = true;
+        emit LogAddSuperWhiteList(msg.sender, pubKey);
+    }
+
+    /// @notice Add validators into superWhiteList
+    /// @param pubKeys Array of public keys of the validator
+    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyBot external{
+        for(uint i = 0; i < pubKeys.length; i++){
+            addSuperWhiteList(pubKeys[i]);
+        }
+    }
+
     // @notice Update the cronjob bot address
     /// @param _address The address of the cronjob bot
     function updateBotAddress(address _address) onlyOwner external{

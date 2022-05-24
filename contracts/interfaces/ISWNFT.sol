@@ -80,6 +80,11 @@ interface ISWNFT
         bytes indexed pubKey
     );
 
+    event LogAddSuperWhiteList(
+        address user,
+        bytes indexed pubKey
+    );
+
     event LogUpdateBotAddress(
         address _address
     );
