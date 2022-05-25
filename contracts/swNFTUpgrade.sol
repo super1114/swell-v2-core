@@ -407,6 +407,7 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
+        bool operator;
         if(!superWhiteList[pubKey]) {
             if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
                 require(amount == 16 ether, "Must send 16 ETH bond");
@@ -416,13 +417,11 @@ contract SWNFTUpgrade is
                 require(amount == 1 ether, "Must send 1 ETH bond"); 
                 //TODO: Will add require for swDAO bond once there's price 
             }
-        }
-        
-        bool operator;
-        if(validatorDeposits[pubKey] == 0) {
-            operator = true;
-        } else {
-            require(isValidatorActive[pubKey], 'validator is not active');
+            if(validatorDeposits[pubKey] == 0) {
+                operator = true;
+            } else {
+                require(isValidatorActive[pubKey], 'validator is not active');
+            }
         }
         depositContract.deposit{value: amount}(
             pubKey,
