@@ -1168,7 +1168,7 @@
           {
             "contract": "SWNFTUpgrade",
             "label": "opRate",
-            "type": "t_mapping(t_address,t_uint256)",
+            "type": "t_mapping(t_bytes_memory_ptr,t_uint256)",
             "src": "contracts/swNFTUpgrade.sol:380"
           }
         ],

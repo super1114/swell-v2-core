@@ -1557,7 +1557,7 @@
             "label": "opRate",
             "offset": 0,
             "slot": "365",
-            "type": "t_mapping(t_address,t_uint256)",
+            "type": "t_mapping(t_bytes_memory_ptr,t_uint256)",
             "contract": "SWNFTUpgrade",
             "src": "contracts/swNFTUpgrade.sol:428"
           },
