@@ -38,7 +38,8 @@ interface ISWNFT
         uint256 indexed itemId,
         bytes indexed pubKey,
         uint deposit,
-        uint timeStamp
+        uint timeStamp,
+        string referral
     );
 
     event LogDeposit(
@@ -108,4 +109,3 @@ interface ISWNFT
         uint rate
     );
 }
-

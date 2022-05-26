@@ -32,3 +32,4 @@ coverage/
 coverage.json
 
 .vscode/
+.openzeppelin/unknown-31337.json
