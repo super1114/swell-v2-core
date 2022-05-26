@@ -19,6 +19,7 @@ const depositDataRoot2 =
 
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+const referralCode = "test-referral";
 let swNFT, swETH, signer, user, strategy;
 
 describe("SWNFTUpgrade", () => {
@@ -65,7 +66,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -78,7 +79,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -95,7 +96,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -143,7 +144,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -171,7 +172,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -210,7 +211,7 @@ describe("SWNFTUpgrade", () => {
               amount
             }
           ],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -457,7 +458,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -468,7 +469,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -481,7 +482,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
@@ -504,7 +505,7 @@ describe("SWNFTUpgrade", () => {
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
-          "test-referral",
+          referralCode,
           {
             value: amount
           }
