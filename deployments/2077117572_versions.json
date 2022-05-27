@@ -72,5 +72,20 @@
       "name": "unknown"
     },
     "date": "Thu, 19 May 2022 01:03:36 GMT"
+  },
+  "v1.8.0": {
+    "contracts": {
+      "depositContractAddress": "0x1CfaA309e849BDE2Ff1506236D3ebf47BBA9572a",
+      "swell": "0x4F6385f180ad473ab9c2127D4556587d2aFfAb4D",
+      "nftDescriptorLibrary": "0x0988DF9B2F00Da9B515Ab4E555e9686A907083A0",
+      "swNFT": "0x0Be0fE93885bDc2C8459f04EdC0Df2e285b8d6DB",
+      "swETH": "0x798632F9d8be6CBec6E2630b77342171BC90B5b8",
+      "strategy": "0xF81058685270A4380E948D8ea4802536c4eB1349"
+    },
+    "network": {
+      "chainId": 2077117572,
+      "name": "unknown"
+    },
+    "date": "Thu, 26 May 2022 20:40:04 GMT"
   }
 }
