@@ -17,6 +17,14 @@ const signature2 =
 const depositDataRoot2 =
   "0xc846f5e5ff1f6748a980747bc00bdfa75c2c2631201561fad976c2e167206e07";
 
+// 32 ETH
+const pubKey3 =
+  "0x84897074b3296baeec7571322cbac918aea4c918f38de95999e14b614d37c199e6358f2bc83de6c61947c5620a828798";
+const signature3 =
+  "0xacd6c072bb53342084500c9c21e34e4673a654b1626c9dedc093e323b9a0f11c3e2ece806ee2ff49f3c9ee0e487efe6d0903542ccae0a57c490b27d58be7114a6c61ecf0755067de3e3d79c3ef3c929ba78eaaa753c7c0010edb241a0c1f34ad";
+const depositDataRoot3 =
+  "0x25cf99b7c946e85710519de6f8df4b543a2d650852e3af93945af1dcf1ebff04";
+
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 let swNFT, swETH, signer, user, strategy;
@@ -493,6 +501,67 @@ describe("SWNFTUpgrade", () => {
       await expect(swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 2))
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
         .withArgs(bot.address, pubKey, true);
+    });
+  });
+  describe("Super Whitelisted Validator", () => {
+    before(async () => {
+      [signer, user, bot] = await ethers.getSigners();
+
+      const Swell = await ethers.getContractFactory("SWELL");
+      swell = await Swell.deploy();
+      await swell.deployed();
+
+      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
+      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
+        "NFTDescriptor"
+      );
+      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
+      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
+      });
+      swNFT = await upgrades.deployProxy(
+        SWNFTUpgrade,
+        [swell.address, depositAddress],
+        {
+          kind: "uups",
+          initializer: "initialize(address, address)",
+          unsafeAllowLinkedLibraries: true
+        }
+      );
+      await swNFT.deployed();
+
+      const SWETH = await ethers.getContractFactory("SWETH");
+      swETH = await SWETH.deploy(swNFT.address);
+      await swETH.deployed();
+      await swNFT.setswETHAddress(swETH.address);
+
+      const Strategy = await ethers.getContractFactory("Strategy");
+      strategy = await Strategy.deploy(swNFT.address);
+      await strategy.deployed();
+    });
+
+    it("Owner can add validator into superWhiteList", async () => {
+      await expect(swNFT.connect(user).addSuperWhiteList(pubKey3))
+        .to.be.revertedWith('Ownable: caller is not the owner');
+      await expect(await swNFT.addSuperWhiteList(pubKey3))
+        .to.emit(swNFT, "LogAddSuperWhiteList")
+        .withArgs(signer.address, pubKey3);
+    });
+
+    it("SuperWhitelisted Validator can stake 32 ETH", async function() {
+      amount = ethers.utils.parseEther("32");
+      await expect(
+        swNFT.stake([{ 
+          pubKey: pubKey3, 
+          signature: signature3, 
+          depositDataRoot: depositDataRoot3, 
+          amount 
+        }], {
+          value: amount
+        })
+      ).to.emit(swNFT, "LogStake");
     });
   });
 });
