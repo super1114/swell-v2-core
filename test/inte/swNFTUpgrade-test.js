@@ -548,6 +548,23 @@ describe("SWNFTUpgrade", () => {
       await expect(await swNFT.addSuperWhiteList(pubKey3))
         .to.emit(swNFT, "LogAddSuperWhiteList")
         .withArgs(signer.address, pubKey3);
+      await expect(await swNFT.addSuperWhiteList(pubKey))
+        .to.emit(swNFT, "LogAddSuperWhiteList")
+        .withArgs(signer.address, pubKey);
+    });
+
+    it("SuperWhitelisted Validator can stake 1 ETH on first deposit", async function() {
+      amount = ethers.utils.parseEther("1");
+      await expect(
+        swNFT.stake([{ 
+          pubKey, 
+          signature, 
+          depositDataRoot, 
+          amount 
+        }], {
+          value: amount
+        })
+      ).to.emit(swNFT, "LogStake");
     });
 
     it("SuperWhitelisted Validator can stake 32 ETH", async function() {
