@@ -36,20 +36,35 @@ describe("SWNFTUpgrade", () => {
         "NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
+      const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgradeOld", {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address
         }
       });
-      swNFT = await upgrades.deployProxy(
+      const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swell.address, depositAddress],
+        [swell.address],
         {
           kind: "uups",
-          initializer: "initialize(address, address)",
+          initializer: "initialize(address)",
           unsafeAllowLinkedLibraries: true
         }
       );
+      await oldswNFT.deployed();
+
+      const SWNFTUpgradeNew = await ethers.getContractFactory("SWNFTUpgrade", {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
+      });
+
+      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+        kind: "uups",
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        },
+        unsafeAllowLinkedLibraries: true
+      });
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
@@ -421,20 +436,36 @@ describe("SWNFTUpgrade", () => {
         "NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
+      const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgradeOld", {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address
         }
       });
-      swNFT = await upgrades.deployProxy(
+
+      const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swell.address, depositAddress],
+        [swell.address],
         {
           kind: "uups",
-          initializer: "initialize(address, address)",
+          initializer: "initialize(address)",
           unsafeAllowLinkedLibraries: true
         }
       );
+      await oldswNFT.deployed();
+
+      const SWNFTUpgradeNew = await ethers.getContractFactory("SWNFTUpgrade", {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
+      });
+
+      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+        kind: "uups",
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        },
+        unsafeAllowLinkedLibraries: true
+      });
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
@@ -513,13 +544,17 @@ describe("SWNFTUpgrade", () => {
       ).to.emit(swNFT, "LogStake");
     });
     it("Bot can set the validator rate", async function() {
-      await expect(swNFT.connect(user).updateIsValidatorActiveAndSetRate(pubKey, 2))
-        .to.be.revertedWith("sender is not the bot")
-  
-      await expect(swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 0))
-        .to.be.revertedWith("rate should be bigger than zero")
-  
-      await expect(swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 2))
+      await expect(
+        swNFT.connect(user).updateIsValidatorActiveAndSetRate(pubKey, 2)
+      ).to.be.revertedWith("sender is not the bot");
+
+      await expect(
+        swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 0)
+      ).to.be.revertedWith("rate should be bigger than zero");
+
+      await expect(
+        swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 2)
+      )
         .to.emit(swNFT, "LogUpdateIsValidatorActive")
         .withArgs(bot.address, pubKey, true);
     });
