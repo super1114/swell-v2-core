@@ -71,6 +71,11 @@ contract SWNFTUpgradeOld is
 
     address[] public deprecatedStrategies; // deprecated
 
+    modifier onlyBot() {
+        require(msg.sender == botAddress, "sender is not the bot");
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -161,8 +166,7 @@ contract SWNFTUpgradeOld is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) public{
-        require(msg.sender == botAddress, "sender is not the bot");
+    function updateIsValidatorActive(bytes calldata pubKey) onlyBot public {
         isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(msg.sender, pubKey, isValidatorActive[pubKey]);
     }
@@ -173,6 +177,22 @@ contract SWNFTUpgradeOld is
         for(uint i = 0; i < pubKeys.length; i++){
             updateIsValidatorActive(pubKeys[i]);
         }
+    }
+
+    // @notice Update validator rate
+    /// @param pubKey The public key of the validator
+    function setRate(bytes calldata pubKey, uint rate) onlyBot public {
+        require(rate > 0, "rate should be bigger than zero");
+        opRate[pubKey] = rate;
+        emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
+    }
+
+    // @notice Update the validator active status and set rate
+    /// @param pubKey Public key of the validator
+    /// @param rate Validator rate
+    function updateIsValidatorActiveAndSetRate(bytes calldata pubKey, uint rate) onlyBot external {
+        updateIsValidatorActive(pubKey);
+        setRate(pubKey, rate);
     }
 
     /// @notice Renonce ownership is not allowed
@@ -271,11 +291,11 @@ contract SWNFTUpgradeOld is
     /// @notice batch stake for multiple validators
     /// @param stakes The stakes to perform
     /// @return ids The token IDs that were minted
-    function stake(Stake[] calldata stakes) external payable returns (uint[] memory ids) {
+    function stake(Stake[] calldata stakes, string calldata referral) external payable returns (uint[] memory ids) {
         ids = new uint[](stakes.length);
         uint totalAmount = msg.value;
         for(uint i = 0; i < stakes.length; i++){
-            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount);
+            ids[i] = _stake(stakes[i].pubKey, stakes[i].signature, stakes[i].depositDataRoot, stakes[i].amount, referral);
             totalAmount -= stakes[i].amount;
         }
         payable(msg.sender).transfer(totalAmount); // refund the extra ETH
@@ -357,12 +377,14 @@ contract SWNFTUpgradeOld is
     /// @param signature The signature of the withdrawal
     /// @param depositDataRoot The root of the deposit data
     /// @param amount The amount of ETH to deposit
+    /// @param referral The referral code sent from the frontend
     /// @return newItemId The token ID of the new token
     function _stake(
         bytes calldata pubKey,
         bytes calldata signature,
         bytes32 depositDataRoot,
-        uint amount
+        uint amount,
+        string calldata referral
     ) private returns (uint256 newItemId) {
         require(amount <= msg.value, "cannot stake more than sent");
         require(amount >= 1 ether, "Must send at least 1 ETH");
@@ -408,7 +430,7 @@ contract SWNFTUpgradeOld is
             operator: operator
         });
 
-        emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp);
+        emit LogStake(msg.sender, newItemId, pubKey, amount, block.timestamp, referral);
 
         if(!operator) ISWETH(swETHAddress).mint(amount);
         _safeMint(msg.sender, newItemId);
@@ -425,7 +447,7 @@ contract SWNFTUpgradeOld is
     /// @param _newAddress The address of the new contract
     function _authorizeUpgrade(address _newAddress) internal view override onlyOwner {}
 
-    mapping(bytes => uint) public opRate; // deprecated
+    mapping(bytes => uint) public opRate;
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;

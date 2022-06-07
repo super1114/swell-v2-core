@@ -38,7 +38,8 @@ interface ISWNFT
         uint256 indexed itemId,
         bytes indexed pubKey,
         uint deposit,
-        uint timeStamp
+        uint timeStamp,
+        string referral
     );
 
     event LogDeposit(
@@ -101,5 +102,10 @@ interface ISWNFT
     event LogSetFee(
         uint fee
     );
-}
 
+    event LogSetRate(
+        address user,
+        bytes indexed pubKey,
+        uint rate
+    );
+}

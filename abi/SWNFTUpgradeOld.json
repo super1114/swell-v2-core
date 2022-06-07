@@ -250,6 +250,31 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogSetRate",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "swETHAddress",
         "type": "address"
       }
@@ -289,6 +314,12 @@
         "internalType": "uint256",
         "name": "timeStamp",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "referral",
+        "type": "string"
       }
     ],
     "name": "LogStake",
@@ -1064,6 +1095,24 @@
   {
     "inputs": [
       {
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_swETHAddress",
         "type": "address"
@@ -1102,6 +1151,11 @@
         "internalType": "struct ISWNFT.Stake[]",
         "name": "stakes",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "string",
+        "name": "referral",
+        "type": "string"
       }
     ],
     "name": "stake",
@@ -1371,6 +1425,24 @@
       }
     ],
     "name": "updateIsValidatorActive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateIsValidatorActiveAndSetRate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
