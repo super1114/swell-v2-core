@@ -36,7 +36,7 @@ interface IDepositContract {
 }
 
 /// @title Contract for SWNFTUpgrade
-contract SWNFTUpgradeOld is
+contract SWNFTUpgrade18 is
     ERC721EnumerableUpgradeable,
     UUPSUpgradeable,
     OwnableUpgradeable,
