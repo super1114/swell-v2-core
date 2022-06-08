@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import "../swNFTUpgrade.sol";
+import "./swNFTUpgrade18.sol";
 
-contract TestswNFTUpgrade is SWNFTUpgrade {
+contract TestswNFTUpgrade18 is SWNFTUpgrade18 {
     address public eth1WithdrawalAddress;
 
     function initialize(address _swellAddress, address _eth1WithdrawalAddress) external initializer {

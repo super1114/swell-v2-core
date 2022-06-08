@@ -39,12 +39,15 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         "NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
+      const SWNFTUpgrade = await ethers.getContractFactory(
+        "TestswNFTUpgrade18",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address
+          }
         }
-      });
-      swNFT = await upgrades.deployProxy(
+      );
+      const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
         [swell.address, depositAddress],
         {
@@ -53,6 +56,24 @@ describe("SWNFTUpgrade with BalancerVault", () => {
           unsafeAllowLinkedLibraries: true
         }
       );
+      await oldswNFT.deployed();
+
+      const SWNFTUpgradeNew = await ethers.getContractFactory(
+        "TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address
+          }
+        }
+      );
+
+      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+        kind: "uups",
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        },
+        unsafeAllowLinkedLibraries: true
+      });
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
@@ -461,12 +482,15 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         "NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
+      const SWNFTUpgrade = await ethers.getContractFactory(
+        "TestswNFTUpgrade18",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address
+          }
         }
-      });
-      swNFT = await upgrades.deployProxy(
+      );
+      const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
         [swell.address, depositAddress],
         {
@@ -475,6 +499,24 @@ describe("SWNFTUpgrade with BalancerVault", () => {
           unsafeAllowLinkedLibraries: true
         }
       );
+      await oldswNFT.deployed();
+
+      const SWNFTUpgradeNew = await ethers.getContractFactory(
+        "TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address
+          }
+        }
+      );
+
+      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+        kind: "uups",
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        },
+        unsafeAllowLinkedLibraries: true
+      });
       await swNFT.deployed();
 
       const SWETH = await ethers.getContractFactory("SWETH");
