@@ -49,6 +49,9 @@ describe("SWNFT", async () => {
     await oldswNFT.deployed();
     console.log("--> old nft deployed");
 
+    console.log({ currentBranch });
+    await getCurrentContractFactory(currentBranch);
+
     const SWNFTUpgradeNew = await ethers.getContractFactory(
       "TestswNFTUpgrade",
       {
@@ -57,9 +60,6 @@ describe("SWNFT", async () => {
         }
       }
     );
-
-    console.log({ currentBranch });
-    await getCurrentContractFactory(currentBranch);
 
     swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
       kind: "uups",
