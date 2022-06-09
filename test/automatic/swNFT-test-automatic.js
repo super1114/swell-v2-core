@@ -29,7 +29,7 @@ describe("SWNFT", async () => {
     await swell.deployed();
 
     console.log("swell deployed", swell.address);
-    await getLastContractFactory();
+    const currentBranch = await getLastContractFactory();
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -48,7 +48,6 @@ describe("SWNFT", async () => {
     });
     await oldswNFT.deployed();
     console.log("--> old nft deployed");
-    const currentBranch = await getLastContractFactory();
 
     const SWNFTUpgradeNew = await ethers.getContractFactory(
       "TestswNFTUpgrade",
