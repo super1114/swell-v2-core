@@ -6,7 +6,9 @@ const getLastContractFactory = async () => {
   try {
     await execProm("git pull --tags");
   } catch {}
-  const current = await execProm("git branch --show-current");
+  const currentResult = await execProm("git branch --show-current");
+  const current = currentResult.stdout.trim();
+  console.log({ current });
   const result = await execProm("git tag | sort -V | tail -1");
   const tag = result.stdout.trim();
   await execProm(
@@ -14,7 +16,7 @@ const getLastContractFactory = async () => {
   );
   await execProm(`npx hardhat compile`);
   console.log("--> old contract factory getting done");
-  return current.stdout.trim();
+  return current;
 };
 
 const getCurrentContractFactory = async branch => {
