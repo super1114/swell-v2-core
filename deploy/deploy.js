@@ -3,9 +3,9 @@ const { networkNames } = require("@openzeppelin/upgrades-core");
 const { getTag } = require("./helpers");
 const {
   deployDepositContract,
-  deploySWNFTUpgradeTestnet
+  deploySWNFTUpgradeTestnet,
 } = require("./deployTestnet");
-const goerliDepositContract = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC";
+const goerliDepositContract = "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b";
 const kilnDepositContract = "0x4242424242424242424242424242424242424242";
 let depositContractAddress, swNFT, nftDescriptorLibrary;
 const pubKey =
@@ -70,9 +70,8 @@ task("deploy", "Deploy the contracts")
 
       if (network.chainId === 2077117572) {
         depositContractAddress = await deployDepositContract();
-        versions[
-          newTag
-        ].contracts.depositContractAddress = depositContractAddress;
+        versions[newTag].contracts.depositContractAddress =
+          depositContractAddress;
       }
 
       const SWDAO = await ethers.getContractFactory("SWELL");
@@ -109,15 +108,15 @@ task("deploy", "Deploy the contracts")
 
           const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade", {
             libraries: {
-              NFTDescriptor: nftDescriptorLibrary.address
-            }
+              NFTDescriptor: nftDescriptorLibrary.address,
+            },
           });
           swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swDAO.address], {
             kind: "uups",
             libraries: {
-              NFTDescriptor: nftDescriptorLibrary.address
+              NFTDescriptor: nftDescriptorLibrary.address,
             },
-            unsafeAllowLinkedLibraries: true
+            unsafeAllowLinkedLibraries: true,
           });
       }
       await swNFT.deployed();
