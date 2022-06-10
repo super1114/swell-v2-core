@@ -2,8 +2,7 @@ const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { it } = require("mocha");
 const {
-  getLastContractFactory,
-  getCurrentContractFactory
+  getLastTagContractFactory
 } = require("../../deploy/swNFTContractFromLastTag");
 
 describe("SWNFT", async () => {
@@ -29,18 +28,22 @@ describe("SWNFT", async () => {
     await swell.deployed();
 
     console.log("swell deployed", swell.address);
-    const currentBranch = await getLastContractFactory();
+    await getLastTagContractFactory();
+    console.log("--> submodule added");
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
       "NFTDescriptor"
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-    const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
-      libraries: {
-        NFTDescriptor: nftDescriptorLibrary.address
+    const SWNFTUpgrade = await ethers.getContractFactory(
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
       }
-    });
+    );
     const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
       kind: "uups",
       initializer: "initialize(address)",
