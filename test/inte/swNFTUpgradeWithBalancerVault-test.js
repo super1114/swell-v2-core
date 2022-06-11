@@ -57,10 +57,10 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       );
       const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swell.address],
+        [swell.address, depositAddress],
         {
           kind: "uups",
-          initializer: "initialize(address)",
+          initializer: "initialize(address, address)",
           unsafeAllowLinkedLibraries: true
         }
       );
