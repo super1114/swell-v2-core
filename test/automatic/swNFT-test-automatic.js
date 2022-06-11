@@ -23,17 +23,16 @@ describe("SWNFT", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const Swell = await ethers.getContractFactory("SWELL");
+    const Swell = await ethers.getContractFactory("contracts/SWELL.sol:SWELL");
     swell = await Swell.deploy();
     await swell.deployed();
 
     console.log("swell deployed", swell.address);
     await getLastTagContractFactory();
-    console.log("--> submodule added");
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-      "NFTDescriptor"
+      "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
     const SWNFTUpgrade = await ethers.getContractFactory(
@@ -50,13 +49,9 @@ describe("SWNFT", async () => {
       unsafeAllowLinkedLibraries: true
     });
     await oldswNFT.deployed();
-    console.log("--> old nft deployed");
-
-    console.log({ currentBranch });
-    await getCurrentContractFactory(currentBranch);
 
     const SWNFTUpgradeNew = await ethers.getContractFactory(
-      "TestswNFTUpgrade",
+      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
       {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address
@@ -73,12 +68,14 @@ describe("SWNFT", async () => {
     });
     await swNFT.deployed();
 
-    const SWETH = await ethers.getContractFactory("SWETH");
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
     swETH = await SWETH.deploy(swNFT.address);
     await swETH.deployed();
     await swNFT.setswETHAddress(swETH.address);
 
-    const Strategy = await ethers.getContractFactory("Strategy");
+    const Strategy = await ethers.getContractFactory(
+      "contracts/Strategy.sol:Strategy"
+    );
     strategy = await Strategy.deploy(swNFT.address);
     await strategy.deployed();
   });
