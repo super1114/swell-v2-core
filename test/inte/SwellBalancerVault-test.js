@@ -40,14 +40,17 @@ describe("Swell Balancer Vault", function() {
     account4 = ted;
 
     // we get an instantiated contract in the form of a ethers.js Contract instance:
-    const SWETH = await ethers.getContractFactory("SWETH");
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
     swETH = await SWETH.deploy(deployer.address);
     await swETH.deployed();
 
     await swETH.connect(deployer).mint(ethers.utils.parseEther("100000000"));
 
     // get the test token and wrapped ether contracts
-    const wethToken = await ethers.getContractAt("IWETH", wethAddress);
+    const wethToken = await ethers.getContractAt(
+      "contracts/interfaces/IWETH.sol:IWETH",
+      wethAddress
+    );
 
     // deposit one thousand ether from the deployer account into the wrapped ether contract
     await wethToken
@@ -62,7 +65,7 @@ describe("Swell Balancer Vault", function() {
     );
 
     const SwellBalancerVault = await ethers.getContractFactory(
-      "SwellBalancerVault"
+      "contracts/SwellBalancerVault.sol:SwellBalancerVault"
     );
     swellBalancerVault = await SwellBalancerVault.deploy(
       swETH.address,
@@ -72,7 +75,10 @@ describe("Swell Balancer Vault", function() {
       VAULT,
       poolId
     );
-    balancerVault = await ethers.getContractAt("IVault", VAULT);
+    balancerVault = await ethers.getContractAt(
+      "contracts/interfaces/IVault.sol:IVault",
+      VAULT
+    );
 
     // transfer test tokens to the other addresses from the deployer account, deployer account will be initialised with one million test tokens, (will only have 999,990 after creating the balancer pool)
     await swETH

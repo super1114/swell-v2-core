@@ -1,6 +1,9 @@
 const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
+const {
+  getLastTagContractFactory
+} = require("../../deploy/swNFTContractFromLastTag");
 
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -32,14 +35,15 @@ describe("SWNFTUpgrade", () => {
       );
       swell = await Swell.deploy();
       await swell.deployed();
+      await getLastTagContractFactory();
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "NFTDescriptor"
+        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory(
-        "TestswNFTUpgrade18",
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -58,7 +62,7 @@ describe("SWNFTUpgrade", () => {
       await oldswNFT.deployed();
 
       const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "TestswNFTUpgrade",
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -75,12 +79,16 @@ describe("SWNFTUpgrade", () => {
       });
       await swNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory("SWETH");
+      const SWETH = await ethers.getContractFactory(
+        "contracts/swETH.sol:SWETH"
+      );
       swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
-      const Strategy = await ethers.getContractFactory("Strategy");
+      const Strategy = await ethers.getContractFactory(
+        "contracts/Strategy.sol:Strategy"
+      );
       strategy = await Strategy.deploy(swNFT.address);
       await strategy.deployed();
     });
@@ -435,17 +443,21 @@ describe("SWNFTUpgrade", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory("SWELL");
+      const Swell = await ethers.getContractFactory(
+        "contracts/SWELL.sol:SWELL"
+      );
       swell = await Swell.deploy();
       await swell.deployed();
 
+      await getLastTagContractFactory();
+
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "NFTDescriptor"
+        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory(
-        "TestswNFTUpgrade18",
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -464,7 +476,7 @@ describe("SWNFTUpgrade", () => {
       await oldswNFT.deployed();
 
       const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "TestswNFTUpgrade",
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -481,12 +493,16 @@ describe("SWNFTUpgrade", () => {
       });
       await swNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory("SWETH");
+      const SWETH = await ethers.getContractFactory(
+        "contracts/swETH.sol:SWETH"
+      );
       swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
-      const Strategy = await ethers.getContractFactory("Strategy");
+      const Strategy = await ethers.getContractFactory(
+        "contracts/Strategy.sol:Strategy"
+      );
       strategy = await Strategy.deploy(swNFT.address);
       await strategy.deployed();
     });

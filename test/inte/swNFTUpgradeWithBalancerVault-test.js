@@ -3,6 +3,9 @@ const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const { VAULT } = require("../../constants/addresses");
 const { createBalancerPool } = require("../helpers/createBalancerPool");
+const {
+  getLastTagContractFactory
+} = require("../../deploy/swNFTContractFromLastTag");
 
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -30,17 +33,22 @@ describe("SWNFTUpgrade with BalancerVault", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory("SWELL");
+      const Swell = await ethers.getContractFactory(
+        "contracts/SWELL.sol:SWELL"
+      );
       swell = await Swell.deploy();
       await swell.deployed();
 
+      console.log("swell deployed", swell.address);
+      await getLastTagContractFactory();
+
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "NFTDescriptor"
+        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory(
-        "TestswNFTUpgrade18",
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -49,17 +57,17 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       );
       const oldswNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
-        [swell.address, depositAddress],
+        [swell.address],
         {
           kind: "uups",
-          initializer: "initialize(address, address)",
+          initializer: "initialize(address)",
           unsafeAllowLinkedLibraries: true
         }
       );
       await oldswNFT.deployed();
 
       const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "TestswNFTUpgrade",
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -76,13 +84,18 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       });
       await swNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory("SWETH");
+      const SWETH = await ethers.getContractFactory(
+        "contracts/swETH.sol:SWETH"
+      );
       swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
       // get the test token and wrapped ether contracts
-      wethToken = await ethers.getContractAt("IWETH", wethAddress);
+      wethToken = await ethers.getContractAt(
+        "contracts/interfaces/IWETH.sol:IWETH",
+        wethAddress
+      );
       // deposit one thousand ether from the deployer account into the wrapped ether contract
       await wethToken
         .connect(signer)
@@ -243,7 +256,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
     it("create the strategy", async function() {
       const SwellBalancerVault = await ethers.getContractFactory(
-        "SwellBalancerVault"
+        "contracts/SwellBalancerVault.sol:SwellBalancerVault"
       );
       strategy = await SwellBalancerVault.deploy(
         swETH.address,
@@ -473,17 +486,20 @@ describe("SWNFTUpgrade with BalancerVault", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory("SWELL");
+      const Swell = await ethers.getContractFactory(
+        "contracts/SWELL.sol:SWELL"
+      );
       swell = await Swell.deploy();
       await swell.deployed();
+      await getLastTagContractFactory();
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "NFTDescriptor"
+        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
       );
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory(
-        "TestswNFTUpgrade18",
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -502,7 +518,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await oldswNFT.deployed();
 
       const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "TestswNFTUpgrade",
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
             NFTDescriptor: nftDescriptorLibrary.address
@@ -519,13 +535,18 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       });
       await swNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory("SWETH");
+      const SWETH = await ethers.getContractFactory(
+        "contracts/swETH.sol:SWETH"
+      );
       swETH = await SWETH.deploy(swNFT.address);
       await swETH.deployed();
       await swNFT.setswETHAddress(swETH.address);
 
       // get the test token and wrapped ether contracts
-      wethToken = await ethers.getContractAt("IWETH", wethAddress);
+      wethToken = await ethers.getContractAt(
+        "contracts/interfaces/IWETH.sol:IWETH",
+        wethAddress
+      );
       // deposit one thousand ether from the deployer account into the wrapped ether contract
       await wethToken
         .connect(signer)

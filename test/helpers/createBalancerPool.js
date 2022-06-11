@@ -45,7 +45,7 @@ const createBalancerPool = async (
 
   // get the weighted pool factory to be able to create the pool
   const factory = await ethers.getContractAt(
-    "IBalancerWeightedPoolFactory",
+    "contracts/interfaces/IBalancerWeightedPoolFactory.sol:IBalancerWeightedPoolFactory",
     WEIGHTED_POOL_FACTORY
   );
 
@@ -66,11 +66,17 @@ const createBalancerPool = async (
   const poolAddress = poolCreationEvents[0].args.pool;
 
   // get the pool contract instance and get the pool id for the newly created pool
-  const pool = await ethers.getContractAt("IWeightedPool", poolAddress);
+  const pool = await ethers.getContractAt(
+    "contracts/interfaces/IWeightedPool.sol:IWeightedPool",
+    poolAddress
+  );
   const poolId = await pool.getPoolId();
 
   // approve the vault (balancer's token vault) contract to transfer tokens for each of the tokens in the tokens array
-  const vault = await ethers.getContractAt("IVault", VAULT);
+  const vault = await ethers.getContractAt(
+    "contracts/interfaces/IVault.sol:IVault",
+    VAULT
+  );
   for (let i in tokens) {
     const tokenContract = await ethers.getContractAt(
       "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
