@@ -13,7 +13,7 @@ describe("NFTDescriptor", () => {
     // const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
 
     const NFTDescriptorFactory = await ethers.getContractFactory(
-      "NFTDescriptorTest",
+      "contracts/tests/NFTDescriptorTest.sol:NFTDescriptorTest",
       {
         //   libraries: {
         //     NFTDescriptor: nftDescriptorLibrary.address,

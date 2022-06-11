@@ -27,7 +27,9 @@ describe("SWNFTUpgrade", () => {
     before(async () => {
       [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory("SWELL");
+      const Swell = await ethers.getContractFactory(
+        "contracts/SWELL.sol:SWELL"
+      );
       swell = await Swell.deploy();
       await swell.deployed();
 
