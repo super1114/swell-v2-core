@@ -45,9 +45,8 @@ task("deploy", "Deploy the contracts")
 
     try {
       // Init tag
-      const path = `./deployments/${network.chainId}_versions${
-        isMain ? "-main" : ""
-      }.json`;
+      const path = `./deployments/${network.chainId}_versions${isMain ? "-main" : ""
+        }.json`;
       const versions = require("." + path);
 
       const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
@@ -77,8 +76,8 @@ task("deploy", "Deploy the contracts")
       const SWDAO = await ethers.getContractFactory("SWELL");
       const swDAO = await SWDAO.deploy();
       await swDAO.deployed();
-      console.log("swDAO:", swDAO.address);
-      versions[newTag].contracts.swDAO = swDAO.address;
+      console.log("SWELL:", swDAO.address);
+      versions[newTag].contracts.SWELL = swDAO.address;
 
       switch (network.chainId) {
         case 5:
