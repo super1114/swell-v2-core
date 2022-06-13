@@ -57,5 +57,20 @@
       "prettier --write test/**/*.js"
     ],
     "*.sol": "solhint --fix contracts/**/*.sol"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "prettier"
+    ],
+    "env": {
+      "commonjs": true,
+      "es6": true,
+      "node": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    }
   }
 }
