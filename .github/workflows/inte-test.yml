@@ -18,6 +18,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Set up node
         uses: actions/setup-node@v2
         with:
@@ -26,7 +28,7 @@ jobs:
         uses: actions/cache@v2
         id: node-cache
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: npm-v2-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-v2-
       - name: Install dependencies
@@ -47,7 +49,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           start: npx hardhat node --fork https://eth-mainnet.alchemyapi.io/v2/${{ env.ALCHEMY_API_KEY }}
-          wait-on: 'http://localhost:8545/'
+          wait-on: "http://localhost:8545/"
           command: npm run coverage:inte
         env:
           PORT: 8545
