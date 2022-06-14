@@ -8,7 +8,7 @@ const getLastTagContractFactory = async () => {
   console.log({ tag });
   await execProm("rm -rf contracts/latest-tag");
   await execProm(
-    "git clone git@github.com:SwellNetwork/v2-core.git contracts/latest"
+    "git clone https://github.com/SwellNetwork/v2-core.git contracts/latest"
   );
   await execProm(
     `cd contracts/latest && git checkout tags/${tag} -b automatic-latest-testing-${new Date().getTime()}`
