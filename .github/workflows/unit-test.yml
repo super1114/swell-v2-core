@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: "latest"
+          path: latest
         run: cd latest && git checkout tags/v1.8.0 -b automatic-latest-testing
       - name: Set up node
         uses: actions/setup-node@v2
