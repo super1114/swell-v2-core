@@ -18,8 +18,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository
         uses: actions/checkout@v2
+      - name: Check out repository for latest tag
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          path: latest
+      - name: Checkout to the latest tag
+        run: |
+          cd latest && git checkout tags/v1.8.0 -b automatic-latest-testing
       - name: Set up node
         uses: actions/setup-node@v2
         with:
