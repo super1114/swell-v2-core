@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
           path: "latest"
-        run: cd latest && git checkout tags/echo $(git tag | sort -V | tail -1) -b automatic-latest-testing
+        run: cd latest && git checkout tags/v1.8.0 -b automatic-latest-testing
       - name: Set up node
         uses: actions/setup-node@v2
         with:
