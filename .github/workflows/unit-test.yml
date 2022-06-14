@@ -25,7 +25,9 @@ jobs:
           path: latest
       - name: Checkout to the latest tag
         run: |
-          cd latest && git checkout tags/v1.8.0 -b automatic-latest-testing
+          cd latest
+          latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          git checkout $latestTag
       - name: Set up node
         uses: actions/setup-node@v2
         with:
