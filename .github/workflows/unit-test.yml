@@ -28,6 +28,9 @@ jobs:
           cd latest
           latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
           git checkout $latestTag
+          cd ..
+          mv latest/contracts contracts/latest-tag
+          rm -rf latest
       - name: Set up node
         uses: actions/setup-node@v2
         with:
