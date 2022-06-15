@@ -31,6 +31,9 @@ jobs:
           cd ..
           mv latest/contracts contracts/latest-tag
           rm -rf latest
+          ls -la
+          cd contracts/latest-tag
+          ls -la
       - name: Set up node
         uses: actions/setup-node@v2
         with:
