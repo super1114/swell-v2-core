@@ -12,9 +12,9 @@ const getLastTagContractFactory = async () => {
     await execProm(
       `cd latest && git checkout tags/${tag} -b automatic-latest-testing-${new Date().getTime()}`
     );
+    await execProm("mv latest/contracts contracts/latest-tag");
+    await execProm("rm -rf latest");
   }
-  await execProm("mv latest/contracts contracts/latest-tag");
-  await execProm("rm -rf latest");
   await execProm(`npx hardhat compile`);
   console.log("--> old contract factory getting done");
 };
