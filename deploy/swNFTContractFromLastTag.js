@@ -15,7 +15,7 @@ const getLastTagContractFactory = async () => {
     await execProm("mv latest/contracts contracts/latest-tag");
     await execProm("rm -rf latest");
   } else {
-    await execProm("cp latest/contracts contracts/latest-tag");
+    await execProm("cp -r latest/contracts contracts/latest-tag");
   }
   await execProm(`npx hardhat compile`);
   console.log("--> old contract factory getting done");
