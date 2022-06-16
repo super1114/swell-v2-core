@@ -355,9 +355,12 @@ describe("SWNFTUpgrade", () => {
           ethers.utils.parseEther("1")
         );
 
+      // await expect(
+      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+      // ).to.be.revertedWith("reverted with panic code 0x11");
       await expect(
         swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("reverted with panic code 0x11");
+      ).to.be.reverted;
     });
 
     it("can exit strategy", async function() {
