@@ -91,7 +91,7 @@ describe("NFTDescriptor", () => {
         quoteTokenSymbol,
         baseTokenDecimals,
         value,
-        pubKey
+        pubKey,
       });
       console.log("svg: ", svg);
       expect(isSvg(svg)).to.eq(true);

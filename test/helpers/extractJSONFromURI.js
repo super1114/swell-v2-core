@@ -5,5 +5,5 @@ function extractJSONFromURI(uri) {
 }
 
 module.exports = {
-  extractJSONFromURI
+  extractJSONFromURI,
 };

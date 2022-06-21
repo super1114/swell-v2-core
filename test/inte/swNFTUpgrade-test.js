@@ -46,8 +46,8 @@ describe("SWNFTUpgrade", () => {
         "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          }
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
         }
       );
       const oldswNFT = await upgrades.deployProxy(
@@ -56,7 +56,7 @@ describe("SWNFTUpgrade", () => {
         {
           kind: "uups",
           initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true
+          unsafeAllowLinkedLibraries: true,
         }
       );
       await oldswNFT.deployed();
@@ -65,17 +65,17 @@ describe("SWNFTUpgrade", () => {
         "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          }
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
         }
       );
 
       swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
         kind: "uups",
         libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
+          NFTDescriptor: nftDescriptorLibrary.address,
         },
-        unsafeAllowLinkedLibraries: true
+        unsafeAllowLinkedLibraries: true,
       });
       await swNFT.deployed();
 
@@ -92,27 +92,27 @@ describe("SWNFTUpgrade", () => {
       strategy = await Strategy.deploy(swNFT.address);
       await strategy.deployed();
     });
-    it("cannot stake less than 1 Ether", async function() {
+    it("cannot stake less than 1 Ether", async function () {
       amount = ethers.utils.parseEther("0.1");
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("Must send at least 1 ETH");
     });
 
-    it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function() {
+    it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("Must send 16 ETH bond");
@@ -124,12 +124,12 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
@@ -163,7 +163,7 @@ describe("SWNFTUpgrade", () => {
       await expect(position.operator).to.be.equal(true);
     });
 
-    it("Validator should be activated for second deposit", async function() {
+    it("Validator should be activated for second deposit", async function () {
       amount = ethers.utils.parseEther("16");
       await expect(
         swNFT.stake(
@@ -172,12 +172,12 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("validator is not active");
@@ -200,12 +200,12 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
@@ -230,7 +230,7 @@ describe("SWNFTUpgrade", () => {
       await expect(tvl).to.be.equal("32000000000000000000");
     });
 
-    it("cannot stake more than 32 Ether", async function() {
+    it("cannot stake more than 32 Ether", async function () {
       amount = ethers.utils.parseEther("32");
       await expect(
         swNFT.stake(
@@ -239,18 +239,18 @@ describe("SWNFTUpgrade", () => {
               pubKey: pubKey2,
               signature: signature2,
               depositDataRoot: depositDataRoot2,
-              amount
-            }
+              amount,
+            },
           ],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("cannot stake more than 32 ETH");
     });
 
-    it("cannot withdraw 2 swETH", async function() {
+    it("cannot withdraw 2 swETH", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("2"))
       ).to.be.revertedWith("cannot withdraw more than the position balance");
@@ -260,7 +260,7 @@ describe("SWNFTUpgrade", () => {
       ).to.be.revertedWith("Only owner can withdraw");
     });
 
-    it("can not withdraw with no balance", async function() {
+    it("can not withdraw with no balance", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("1"))
       ).to.be.revertedWith("cannot withdraw more than the position balance");
@@ -271,7 +271,7 @@ describe("SWNFTUpgrade", () => {
       await expect(position.baseTokenBalance).to.be.equal("0");
     });
 
-    it("can withdraw 1 swETH", async function() {
+    it("can withdraw 1 swETH", async function () {
       await expect(
         swNFT.connect(user).withdraw("2", ethers.utils.parseEther("1"))
       ).to.emit(swNFT, "LogWithdraw");
@@ -284,14 +284,14 @@ describe("SWNFTUpgrade", () => {
       );
     });
 
-    it("cannot deposit if not owner", async function() {
+    it("cannot deposit if not owner", async function () {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
       ).to.be.revertedWith("Only owner can deposit");
     });
 
-    it("can deposit 1 swETH", async function() {
+    it("can deposit 1 swETH", async function () {
       await swETH
         .connect(user)
         .approve(swNFT.address, ethers.utils.parseEther("1"));
@@ -309,7 +309,7 @@ describe("SWNFTUpgrade", () => {
       );
     });
 
-    it("can add strategy", async function() {
+    it("can add strategy", async function () {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
         "address cannot be 0"
       );
@@ -331,7 +331,7 @@ describe("SWNFTUpgrade", () => {
       await expect(strategyAddress).to.be.equal(strategy.address);
     });
 
-    it("can enter strategy", async function() {
+    it("can enter strategy", async function () {
       await expect(
         swNFT
           .connect(user)
@@ -363,7 +363,7 @@ describe("SWNFTUpgrade", () => {
       ).to.be.reverted;
     });
 
-    it("can exit strategy", async function() {
+    it("can exit strategy", async function () {
       await expect(
         swNFT.exitStrategy("2", strategy.address, ethers.utils.parseEther("1"))
       ).to.be.revertedWith("Only owner can exit strategy");
@@ -386,27 +386,27 @@ describe("SWNFTUpgrade", () => {
       ).to.be.revertedWith("Not enough position to exit");
     });
 
-    it("can batch actions", async function() {
+    it("can batch actions", async function () {
       await expect(
         await swNFT.connect(user).batchAction([
           {
             tokenId: "2",
             action: "2",
             amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address
+            strategy: strategy.address,
           },
           {
             tokenId: "2",
             action: "3",
             amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address
+            strategy: strategy.address,
           },
           {
             tokenId: "2",
             action: "1",
             amount: ethers.utils.parseEther("1"),
-            strategy: depositAddress
-          }
+            strategy: depositAddress,
+          },
         ])
       )
         .to.emit(swNFT, "LogEnterStrategy")
@@ -427,7 +427,7 @@ describe("SWNFTUpgrade", () => {
         .withArgs("2", user.address, ethers.utils.parseEther("1"));
     });
 
-    it("can remove strategy", async function() {
+    it("can remove strategy", async function () {
       await expect(
         swNFT.connect(user).removeStrategy(strategy.address)
       ).to.be.revertedWith("Ownable: caller is not the owner");
@@ -463,8 +463,8 @@ describe("SWNFTUpgrade", () => {
         "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          }
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
         }
       );
       const oldswNFT = await upgrades.deployProxy(
@@ -473,7 +473,7 @@ describe("SWNFTUpgrade", () => {
         {
           kind: "uups",
           initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true
+          unsafeAllowLinkedLibraries: true,
         }
       );
       await oldswNFT.deployed();
@@ -482,17 +482,17 @@ describe("SWNFTUpgrade", () => {
         "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
         {
           libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address
-          }
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
         }
       );
 
       swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
         kind: "uups",
         libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
+          NFTDescriptor: nftDescriptorLibrary.address,
         },
-        unsafeAllowLinkedLibraries: true
+        unsafeAllowLinkedLibraries: true,
       });
       await swNFT.deployed();
 
@@ -516,14 +516,14 @@ describe("SWNFTUpgrade", () => {
         .withArgs(signer.address, pubKey);
     });
 
-    it("Must send 1 ETH bond as first deposit (Operator)", async function() {
+    it("Must send 1 ETH bond as first deposit (Operator)", async function () {
       amount = ethers.utils.parseEther("2");
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("Must send 1 ETH bond");
@@ -534,20 +534,20 @@ describe("SWNFTUpgrade", () => {
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
     });
 
-    it("Validator should be activated for second deposit", async function() {
+    it("Validator should be activated for second deposit", async function () {
       amount = ethers.utils.parseEther("1");
       await expect(
         swNFT.stake(
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.be.revertedWith("validator is not active");
@@ -570,12 +570,12 @@ describe("SWNFTUpgrade", () => {
           [{ pubKey, signature, depositDataRoot, amount }],
           referralCode,
           {
-            value: amount
+            value: amount,
           }
         )
       ).to.emit(swNFT, "LogStake");
     });
-    it("Bot can set the validator rate", async function() {
+    it("Bot can set the validator rate", async function () {
       await expect(
         swNFT.connect(user).updateIsValidatorActiveAndSetRate(pubKey, 2)
       ).to.be.revertedWith("sender is not the bot");

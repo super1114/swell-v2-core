@@ -53,7 +53,7 @@ const DEFAULT_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 200,
+      runs: 150,
       details: {
         yul: false
       }

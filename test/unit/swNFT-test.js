@@ -46,7 +46,7 @@ describe("SWNFT", async () => {
     const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
       kind: "uups",
       initializer: "initialize(address)",
-      unsafeAllowLinkedLibraries: true
+      unsafeAllowLinkedLibraries: true,
     });
     await oldswNFT.deployed();
 
@@ -62,9 +62,9 @@ describe("SWNFT", async () => {
     swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
       kind: "uups",
       libraries: {
-        NFTDescriptor: nftDescriptorLibrary.address
+        NFTDescriptor: nftDescriptorLibrary.address,
       },
-      unsafeAllowLinkedLibraries: true
+      unsafeAllowLinkedLibraries: true,
     });
     await swNFT.deployed();
 
@@ -80,20 +80,20 @@ describe("SWNFT", async () => {
     await strategy.deployed();
   });
 
-  it("cannot stake 1 ETH when validator is not active", async function() {
+  it("cannot stake 1 ETH when validator is not active", async function () {
     amount = ethers.utils.parseEther("1");
     await expect(
       swNFT.stake(
         [{ pubKey, signature, depositDataRoot, amount }],
         "test-referral",
         {
-          value: amount
+          value: amount,
         }
       )
     ).to.be.revertedWith("Must send 16 ETH bond");
   });
 
-  it("owner sets the bot address", async function() {
+  it("owner sets the bot address", async function () {
     const owner = await swNFT.owner();
     await expect(owner).to.be.equal(signer.address);
 
@@ -102,7 +102,7 @@ describe("SWNFT", async () => {
       .withArgs(bot.address);
   });
 
-  it("owner sets fee pool address", async function() {
+  it("owner sets fee pool address", async function () {
     const owner = await swNFT.owner();
     await expect(owner).to.be.equal(signer.address);
 
@@ -111,7 +111,7 @@ describe("SWNFT", async () => {
       .withArgs(bot.address);
   });
 
-  it("owner sets fee", async function() {
+  it("owner sets fee", async function () {
     const owner = await swNFT.owner();
     await expect(owner).to.be.equal(signer.address);
 
@@ -120,7 +120,7 @@ describe("SWNFT", async () => {
       .withArgs((5e17).toString());
   });
 
-  it("bot sets the validator to active", async function() {
+  it("bot sets the validator to active", async function () {
     const address = await swNFT.botAddress();
     await expect(address).to.be.equal(bot.address);
 
@@ -129,7 +129,7 @@ describe("SWNFT", async () => {
       .withArgs(bot.address, pubKey, true);
   });
 
-  it("bot sets validators to active", async function() {
+  it("bot sets validators to active", async function () {
     const address = await swNFT.botAddress();
     await expect(address).to.be.equal(bot.address);
 
@@ -138,7 +138,7 @@ describe("SWNFT", async () => {
       .withArgs(bot.address, pubKey1, true);
   });
 
-  it("can add validator into white list", async function() {
+  it("can add validator into white list", async function () {
     await expect(swNFT.addWhiteList(pubKey1)).to.emit(
       swNFT,
       "LogAddWhiteList",
@@ -147,7 +147,7 @@ describe("SWNFT", async () => {
     );
   });
 
-  it("can add validator into white lists", async function() {
+  it("can add validator into white lists", async function () {
     await expect(swNFT.addWhiteLists([pubKey1])).to.emit(
       swNFT,
       "LogAddWhiteList",

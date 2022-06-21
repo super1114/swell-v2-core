@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 const {
   WEIGHTED_POOL_FACTORY,
   ZERO_ADDRESS,
-  VAULT
+  VAULT,
 } = require("../../constants/addresses");
 
 /**
@@ -40,7 +40,7 @@ const createBalancerPool = async (
   const swapFeePercentage = ethers.utils.parseEther("0.005"); // 0.5%
   const weights = [
     ethers.utils.parseEther("0.5"),
-    ethers.utils.parseEther("0.5")
+    ethers.utils.parseEther("0.5"),
   ]; // total weights must add up to one, weight array positions corresponds to the positions of the tokens in the tokens array
 
   // get the weighted pool factory to be able to create the pool
@@ -61,7 +61,7 @@ const createBalancerPool = async (
 
   // get the new pool address out of the PoolCreated event
   const poolCreationEvents = poolCreationReceipt.events.filter(
-    e => e.event === "PoolCreated"
+    (e) => e.event === "PoolCreated"
   );
   const poolAddress = poolCreationEvents[0].args.pool;
 
@@ -89,7 +89,7 @@ const createBalancerPool = async (
   // initial token balances, needs to be in the same order as the tokens in the tokens array
   const initialBalances = [
     ethers.utils.parseEther("10"),
-    ethers.utils.parseEther("10")
+    ethers.utils.parseEther("10"),
   ];
 
   // construct user data and join request object
@@ -103,7 +103,7 @@ const createBalancerPool = async (
     assets: tokens,
     maxAmountsIn: initialBalances,
     userData: initUserData,
-    fromInternalBalance: false
+    fromInternalBalance: false,
   };
 
   // join the pool in the vault contract
@@ -119,5 +119,5 @@ const createBalancerPool = async (
 };
 
 module.exports = {
-  createBalancerPool
+  createBalancerPool,
 };

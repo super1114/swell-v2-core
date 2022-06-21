@@ -14,5 +14,5 @@ const chainDeposit = async (balancerVault, deposits, amount, signer) => {
 };
 
 module.exports = {
-  chainDeposit
+  chainDeposit,
 };
