@@ -12,7 +12,7 @@ const getLastTagContractFactory = async () => {
     await execProm(
       `cd latest && git checkout tags/${tag} -b automatic-latest-testing-${new Date().getTime()}`
     );
-    await execProm("mv latest/contracts contracts/latest-tag");
+    await execProm("cp -r latest/contracts contracts/latest-tag");
     await execProm("rm -rf latest");
   } else {
     await execProm("cp -r latest/contracts contracts/latest-tag");
