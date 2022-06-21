@@ -21,5 +21,5 @@ const getTestTokenBalanceFromBalancerPool = async (
 };
 
 module.exports = {
-  getTestTokenBalanceFromBalancerPool
+  getTestTokenBalanceFromBalancerPool,
 };

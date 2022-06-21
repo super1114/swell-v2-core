@@ -4,7 +4,7 @@ const { chainDeposit } = require("../helpers/chainDeposit");
 const { createBalancerPool } = require("../helpers/createBalancerPool");
 const { VAULT } = require("../../constants/addresses");
 const {
-  getTestTokenBalanceFromBalancerPool
+  getTestTokenBalanceFromBalancerPool,
 } = require("../helpers/getTestTokenBalanceFromBalancerPool");
 
 const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -12,7 +12,7 @@ const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 /*///////////////////////////////////////////////////////////////
                     BALANCER VAULT TEST SUITE
     //////////////////////////////////////////////////////////////*/
-describe("Swell Balancer Vault", function() {
+describe("Swell Balancer Vault", function () {
   let swellBalancerVault,
     swETH,
     balancerVault,
@@ -32,7 +32,7 @@ describe("Swell Balancer Vault", function() {
    * - transfer 100,000 test tokens each of the test accounts using the deployer account
    * - approve the swell balancer vault contract to transfer tokens in the test token contract for all the test accounts
    */
-  before(async function() {
+  before(async function () {
     const [deployer, alice, bob, carol, ted] = await ethers.getSigners();
     account1 = alice;
     account2 = bob;
