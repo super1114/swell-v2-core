@@ -14,9 +14,10 @@ const getLastTagContractFactory = async (recompile = true) => {
     );
     await execProm("cp -r latest/contracts contracts/latest-tag");
     await execProm("rm -rf latest");
-  } else {
-    await execProm("cp -r latest/contracts contracts/latest-tag");
   }
+  // else {
+  //   await execProm("cp -r latest/contracts contracts/latest-tag");
+  // }
 
   if (recompile) {
     await execProm(`npx hardhat compile`);
