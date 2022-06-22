@@ -4,7 +4,7 @@ const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const { VAULT } = require("../../constants/addresses");
 const { createBalancerPool } = require("../helpers/createBalancerPool");
 const {
-  getLastTagContractFactory
+  getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
 
 const pubKey =
@@ -26,7 +26,17 @@ const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const referralCode = "test-referral";
-let swNFT, swETH, wethToken, signer, user, strategy;
+let swell,
+  swNFT,
+  swETH,
+  wethToken,
+  signer,
+  bot,
+  amount,
+  user,
+  poolId,
+  strategy,
+  recompile = true;
 
 describe("SWNFTUpgrade with BalancerVault", () => {
   describe("If not operator", () => {
@@ -40,7 +50,8 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await swell.deployed();
 
       console.log("swell deployed", swell.address);
-      await getLastTagContractFactory();
+      await getLastTagContractFactory(recompile);
+      recompile = false;
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -494,7 +505,8 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       );
       swell = await Swell.deploy();
       await swell.deployed();
-      await getLastTagContractFactory();
+      await getLastTagContractFactory(recompile);
+      recompile = false;
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(

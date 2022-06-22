@@ -2,7 +2,7 @@ const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
-  getLastTagContractFactory
+  getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
 
 const pubKey =
@@ -23,7 +23,15 @@ const depositDataRoot2 =
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const referralCode = "test-referral";
-let swNFT, swETH, signer, user, strategy;
+let swell,
+  swNFT,
+  swETH,
+  signer,
+  bot,
+  amount,
+  user,
+  strategy,
+  recompile = true;
 
 describe("SWNFTUpgrade", () => {
   describe("Non-Whitelisted Validator", () => {
@@ -35,7 +43,8 @@ describe("SWNFTUpgrade", () => {
       );
       swell = await Swell.deploy();
       await swell.deployed();
-      await getLastTagContractFactory();
+      await getLastTagContractFactory(recompile);
+      recompile = false;
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
@@ -452,7 +461,8 @@ describe("SWNFTUpgrade", () => {
       swell = await Swell.deploy();
       await swell.deployed();
 
-      await getLastTagContractFactory();
+      await getLastTagContractFactory(recompile);
+      recompile = false;
 
       // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
       const nftDescriptorLibraryFactory = await ethers.getContractFactory(
