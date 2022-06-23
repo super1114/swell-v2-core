@@ -556,7 +556,7 @@ describe("SWNFTUpgrade", () => {
     it("SuperWhitelisted Validator can stake 1 ETH on first deposit", async function() {
       amount = ethers.utils.parseEther("1");
       await expect(
-        swNFT.stake([{ 
+        swNFT.connect(user).stake([{ 
           pubKey, 
           signature, 
           depositDataRoot, 
