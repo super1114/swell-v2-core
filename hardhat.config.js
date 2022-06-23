@@ -104,7 +104,8 @@ module.exports = {
     clear: true,
     flat: true,
     runOnCompile: true,
-    only: ["SWETH", "SWNFTUpgrade", "SWELL", "Strategy", "SWNFTUpgradeTestnet"]
+    only: ["SWETH", "SWNFTUpgrade", "SWELL", "Strategy", "SWNFTUpgradeTestnet"],
+    except: ["contracts/latest-tag"]
   },
   gasReporter: {
     showTimeSpent: true,
@@ -114,5 +115,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY
+  },
+  mocha: {
+    timeout: 100000000
   }
 };

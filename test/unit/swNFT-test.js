@@ -1,6 +1,9 @@
 const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { it } = require("mocha");
+const {
+  getLastTagContractFactory
+} = require("../../deploy/swNFTContractFromLastTag");
 
 describe("SWNFT", async () => {
   // 1 ETH
@@ -20,20 +23,26 @@ describe("SWNFT", async () => {
   before(async () => {
     [signer, user, bot] = await ethers.getSigners();
 
-    const Swell = await ethers.getContractFactory("SWELL");
+    const Swell = await ethers.getContractFactory("contracts/SWELL.sol:SWELL");
     swell = await Swell.deploy();
     await swell.deployed();
 
+    console.log("swell deployed", swell.address);
+    await getLastTagContractFactory();
+
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-      "NFTDescriptor"
+      "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-    const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade18", {
-      libraries: {
-        NFTDescriptor: nftDescriptorLibrary.address,
-      },
-    });
+    const SWNFTUpgrade = await ethers.getContractFactory(
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
+      }
+    );
     const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
       kind: "uups",
       initializer: "initialize(address)",
@@ -41,11 +50,14 @@ describe("SWNFT", async () => {
     });
     await oldswNFT.deployed();
 
-    const SWNFTUpgradeNew = await ethers.getContractFactory("SWNFTUpgrade", {
-      libraries: {
-        NFTDescriptor: nftDescriptorLibrary.address,
-      },
-    });
+    const SWNFTUpgradeNew = await ethers.getContractFactory(
+      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address
+        }
+      }
+    );
 
     swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
       kind: "uups",
@@ -56,12 +68,14 @@ describe("SWNFT", async () => {
     });
     await swNFT.deployed();
 
-    const SWETH = await ethers.getContractFactory("SWETH");
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
     swETH = await SWETH.deploy(swNFT.address);
     await swETH.deployed();
     await swNFT.setswETHAddress(swETH.address);
 
-    const Strategy = await ethers.getContractFactory("Strategy");
+    const Strategy = await ethers.getContractFactory(
+      "contracts/Strategy.sol:Strategy"
+    );
     strategy = await Strategy.deploy(swNFT.address);
     await strategy.deployed();
   });

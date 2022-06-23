@@ -5,7 +5,9 @@ describe("Dispatch Test ETH", () => {
   let signer, user1, MultiSender, multisender;
   before(async () => {
     [signer, user1] = await ethers.getSigners();
-    MultiSender = await ethers.getContractFactory("MultiSender");
+    MultiSender = await ethers.getContractFactory(
+      "contracts/utils/MultiSender.sol:MultiSender"
+    );
     multisender = await MultiSender.deploy();
     await multisender.deployed();
   });

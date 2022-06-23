@@ -33,3 +33,5 @@ coverage.json
 
 .vscode/
 .openzeppelin/unknown-31337.json
+contracts/latest
+contracts/latest-tag
