@@ -18,14 +18,7 @@ describe("SWNFT", async () => {
   const depositDataRoot =
     "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
   // const zeroAddress = "0x0000000000000000000000000000000000000000";
-  let swNFT,
-    swETH,
-    signer,
-    bot,
-    amount,
-    strategy,
-    swell,
-    recompile = true;
+  let swNFT, swETH, signer, bot, amount, strategy, swell;
 
   before(async () => {
     [signer, , bot] = await ethers.getSigners();
@@ -35,8 +28,7 @@ describe("SWNFT", async () => {
     await swell.deployed();
 
     console.log("swell deployed", swell.address);
-    await getLastTagContractFactory(recompile);
-    recompile = false;
+    await getLastTagContractFactory();
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(

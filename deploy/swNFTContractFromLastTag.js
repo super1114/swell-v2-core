@@ -3,7 +3,7 @@ const { getTag } = require("./helpers");
 const { exec } = require("child_process");
 const execProm = util.promisify(exec);
 
-const getLastTagContractFactory = async (recompile = true) => {
+const getLastTagContractFactory = async () => {
   const tag = await getTag();
 
   if (process.env.SKIP_GIT_CLONE === "false") {
@@ -16,9 +16,7 @@ const getLastTagContractFactory = async (recompile = true) => {
     await execProm("rm -rf latest");
   }
 
-  if (recompile) {
-    await execProm(`npx hardhat compile`);
-  }
+  await execProm(`npx hardhat compile`);
 };
 
 module.exports = {

@@ -26,93 +26,78 @@ const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const referralCode = "test-referral";
-let swell,
-  swNFT,
-  swETH,
-  wethToken,
-  signer,
-  bot,
-  amount,
-  user,
-  poolId,
-  strategy,
-  recompile = true;
+let swell, swNFT, swETH, wethToken, signer, bot, amount, user, poolId, strategy;
 
 describe("SWNFTUpgrade with BalancerVault", () => {
-  describe("If not operator", () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
+  before(async () => {
+    [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory(
-        "contracts/SWELL.sol:SWELL"
-      );
-      swell = await Swell.deploy();
-      await swell.deployed();
+    const Swell = await ethers.getContractFactory("contracts/SWELL.sol:SWELL");
+    swell = await Swell.deploy();
+    await swell.deployed();
 
-      console.log("swell deployed", swell.address);
-      await getLastTagContractFactory(recompile);
-      recompile = false;
+    console.log("swell deployed", swell.address);
+    await getLastTagContractFactory();
 
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory(
-        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-      const oldswNFT = await upgrades.deployProxy(
-        SWNFTUpgrade,
-        [swell.address, depositAddress],
-        {
-          kind: "uups",
-          initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true,
-        }
-      );
-      await oldswNFT.deployed();
-
-      const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-
-      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
-        kind: "uups",
+    // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
+    const nftDescriptorLibraryFactory = await ethers.getContractFactory(
+      "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
+    );
+    const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
+    const SWNFTUpgrade = await ethers.getContractFactory(
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address,
         },
+      }
+    );
+    const oldswNFT = await upgrades.deployProxy(
+      SWNFTUpgrade,
+      [swell.address, depositAddress],
+      {
+        kind: "uups",
+        initializer: "initialize(address, address)",
         unsafeAllowLinkedLibraries: true,
-      });
-      await swNFT.deployed();
+      }
+    );
+    await oldswNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory(
-        "contracts/swETH.sol:SWETH"
-      );
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
+    const SWNFTUpgradeNew = await ethers.getContractFactory(
+      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address,
+        },
+      }
+    );
 
-      // get the test token and wrapped ether contracts
-      wethToken = await ethers.getContractAt(
-        "contracts/interfaces/IWETH.sol:IWETH",
-        wethAddress
-      );
-      // deposit one thousand ether from the deployer account into the wrapped ether contract
-      await wethToken
-        .connect(signer)
-        .deposit({ value: ethers.utils.parseEther("1000") });
+    swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+      kind: "uups",
+      libraries: {
+        NFTDescriptor: nftDescriptorLibrary.address,
+      },
+      unsafeAllowLinkedLibraries: true,
     });
+    await swNFT.deployed();
 
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
+    swETH = await SWETH.deploy(swNFT.address);
+    await swETH.deployed();
+    await swNFT.setswETHAddress(swETH.address);
+
+    // get the test token and wrapped ether contracts
+    wethToken = await ethers.getContractAt(
+      "contracts/interfaces/IWETH.sol:IWETH",
+      wethAddress
+    );
+    // deposit one thousand ether from the deployer account into the wrapped ether contract
+    await wethToken
+      .connect(signer)
+      .deposit({ value: ethers.utils.parseEther("1000") });
+  });
+
+  describe("If not operator", () => {
     it("cannot stake less than 1 Ether", async function () {
       amount = ethers.utils.parseEther("0.1");
       await expect(
@@ -497,77 +482,6 @@ describe("SWNFTUpgrade with BalancerVault", () => {
   });
 
   describe("If operator", async () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
-
-      const Swell = await ethers.getContractFactory(
-        "contracts/SWELL.sol:SWELL"
-      );
-      swell = await Swell.deploy();
-      await swell.deployed();
-      await getLastTagContractFactory(recompile);
-      recompile = false;
-
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory(
-        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-      const oldswNFT = await upgrades.deployProxy(
-        SWNFTUpgrade,
-        [swell.address, depositAddress],
-        {
-          kind: "uups",
-          initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true,
-        }
-      );
-      await oldswNFT.deployed();
-
-      const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-
-      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
-        kind: "uups",
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
-        unsafeAllowLinkedLibraries: true,
-      });
-      await swNFT.deployed();
-
-      const SWETH = await ethers.getContractFactory(
-        "contracts/swETH.sol:SWETH"
-      );
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
-
-      // get the test token and wrapped ether contracts
-      wethToken = await ethers.getContractAt(
-        "contracts/interfaces/IWETH.sol:IWETH",
-        wethAddress
-      );
-      // deposit one thousand ether from the deployer account into the wrapped ether contract
-      await wethToken
-        .connect(signer)
-        .deposit({ value: ethers.utils.parseEther("1000") });
-    });
-
     it("can add validator into whiteList", async () => {
       await expect(await swNFT.addWhiteList(pubKey))
         .to.emit(swNFT, "LogAddWhiteList")
