@@ -2,7 +2,7 @@ const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
-  getLastTagContractFactory
+  getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
 
 const pubKey =
@@ -31,75 +31,72 @@ const depositDataRoot3 =
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const referralCode = "test-referral";
-let swNFT, swETH, signer, user, strategy;
+let swell, swNFT, swETH, signer, bot, amount, user, strategy;
 
 describe("SWNFTUpgrade", () => {
-  describe("Non-Whitelisted Validator", () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
+  before(async () => {
+    [signer, user, bot] = await ethers.getSigners();
 
-      const Swell = await ethers.getContractFactory(
-        "contracts/SWELL.sol:SWELL"
-      );
-      swell = await Swell.deploy();
-      await swell.deployed();
-      await getLastTagContractFactory();
+    const Swell = await ethers.getContractFactory("contracts/SWELL.sol:SWELL");
+    swell = await Swell.deploy();
+    await swell.deployed();
+    await getLastTagContractFactory();
 
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory(
-        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-      const oldswNFT = await upgrades.deployProxy(
-        SWNFTUpgrade,
-        [swell.address, depositAddress],
-        {
-          kind: "uups",
-          initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true,
-        }
-      );
-      await oldswNFT.deployed();
-
-      const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-
-      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
-        kind: "uups",
+    // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
+    const nftDescriptorLibraryFactory = await ethers.getContractFactory(
+      "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
+    );
+    const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
+    const SWNFTUpgrade = await ethers.getContractFactory(
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address,
         },
+      }
+    );
+    const oldswNFT = await upgrades.deployProxy(
+      SWNFTUpgrade,
+      [swell.address, depositAddress],
+      {
+        kind: "uups",
+        initializer: "initialize(address, address)",
         unsafeAllowLinkedLibraries: true,
-      });
-      await swNFT.deployed();
+      }
+    );
+    await oldswNFT.deployed();
 
-      const SWETH = await ethers.getContractFactory(
-        "contracts/swETH.sol:SWETH"
-      );
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
+    const SWNFTUpgradeNew = await ethers.getContractFactory(
+      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      {
+        libraries: {
+          NFTDescriptor: nftDescriptorLibrary.address,
+        },
+      }
+    );
 
-      const Strategy = await ethers.getContractFactory(
-        "contracts/Strategy.sol:Strategy"
-      );
-      strategy = await Strategy.deploy(swNFT.address);
-      await strategy.deployed();
+    swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
+      kind: "uups",
+      libraries: {
+        NFTDescriptor: nftDescriptorLibrary.address,
+      },
+      unsafeAllowLinkedLibraries: true,
     });
+    await swNFT.deployed();
+
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
+    swETH = await SWETH.deploy(swNFT.address);
+    await swETH.deployed();
+    await swNFT.setswETHAddress(swETH.address);
+
+    const Strategy = await ethers.getContractFactory(
+      "contracts/Strategy.sol:Strategy"
+    );
+    strategy = await Strategy.deploy(swNFT.address);
+    await strategy.deployed();
+  });
+
+  describe("Non-Whitelisted Validator", () => {
     it("cannot stake less than 1 Ether", async function () {
       amount = ethers.utils.parseEther("0.1");
       await expect(
@@ -451,73 +448,6 @@ describe("SWNFTUpgrade", () => {
   });
 
   describe("Whitelisted Validator", () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
-
-      const Swell = await ethers.getContractFactory(
-        "contracts/SWELL.sol:SWELL"
-      );
-      swell = await Swell.deploy();
-      await swell.deployed();
-
-      await getLastTagContractFactory();
-
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory(
-        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-      const oldswNFT = await upgrades.deployProxy(
-        SWNFTUpgrade,
-        [swell.address, depositAddress],
-        {
-          kind: "uups",
-          initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true,
-        }
-      );
-      await oldswNFT.deployed();
-
-      const SWNFTUpgradeNew = await ethers.getContractFactory(
-        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-
-      swNFT = await upgrades.upgradeProxy(oldswNFT.address, SWNFTUpgradeNew, {
-        kind: "uups",
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
-        unsafeAllowLinkedLibraries: true,
-      });
-      await swNFT.deployed();
-
-      const SWETH = await ethers.getContractFactory(
-        "contracts/swETH.sol:SWETH"
-      );
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
-
-      const Strategy = await ethers.getContractFactory(
-        "contracts/Strategy.sol:Strategy"
-      );
-      strategy = await Strategy.deploy(swNFT.address);
-      await strategy.deployed();
-    });
-
     it("can add validator into whiteList", async () => {
       await expect(await swNFT.addWhiteList(pubKey))
         .to.emit(swNFT, "LogAddWhiteList")

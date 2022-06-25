@@ -20,10 +20,8 @@ describe("Swell Balancer Vault", function () {
     account2,
     account3,
     account4,
-    poolId,
-    initialTestTokenPoolBalance;
+    poolId;
 
-  const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
   const nftAddress = "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414";
 
   /**
@@ -115,7 +113,7 @@ describe("Swell Balancer Vault", function () {
       .approve(swellBalancerVault.address, ethers.constants.MaxUint256);
 
     // get the initial test token balancer pool balance
-    initialTestTokenPoolBalance = await getTestTokenBalanceFromBalancerPool(
+    await getTestTokenBalanceFromBalancerPool(
       balancerVault,
       poolId,
       swETH.address
