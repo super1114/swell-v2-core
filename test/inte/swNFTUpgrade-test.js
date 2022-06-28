@@ -544,8 +544,8 @@ describe("SWNFTUpgrade", () => {
       const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
       const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
         libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address
-        }
+          NFTDescriptor: nftDescriptorLibrary.address,
+        },
       });
       swNFT = await upgrades.deployProxy(
         SWNFTUpgrade,
@@ -553,7 +553,7 @@ describe("SWNFTUpgrade", () => {
         {
           kind: "uups",
           initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true
+          unsafeAllowLinkedLibraries: true,
         }
       );
       await swNFT.deployed();
@@ -569,8 +569,9 @@ describe("SWNFTUpgrade", () => {
     });
 
     it("Owner can add validator into superWhiteList", async () => {
-      await expect(swNFT.connect(user).addSuperWhiteList(pubKey3))
-        .to.be.revertedWith('Ownable: caller is not the owner');
+      await expect(
+        swNFT.connect(user).addSuperWhiteList(pubKey3)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
       await expect(await swNFT.addSuperWhiteList(pubKey3))
         .to.emit(swNFT, "LogAddSuperWhiteList")
         .withArgs(signer.address, pubKey3);
@@ -579,31 +580,41 @@ describe("SWNFTUpgrade", () => {
         .withArgs(signer.address, pubKey);
     });
 
-    it("SuperWhitelisted Validator can stake 1 ETH on first deposit", async function() {
+    it("SuperWhitelisted Validator can stake 1 ETH on first deposit", async function () {
       amount = ethers.utils.parseEther("1");
       await expect(
-        swNFT.connect(user).stake([{ 
-          pubKey, 
-          signature, 
-          depositDataRoot, 
-          amount 
-        }], {
-          value: amount
-        })
+        swNFT.connect(user).stake(
+          [
+            {
+              pubKey,
+              signature,
+              depositDataRoot,
+              amount,
+            },
+          ],
+          {
+            value: amount,
+          }
+        )
       ).to.emit(swNFT, "LogStake");
     });
 
-    it("SuperWhitelisted Validator can stake 32 ETH", async function() {
+    it("SuperWhitelisted Validator can stake 32 ETH", async function () {
       amount = ethers.utils.parseEther("32");
       await expect(
-        swNFT.stake([{ 
-          pubKey: pubKey3, 
-          signature: signature3, 
-          depositDataRoot: depositDataRoot3, 
-          amount 
-        }], {
-          value: amount
-        })
+        swNFT.stake(
+          [
+            {
+              pubKey: pubKey3,
+              signature: signature3,
+              depositDataRoot: depositDataRoot3,
+              amount,
+            },
+          ],
+          {
+            value: amount,
+          }
+        )
       ).to.emit(swNFT, "LogStake");
     });
   });
