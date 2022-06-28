@@ -36,7 +36,7 @@ describe("SWNFT", async () => {
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
     const SWNFTUpgrade = await ethers.getContractFactory(
-      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
       {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address,
