@@ -14,29 +14,12 @@ require("./bin/addWhiteLists");
 require("./bin/updateIsValidatorsActive");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
-  version: "0.8.9",
-  settings: {
-    evmVersion: "istanbul",
-    optimizer: {
-      enabled: true,
-      runs: 50,
-      details: {
-        yul: false,
-      },
-    },
-    metadata: {
-      bytecodeHash: "none",
-    },
-  },
-};
-
-const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.8.13",
   settings: {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 1,
+      runs: 50,
       details: {
         yul: false,
       },
@@ -56,6 +39,23 @@ const DEFAULT_COMPILER_SETTINGS = {
       runs: 200,
       details: {
         yul: false,
+      },
+    },
+    metadata: {
+      bytecodeHash: "none",
+    },
+  },
+};
+
+const UNISWAP_COMPILER_SETTINGS = {
+  version: "0.8.13",
+  settings: {
+    evmVersion: "istanbul",
+    optimizer: {
+      enabled: true,
+      runs: 1,
+      details: {
+        yul: true,
       },
     },
     metadata: {
@@ -106,6 +106,7 @@ module.exports = {
         LOW_OPTIMIZER_COMPILER_SETTINGS,
       "contracts/latest-tag/tests/swNFTUpgradeTestnet.sol":
         LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/SwellIzumiVault.sol": UNISWAP_COMPILER_SETTINGS,
     },
   },
   abiExporter: {
