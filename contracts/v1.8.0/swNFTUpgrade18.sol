@@ -13,12 +13,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Interfaces
 import "./interfaces/ISWNFT.sol";
-import "./interfaces/ISWETH.sol";
-import "./interfaces/IStrategy.sol";
+import "../interfaces/ISWETH.sol";
+import "../interfaces/IStrategy.sol";
 
 // Libraries
-import {Helpers} from "./helpers.sol";
-import {NFTDescriptor} from "./libraries/NFTDescriptor.sol";
+import {Helpers} from "../helpers.sol";
+import {NFTDescriptor} from "../libraries/NFTDescriptor.sol";
 
 interface IDepositContract {
     /// @notice Submit a Phase 0 DepositData object.
@@ -36,7 +36,7 @@ interface IDepositContract {
 }
 
 /// @title Contract for SWNFTUpgrade
-contract SWNFTUpgrade is
+contract SWNFTUpgrade18 is
     ERC721EnumerableUpgradeable,
     UUPSUpgradeable,
     OwnableUpgradeable,
@@ -75,6 +75,7 @@ contract SWNFTUpgrade is
         require(msg.sender == botAddress, "sender is not the bot");
         _;
     }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -157,21 +158,6 @@ contract SWNFTUpgrade is
     function addWhiteLists(bytes[] calldata pubKeys) external onlyOwner {
         for (uint256 i = 0; i < pubKeys.length; i++) {
             addWhiteList(pubKeys[i]);
-        }
-    }
-
-    /// @notice Add a new validator into superWhiteList
-    /// @param pubKey The public key of the validator
-    function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
-        superWhiteList[pubKey] = true;
-        emit LogAddSuperWhiteList(msg.sender, pubKey);
-    }
-
-    /// @notice Add validators into superWhiteList
-    /// @param pubKeys Array of public keys of the validator
-    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
-        for(uint i = 0; i < pubKeys.length; i++){
-            addSuperWhiteList(pubKeys[i]);
         }
     }
 
@@ -550,5 +536,4 @@ contract SWNFTUpgrade is
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;
-    mapping(bytes => bool) public superWhiteList;
 }

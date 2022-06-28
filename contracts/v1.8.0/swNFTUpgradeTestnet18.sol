@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.13;
 
-import "../swNFTUpgrade.sol";
+import "./swNFTUpgrade18.sol";
 
-contract SWNFTUpgradeTestnet is SWNFTUpgrade {
+contract SWNFTUpgradeTestnet18 is SWNFTUpgrade18 {
     function initialize(address _swellAddress, address _depositContract)
         external
         initializer

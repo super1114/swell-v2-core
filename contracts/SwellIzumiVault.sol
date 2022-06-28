@@ -22,7 +22,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
     using SafeERC20 for IERC20;
     /// Structs
     struct ConstructorParams {
-        ERC20 asset;
+        ERC20Permit asset;
         string name;
         string symbol;
         address positionManager;
@@ -32,7 +32,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
     }
     struct UniswapPoolData {
         IUniswapV3Pool pool;
-        ERC20 counterToken;
+        ERC20Permit counterToken;
         uint24 fee;
         int24 tickLower;
         int24 tickUpper;
@@ -196,7 +196,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
         uint128 onsideLiquidity,
         uint256 offsideAmount,
         bool assetIsToken0
-    ) internal view returns (uint256 totalValue) {
+    ) internal pure returns (uint256 totalValue) {
         uint160 sqrtLower = TickMath.getSqrtRatioAtTick(tickLower);
         uint160 sqrtUpper = TickMath.getSqrtRatioAtTick(tickUpper);
         uint128 totalLiquidity = onsideLiquidity;
@@ -297,7 +297,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
         uint256 assets,
         uint256,
         bytes calldata params
-    ) internal override {
+    ) internal {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 
@@ -393,7 +393,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
         uint256 assets,
         uint256,
         bytes calldata params
-    ) internal override validTokenId returns (uint256 assetsRecovered) {
+    ) internal validTokenId returns (uint256 assetsRecovered) {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 

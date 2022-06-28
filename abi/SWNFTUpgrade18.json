@@ -1,5 +1,10 @@
 [
   {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -105,25 +110,6 @@
       }
     ],
     "name": "LogAddStrategy",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes",
-        "name": "pubKey",
-        "type": "bytes"
-      }
-    ],
-    "name": "LogAddSuperWhiteList",
     "type": "event"
   },
   {
@@ -525,32 +511,6 @@
         "type": "bytes"
       }
     ],
-    "name": "addSuperWhiteList",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "pubKeys",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "addSuperWhiteLists",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "pubKey",
-        "type": "bytes"
-      }
-    ],
     "name": "addWhiteList",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -850,24 +810,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_swellAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_depositContract",
-        "type": "address"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1254,25 +1196,6 @@
         "internalType": "address",
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "name": "superWhiteList",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
