@@ -22,7 +22,7 @@ const { parseUSD } = require("../helpers/uniswap/formatHelper");
 
 const nftAddress = "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414";
 
-describe("Uniswap Izumi Vault", () => {
+describe("Swell Izumi Vault", () => {
   let swellVault, positionManager;
   let owner, alice;
   let pool;
