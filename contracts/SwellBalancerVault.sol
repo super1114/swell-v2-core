@@ -58,7 +58,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         returns (bool success)
     {
         require(amount > 0, "cannot enter strategy with 0 amount");
-        deposit(amount, msg.sender);
+        deposit(amount, msg.sender, new bytes(0));
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
         return true;
@@ -75,7 +75,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     {
         require(amount > 0, "No position to exit");
         require(amount <= positions[tokenId], "Not enough position to exit");
-        withdraw(amount, msg.sender, msg.sender);
+        withdraw(amount, msg.sender, msg.sender, new bytes(0));
         positions[tokenId] -= amount;
         emit LogExit(tokenId, amount);
         return true;
@@ -122,11 +122,11 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     /*///////////////////////////////////////////////////////////////
                        HOOK OVERRIDES
     //////////////////////////////////////////////////////////////*/
-    function beforeWithdraw(uint256 assets, uint256 shares)
-        internal
-        override
-        returns (uint256 assetsRecovered)
-    {
+    function beforeWithdraw(
+        uint256 assets,
+        uint256 shares,
+        bytes memory
+    ) internal override returns (uint256 assetsRecovered) {
         (address pool, ) = balancerVault.getPool(poolId);
 
         uint256 bptShareAmount = ERC20(pool).balanceOf(address(this)).mulDivUp(
@@ -165,7 +165,11 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         assetsRecovered = asset.balanceOf(address(this)) - assetsRecovered;
     }
 
-    function afterDeposit(uint256 assets, uint256) internal override {
+    function afterDeposit(
+        uint256 assets,
+        uint256,
+        bytes memory
+    ) internal override {
         (IERC20[] memory tokensFromPool, , ) = balancerVault.getPoolTokens(
             poolId
         );

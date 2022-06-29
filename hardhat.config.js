@@ -72,6 +72,10 @@ module.exports = {
         url:
           "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
       },
+      blockNumber: 14439914, // latest as of (04/05/22)
+      mining: {
+        auto: true,
+      },
     },
     goerli: {
       url: "https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY,

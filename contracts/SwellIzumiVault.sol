@@ -16,13 +16,17 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IMiningFixRangeBoostV2} from "./libraries/izumi/IMiningFixRangeBoostV2.sol";
+import {WeightedMath} from "./libraries/WeightedMath.sol";
+import "./interfaces/ISWNFT.sol";
+import "./interfaces/IStrategy.sol";
 
-contract SwellIzumiVault is ERC4626, IERC721Receiver {
+contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
     using FixedPointMathLib for uint256;
     using SafeERC20 for IERC20;
     /// Structs
     struct ConstructorParams {
         ERC20Permit asset;
+        address swNFT;
         string name;
         string symbol;
         address positionManager;
@@ -45,9 +49,12 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
     INonfungiblePositionManager public immutable positionManager;
     IUniswapV3SwapRouter public immutable swapRouter;
     IMiningFixRangeBoostV2 public immutable liquidBox;
+    address public immutable swNFT;
     uint256 public nftID;
     UniswapPoolData public poolData;
 
+    /// @dev The token ID position data
+    mapping(uint256 => uint256) public positions;    
     /// Token => balance held in the contract
     mapping(address => uint256) public tokenBalances;
 
@@ -65,9 +72,16 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
         _;
     }
 
+    modifier onlyswNFT() {
+        require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
+        _;
+    }
+
+
     constructor(ConstructorParams memory _params)
         ERC4626(_params.asset, _params.name, _params.symbol)
     {
+        require(_params.swNFT != address(0), "Address cannot be 0");
         require(
             _params.positionManager != address(0),
             "invalid position manager"
@@ -85,6 +99,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
         );
         require(_params.IzumiLiquidBox != address(0), "invalid liquid box");
 
+        swNFT = _params.swNFT;
         positionManager = INonfungiblePositionManager(_params.positionManager);
         swapRouter = IUniswapV3SwapRouter(_params.swapRouter);
         poolData = _params.poolData;
@@ -107,6 +122,43 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
             address(_params.poolData.pool),
             type(uint256).max
         );
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                       STRATEGY FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Enter vault
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH
+    /// @return success or not
+    function enter(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
+        require(amount > 0, "cannot enter strategy with 0 amount");
+        deposit(amount, msg.sender, new bytes(0));
+        positions[tokenId] += amount;
+        emit LogEnter(tokenId, amount);
+        return true;
+    }
+
+    /// @notice Exit vault
+    /// @param tokenId The token ID
+    /// @param amount The amount of swETH
+    /// @return success or not
+    function exit(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
+        require(amount > 0, "No position to exit");
+        require(amount <= positions[tokenId], "Not enough position to exit");
+        withdraw(amount, msg.sender, msg.sender, new bytes(0));
+        positions[tokenId] -= amount;
+        emit LogExit(tokenId, amount);
+        return true;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -296,8 +348,8 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
     function afterDeposit(
         uint256 assets,
         uint256,
-        bytes calldata params
-    ) internal {
+        bytes memory params
+    ) internal override {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 
@@ -392,8 +444,8 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver {
     function beforeWithdraw(
         uint256 assets,
         uint256,
-        bytes calldata params
-    ) internal validTokenId returns (uint256 assetsRecovered) {
+        bytes memory params
+    ) internal override validTokenId returns (uint256 assetsRecovered) {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 

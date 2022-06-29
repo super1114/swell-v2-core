@@ -1,247 +1,347 @@
 const { expect } = require("chai");
-const { deployments, ethers } = require("hardhat");
-const { describe } = require("mocha");
+const { ethers, network } = require("hardhat");
 const {
   NONFUNGIBLE_POSITION_MANAGER,
-  UNISWAP_V3_FACTORY,
-  WETH_ADDRESS,
+  UNISWAP_V3_QUOTER,
   UNISWAP_V3_SWAP_ROUTER,
-  IZUMI_LIQUID_BOX,
 } = require("../../constants/addresses");
+const {
+  IZUMI_LIQUID_BOX,
+  USDT_ADDRESS,
+  USDC_ADDRESS,
+  USD_WHALE,
+  UNISWAP_USDT_USDC_POOL,
+} = require("../constants/izumiTestVariables");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
+const {
+  _getQuoteForToken,
+  _getPriceLimit,
+  generateParams,
+} = require("../helpers/uniswap/generateBytesParams");
+const { parseUSD } = require("../helpers/uniswap/formatHelper");
+
+const nftAddress = "0xe59aC2C5Ae8462554308c578aE4bc8e4098d0414";
 
 describe("Uniswap Izumi Vault", () => {
-  describe("Uniswap Izumi Vault: deployment", () => {
-    let swellVault, testToken, weth, positionManager;
-    let alice;
-    let pool;
-    before(async () => {
-      [, alice] = await ethers.getSigners();
-    });
-    const FEE = "100";
-    const AddressZero = ethers.constants.AddressZero;
+  let swellVault, positionManager;
+  let owner, alice;
+  let pool;
+  let FEE;
 
-    beforeEach(async function () {
-      await deployments.fixture([
-        "_test_token",
-        "_create_uniswap_pool",
-        "_swell_izumi_vault",
-      ]);
-      swellVault = await ethers.getContract("SwellIzumiVault");
-      testToken = await ethers.getContract("TestToken");
-      weth = await ethers.getContractAt("IWETH", WETH_ADDRESS);
-      positionManager = await ethers.getContractAt(
-        "INonfungiblePositionManager",
-        NONFUNGIBLE_POSITION_MANAGER
+  let USDT;
+  let USDC;
+  let testToken;
+  let weth;
+
+  before(async () => {
+    [owner, alice] = await ethers.getSigners();
+    positionManager = await ethers.getContractAt(
+      "INonfungiblePositionManager",
+      NONFUNGIBLE_POSITION_MANAGER
+    );
+    pool = await ethers.getContractAt("IUniswapV3Pool", UNISWAP_USDT_USDC_POOL);
+
+    FEE = (await pool.fee()).toString();
+
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [USD_WHALE],
+    });
+
+    const signer = await ethers.provider.getSigner(USD_WHALE);
+
+    USDT = await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      USDT_ADDRESS
+    );
+    USDC = await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      USDC_ADDRESS
+    );
+
+    const whaleBalance = await USDT.balanceOf(USD_WHALE);
+    USDT.connect(signer).transfer(alice.address, whaleBalance.div(2));
+    USDT.connect(signer).transfer(owner.address, whaleBalance.div(2));
+
+    const testTickSpacing = await getTickRange(pool.address, 100);
+
+    const swellVaultFactory = await ethers.getContractFactory(
+      "SwellIzumiVault"
+    );
+
+    swellVault = await swellVaultFactory.deploy({
+      asset: USDT.address,
+      swNFT: nftAddress,
+      name: "Test Swell Uniswap Vault Token",
+      symbol: "TSUVT",
+      positionManager: NONFUNGIBLE_POSITION_MANAGER,
+      swapRouter: UNISWAP_V3_SWAP_ROUTER,
+      poolData: {
+        pool: pool.address,
+        counterToken: USDC.address,
+        fee: await pool.fee(),
+        tickLower: testTickSpacing.tickLower,
+        tickUpper: testTickSpacing.tickUpper,
+        liquidityPerTick: await pool.maxLiquidityPerTick(),
+      },
+      IzumiLiquidBox: IZUMI_LIQUID_BOX,
+    });
+
+    await USDC.approve(swellVault.address, ethers.constants.MaxUint256);
+    await USDT.approve(swellVault.address, ethers.constants.MaxUint256);
+    await USDC.connect(alice).approve(
+      swellVault.address,
+      ethers.constants.MaxUint256
+    );
+    await USDT.connect(alice).approve(
+      swellVault.address,
+      ethers.constants.MaxUint256
+    );
+    await USDC.connect(alice).approve(
+      positionManager.address,
+      ethers.constants.MaxUint256
+    );
+    await USDT.connect(alice).approve(
+      positionManager.address,
+      ethers.constants.MaxUint256
+    );
+
+    testToken = USDT;
+    weth = USDC;
+  });
+
+  it("should create a new position if this is the first deposit", async () => {
+    expect(await swellVault.nftID()).to.be.eq(0);
+
+    let amountToDeposit = parseUSD("100");
+    let amountIn = amountToDeposit.div(2);
+    let swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
+
+    await swellVault.deposit(amountToDeposit, owner.address, swapParams);
+
+    expect(await swellVault.nftID()).to.be.gt(0);
+  });
+
+  it("should increase the value of the existing position when depositing", async () => {
+    const startingLiquidity = (
+      await positionManager.positions(await swellVault.nftID())
+    ).liquidity;
+
+    let amountToDeposit = parseUSD("1000");
+    let amountIn = amountToDeposit.div(2);
+    let swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
+
+    await swellVault
+      .connect(alice)
+      .deposit(amountToDeposit, alice.address, swapParams);
+
+    expect(startingLiquidity).to.be.lt(
+      (await positionManager.positions(await swellVault.nftID())).liquidity
+    );
+  });
+
+  it("should handle multiple deposits", async () => {
+    let amountToDeposit = parseUSD("100");
+    let amountIn = amountToDeposit.div(2);
+    let swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
+
+    const ownerStartingShares = await swellVault.balanceOf(owner.address);
+    const aliceStartingShares = await swellVault.balanceOf(alice.address);
+    const startingLiquidity = (
+      await positionManager.positions(await swellVault.nftID())
+    ).liquidity;
+
+    for (let i = 0; i < 3; i++) {
+      swapParams = generateParams(
+        amountIn,
+        testToken,
+        weth,
+        FEE,
+        UNISWAP_V3_QUOTER,
+        pool,
+        swellVault
       );
-      pool = await ethers.getContractAt(
-        "IUniswapV3Pool",
-        await (
-          await ethers.getContractAt("IUniswapV3Factory", UNISWAP_V3_FACTORY)
-        ).getPool(testToken.address, WETH_ADDRESS, FEE)
+
+      await swellVault
+        .connect(alice)
+        .deposit(amountToDeposit, alice.address, swapParams);
+
+      swapParams = generateParams(
+        amountIn,
+        testToken,
+        weth,
+        FEE,
+        UNISWAP_V3_QUOTER,
+        pool,
+        swellVault
       );
 
-      await weth.approve(swellVault.address, ethers.constants.MaxUint256);
-      await testToken.approve(swellVault.address, ethers.constants.MaxUint256);
-      await weth
-        .connect(alice)
-        .approve(swellVault.address, ethers.constants.MaxUint256);
-      await testToken
-        .connect(alice)
-        .approve(swellVault.address, ethers.constants.MaxUint256);
-      await weth
-        .connect(alice)
-        .approve(positionManager.address, ethers.constants.MaxUint256);
-      await testToken
-        .connect(alice)
-        .approve(positionManager.address, ethers.constants.MaxUint256);
-    });
+      await swellVault.deposit(amountToDeposit, owner.address, swapParams);
+    }
+    expect(startingLiquidity).to.be.lt(
+      (await positionManager.positions(await swellVault.nftID())).liquidity
+    );
+    expect(ownerStartingShares).to.be.lt(
+      await swellVault.balanceOf(owner.address)
+    );
+    expect(aliceStartingShares).to.be.lt(
+      await swellVault.balanceOf(alice.address)
+    );
+  });
 
-    it("Should not deploy with invalid parameters", async () => {
-      const { deploy } = deployments;
-      const deployer = await ethers.getNamedSigner("deployer");
-      const testTickSpacing = await getTickRange(pool.address, 100);
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: AddressZero,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: pool.address,
-                counterToken: WETH_ADDRESS,
-                fee: FEE,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid position manager");
+  it("should swap into the correct ratio", async () => {
+    let amountToDeposit = parseUSD("120000");
+    let amountIn = amountToDeposit.div(3);
+    let swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: AddressZero,
-              poolData: {
-                pool: pool.address,
-                counterToken: WETH_ADDRESS,
-                fee: FEE,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid swap router");
+    const startingBalanceTestToken = await testToken.balanceOf(
+      swellVault.address
+    );
+    await swellVault.deposit(amountToDeposit, owner.address, swapParams);
+    expect(await testToken.balanceOf(swellVault.address)).to.be.gt(
+      startingBalanceTestToken
+    );
+    expect(await weth.balanceOf(swellVault.address)).to.be.eq(0); // Should always add all the eth swapped for back to the pool
+  });
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: AddressZero,
-                counterToken: WETH_ADDRESS,
-                fee: FEE,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid pool");
+  it("should properly account for internal funds", async () => {
+    let amountToDeposit = parseUSD("300000");
+    let amountIn = amountToDeposit.div(4);
+    let swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: pool.address,
-                counterToken: AddressZero,
-                fee: FEE,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid token");
+    await swellVault.deposit(amountToDeposit, owner.address, swapParams);
+    const amountBefore = await testToken.balanceOf(swellVault.address);
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: pool.address,
-                counterToken: WETH_ADDRESS,
-                fee: 0,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid fee");
+    swapParams = generateParams(
+      amountIn,
+      testToken,
+      weth,
+      FEE,
+      UNISWAP_V3_QUOTER,
+      pool,
+      swellVault
+    );
+    await swellVault.deposit(amountToDeposit, owner.address, swapParams);
+    expect(await testToken.balanceOf(swellVault.address)).to.not.be.eq(
+      amountBefore
+    );
+  });
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: pool.address,
-                counterToken: WETH_ADDRESS,
-                fee: FEE,
-                tickLower: testTickSpacing.tickUpper,
-                tickUpper: testTickSpacing.tickLower,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: IZUMI_LIQUID_BOX,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid tick range");
+  it("Should not work with invalid parameters", async () => {
+    const abiCoder = ethers.utils.defaultAbiCoder;
 
-      await expect(
-        deploy("SwellIzumiVault", {
-          from: deployer.address,
-          args: [
-            {
-              asset: testToken.address,
-              name: "Test Swell Uniswap Vault Token",
-              symbol: "TSUVT",
-              positionManager: NONFUNGIBLE_POSITION_MANAGER,
-              swapRouter: UNISWAP_V3_SWAP_ROUTER,
-              poolData: {
-                pool: pool.address,
-                counterToken: WETH_ADDRESS,
-                fee: FEE,
-                tickLower: testTickSpacing.tickLower,
-                tickUpper: testTickSpacing.tickUpper,
-                liquidityPerTick: await pool.maxLiquidityPerTick(),
-              },
-              IzumiLiquidBox: AddressZero,
-            },
-          ],
-          log: true,
-          autoMine: true,
-        })
-      ).to.be.revertedWith("invalid liquid box");
-    });
+    const INVALID_ASSETS = 0;
+    const INVALID_AMOUNT_IN = 0;
+    const INVALID_AMOUNT_OUT_MIN = 0;
+    const INVALID_SQRT_LIMIT = 0;
+
+    let amountToDeposit = parseUSD("200000");
+    let amountIn = amountToDeposit.div(2);
+
+    let amountOutMin = await _getQuoteForToken(
+      testToken.address,
+      weth.address,
+      FEE,
+      amountIn,
+      UNISWAP_V3_QUOTER
+    );
+    let sqrtPriceLimitX96 = await _getPriceLimit(
+      amountIn,
+      pool,
+      swellVault,
+      testToken,
+      weth
+    );
+    let swapParams = abiCoder.encode(
+      ["uint256", "uint256", "uint160"],
+      [amountIn, amountOutMin, sqrtPriceLimitX96]
+    );
+    await expect(swellVault.deposit(INVALID_ASSETS, owner.address, swapParams))
+      .to.be.reverted;
+
+    sqrtPriceLimitX96 = await _getPriceLimit(
+      amountIn,
+      pool,
+      swellVault,
+      testToken,
+      weth
+    );
+    swapParams = abiCoder.encode(
+      ["uint256", "uint256", "uint160"],
+      [INVALID_AMOUNT_IN, amountOutMin, sqrtPriceLimitX96]
+    );
+    await expect(
+      swellVault.deposit(amountToDeposit, owner.address, swapParams)
+    ).to.be.revertedWith("amountIn cannot be 0");
+
+    sqrtPriceLimitX96 = await _getPriceLimit(
+      amountIn,
+      pool,
+      swellVault,
+      testToken,
+      weth
+    );
+    swapParams = abiCoder.encode(
+      ["uint256", "uint256", "uint160"],
+      [amountIn, INVALID_AMOUNT_OUT_MIN, sqrtPriceLimitX96]
+    );
+    await expect(
+      swellVault.deposit(amountToDeposit, owner.address, swapParams)
+    ).to.be.revertedWith("amountOutMin cannot be 0");
+
+    sqrtPriceLimitX96 = await _getPriceLimit(
+      amountIn,
+      pool,
+      swellVault,
+      testToken,
+      weth
+    );
+    swapParams = abiCoder.encode(
+      ["uint256", "uint256", "uint160"],
+      [amountIn, amountOutMin, INVALID_SQRT_LIMIT]
+    );
+    await expect(
+      swellVault.deposit(amountToDeposit, owner.address, swapParams)
+    ).to.be.revertedWith("sqrtPriceLimit cannot be 0");
   });
 });
