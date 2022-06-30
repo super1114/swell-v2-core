@@ -2,7 +2,7 @@
 /**
  *  SourceUnit: /Users/justin/Work/swell-network/node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol
  */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 interface IUniswapV3SwapRouter {
     /// @notice Swaps `amountIn` of one token for as much as possible of another token

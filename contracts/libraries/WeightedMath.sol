@@ -13,7 +13,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Adjusted pragma version so it compiles. Previous version was ^0.7.0
-pragma solidity >=0.8.0;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 

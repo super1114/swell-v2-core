@@ -2,7 +2,7 @@
 /**
  *  SourceUnit: /Users/justin/Work/swell-network/node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol
  */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
 /// @title Events emitted by a pool
 /// @notice Contains all events emitted by the pool
