@@ -4,6 +4,7 @@ const { it } = require("mocha");
 const {
   getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
+const { getTag } = require("../../deploy/helpers");
 
 describe("SWNFT", async () => {
   // 1 ETH
@@ -28,21 +29,40 @@ describe("SWNFT", async () => {
     await swell.deployed();
 
     console.log("swell deployed", swell.address);
-    await getLastTagContractFactory();
+    const tag = await getTag();
+
+    // To-do after 1.9.0 release, always fetch latest tag
+    if (tag !== "v1.8.0") {
+      await getLastTagContractFactory();
+    }
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
       "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-    const SWNFTUpgrade = await ethers.getContractFactory(
-      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-      {
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
-      }
-    );
+
+    let SWNFTUpgrade;
+
+    if (tag === "v1.8.0") {
+      SWNFTUpgrade = await ethers.getContractFactory(
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        }
+      );
+    } else {
+      SWNFTUpgrade = await ethers.getContractFactory(
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        }
+      );
+    }
     const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
       kind: "uups",
       initializer: "initialize(address)",

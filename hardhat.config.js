@@ -19,7 +19,7 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 2_000,
+      runs: 2000,
       details: {
         yul: false,
       },
@@ -36,7 +36,7 @@ const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 1_000,
+      runs: 1000,
       details: {
         yul: false,
       },
@@ -98,6 +98,12 @@ module.exports = {
     compilers: [DEFAULT_COMPILER_SETTINGS],
     overrides: {
       "contracts/libraries/NFTDescriptor.sol": DEFAULT_COMPILER_SETTINGS,
+      "contracts/tests/TestswNFTUpgrade.sol": DEFAULT_COMPILER_SETTINGS,
+      "contracts/tests/swNFTUpgradeTestnet.sol": DEFAULT_COMPILER_SETTINGS,
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol":
+        DEFAULT_COMPILER_SETTINGS,
+      "contracts/latest-tag/tests/swNFTUpgradeTestnet.sol":
+        DEFAULT_COMPILER_SETTINGS,
     },
   },
   abiExporter: {
