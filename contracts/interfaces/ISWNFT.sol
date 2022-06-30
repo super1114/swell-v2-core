@@ -70,6 +70,11 @@ interface ISWNFT {
 
     event LogAddWhiteList(address user, bytes indexed pubKey);
 
+    event LogAddSuperWhiteList(
+        address user,
+        bytes indexed pubKey
+    );
+
     event LogUpdateBotAddress(address _address);
 
     event LogUpdateIsValidatorActive(

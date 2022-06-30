@@ -164,6 +164,7 @@ contract SWNFTUpgrade is
     /// @param pubKey The public key of the validator
     function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
         superWhiteList[pubKey] = true;
+        emit LogAddSuperWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into superWhiteList
@@ -469,20 +470,22 @@ contract SWNFTUpgrade is
             validatorDeposits[pubKey] + amount <= 32 ether,
             "cannot stake more than 32 ETH"
         );
-        if (!whiteList[pubKey] && validatorDeposits[pubKey] < 16) {
-            require(amount == 16 ether, "Must send 16 ETH bond");
-            //TODO: Will add require for swDAO bond once there's price
-        }
-        if (whiteList[pubKey] && validatorDeposits[pubKey] < 1) {
-            require(amount == 1 ether, "Must send 1 ETH bond");
-            //TODO: Will add require for swDAO bond once there's price
-        }
 
         bool operator;
-        if (validatorDeposits[pubKey] == 0) {
-            operator = true;
-        } else {
-            require(isValidatorActive[pubKey], "validator is not active");
+        if(!superWhiteList[pubKey]) {
+            if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
+                require(amount == 16 ether, "Must send 16 ETH bond");
+                //TODO: Will add require for swDAO bond once there's price
+            }
+            if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
+                require(amount == 1 ether, "Must send 1 ETH bond"); 
+                //TODO: Will add require for swDAO bond once there's price 
+            }
+            if(validatorDeposits[pubKey] == 0) {
+                operator = true;
+            } else {
+                require(isValidatorActive[pubKey], 'validator is not active');
+            }
         }
         depositContract.deposit{value: amount}(
             pubKey,
