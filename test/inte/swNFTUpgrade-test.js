@@ -611,6 +611,7 @@ describe("SWNFTUpgrade", () => {
               amount,
             },
           ],
+          "test-referral",
           {
             value: amount,
           }
@@ -630,6 +631,7 @@ describe("SWNFTUpgrade", () => {
               amount,
             },
           ],
+          "test-referral",
           {
             value: amount,
           }
