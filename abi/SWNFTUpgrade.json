@@ -115,6 +115,25 @@
         "type": "bytes"
       }
     ],
+    "name": "LogAddSuperWhiteList",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes",
+        "name": "pubKey",
+        "type": "bytes"
+      }
+    ],
     "name": "LogAddWhiteList",
     "type": "event"
   },
