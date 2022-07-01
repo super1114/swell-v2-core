@@ -4,6 +4,7 @@ const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
   getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
+const { getTag } = require("../../deploy/helpers");
 
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -40,30 +41,43 @@ describe("SWNFTUpgrade", () => {
     const Swell = await ethers.getContractFactory("contracts/SWELL.sol:SWELL");
     swell = await Swell.deploy();
     await swell.deployed();
-    await getLastTagContractFactory();
+    const tag = await getTag();
+    if (tag !== "v1.8.0") {
+      await getLastTagContractFactory();
+    }
 
     // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
     const nftDescriptorLibraryFactory = await ethers.getContractFactory(
       "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-    const SWNFTUpgrade = await ethers.getContractFactory(
-      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-      {
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
-      }
-    );
-    const oldswNFT = await upgrades.deployProxy(
-      SWNFTUpgrade,
-      [swell.address, depositAddress],
-      {
-        kind: "uups",
-        initializer: "initialize(address, address)",
-        unsafeAllowLinkedLibraries: true,
-      }
-    );
+
+    let SWNFTUpgrade;
+
+    if (tag === "v1.8.0") {
+      SWNFTUpgrade = await ethers.getContractFactory(
+        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        }
+      );
+    } else {
+      SWNFTUpgrade = await ethers.getContractFactory(
+        "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+        {
+          libraries: {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        }
+      );
+    }
+    const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
+      kind: "uups",
+      initializer: "initialize(address)",
+      unsafeAllowLinkedLibraries: true,
+    });
     await oldswNFT.deployed();
 
     const SWNFTUpgradeNew = await ethers.getContractFactory(
@@ -530,44 +544,6 @@ describe("SWNFTUpgrade", () => {
     });
   });
   describe("Super Whitelisted Validator", () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
-
-      const Swell = await ethers.getContractFactory("SWELL");
-      swell = await Swell.deploy();
-      await swell.deployed();
-
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory("TestswNFTUpgrade", {
-        libraries: {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
-      });
-      swNFT = await upgrades.deployProxy(
-        SWNFTUpgrade,
-        [swell.address, depositAddress],
-        {
-          kind: "uups",
-          initializer: "initialize(address, address)",
-          unsafeAllowLinkedLibraries: true,
-        }
-      );
-      await swNFT.deployed();
-
-      const SWETH = await ethers.getContractFactory("SWETH");
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
-
-      const Strategy = await ethers.getContractFactory("Strategy");
-      strategy = await Strategy.deploy(swNFT.address);
-      await strategy.deployed();
-    });
-
     it("Owner can add validator into superWhiteList", async () => {
       await expect(
         swNFT.connect(user).addSuperWhiteList(pubKey3)
@@ -592,6 +568,7 @@ describe("SWNFTUpgrade", () => {
               amount,
             },
           ],
+          "test-referral",
           {
             value: amount,
           }
@@ -611,6 +588,7 @@ describe("SWNFTUpgrade", () => {
               amount,
             },
           ],
+          "test-referral",
           {
             value: amount,
           }

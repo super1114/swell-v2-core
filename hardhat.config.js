@@ -19,7 +19,7 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 2_000,
+      runs: 50,
       details: {
         yul: false,
       },
@@ -36,7 +36,7 @@ const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 1_000,
+      runs: 1,
       details: {
         yul: false,
       },
@@ -53,7 +53,7 @@ const DEFAULT_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 1,
+      runs: 200,
       details: {
         yul: false,
       },
@@ -97,7 +97,15 @@ module.exports = {
   solidity: {
     compilers: [DEFAULT_COMPILER_SETTINGS],
     overrides: {
-      "contracts/libraries/NFTDescriptor.sol": DEFAULT_COMPILER_SETTINGS,
+      "contracts/swNFTUpgrade.sol": LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/libraries/NFTDescriptor.sol": LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/tests/TestswNFTUpgrade.sol": LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/tests/swNFTUpgradeTestnet.sol":
+        LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/latest-tag/tests/TestswNFTUpgrade.sol":
+        LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/latest-tag/tests/swNFTUpgradeTestnet.sol":
+        LOW_OPTIMIZER_COMPILER_SETTINGS,
     },
   },
   abiExporter: {
