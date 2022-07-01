@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // https://github.com/Uniswap/v3-periphery/blob/main/contracts/libraries/NFTDescriptor.sol
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./NFTSVG.sol";

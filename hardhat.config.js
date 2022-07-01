@@ -14,7 +14,7 @@ require("./bin/addWhiteLists");
 require("./bin/updateIsValidatorsActive");
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
-  version: "0.8.13",
+  version: "0.8.9",
   settings: {
     evmVersion: "istanbul",
     optimizer: {
@@ -31,7 +31,7 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
 };
 
 const DEFAULT_COMPILER_SETTINGS = {
-  version: "0.8.13",
+  version: "0.8.9",
   settings: {
     evmVersion: "istanbul",
     optimizer: {
@@ -48,7 +48,7 @@ const DEFAULT_COMPILER_SETTINGS = {
 };
 
 const UNISWAP_COMPILER_SETTINGS = {
-  version: "0.8.13",
+  version: "0.8.9",
   settings: {
     evmVersion: "istanbul",
     optimizer: {

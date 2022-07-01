@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.9;
 
 // Packages
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";

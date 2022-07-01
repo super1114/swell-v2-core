@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity 0.8.13;
+pragma solidity 0.8.9;
 
 // interface implementation of MiningFixRangeBoostV2
 // @author https://github.com/izumiFinance/izumi-uniV3Mining/blob/691e847d5d672a3237d236b95ac67a3a0c8e1703/contracts/miningFixRangeBoost/MiningFixRangeBoostV2.sol
