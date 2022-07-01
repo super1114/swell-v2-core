@@ -544,49 +544,6 @@ describe("SWNFTUpgrade", () => {
     });
   });
   describe("Super Whitelisted Validator", () => {
-    before(async () => {
-      [signer, user, bot] = await ethers.getSigners();
-
-      const Swell = await ethers.getContractFactory(
-        "contracts/SWELL.sol:SWELL"
-      );
-      swell = await Swell.deploy();
-      await swell.deployed();
-
-      // const SWNFTUpgrade = await ethers.getContractFactory("SWNFTUpgrade");
-      const nftDescriptorLibraryFactory = await ethers.getContractFactory(
-        "contracts/libraries/NFTDescriptor.sol:NFTDescriptor"
-      );
-      const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
-      const SWNFTUpgrade = await ethers.getContractFactory(
-        "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
-        {
-          libraries: {
-            NFTDescriptor: nftDescriptorLibrary.address,
-          },
-        }
-      );
-      swNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
-        kind: "uups",
-        initializer: "initialize(address)",
-        unsafeAllowLinkedLibraries: true,
-      });
-      await swNFT.deployed();
-
-      const SWETH = await ethers.getContractFactory(
-        "contracts/swETH.sol:SWETH"
-      );
-      swETH = await SWETH.deploy(swNFT.address);
-      await swETH.deployed();
-      await swNFT.setswETHAddress(swETH.address);
-
-      const Strategy = await ethers.getContractFactory(
-        "contracts/Strategy.sol:Strategy"
-      );
-      strategy = await Strategy.deploy(swNFT.address);
-      await strategy.deployed();
-    });
-
     it("Owner can add validator into superWhiteList", async () => {
       await expect(
         swNFT.connect(user).addSuperWhiteList(pubKey3)
