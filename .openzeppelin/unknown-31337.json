@@ -306,12 +306,6 @@
             "label": "strategiesSet",
             "type": "t_struct(AddressSet)3153_storage",
             "src": "contracts\\swNFTUpgrade.sol:468"
-          },
-          {
-            "contract": "TestswNFTUpgrade",
-            "label": "eth1WithdrawalAddress",
-            "type": "t_address",
-            "src": "contracts\\tests\\TestswNFTUpgrade.sol:8"
           }
         ],
         "types": {
@@ -2281,14 +2275,6 @@
             "type": "t_struct(AddressSet)3153_storage",
             "contract": "SWNFTUpgrade",
             "src": "contracts/latest-tag/swNFTUpgrade.sol:453"
-          },
-          {
-            "label": "eth1WithdrawalAddress",
-            "offset": 0,
-            "slot": "370",
-            "type": "t_address",
-            "contract": "TestswNFTUpgrade",
-            "src": "contracts/latest-tag/tests/TestswNFTUpgrade.sol:8"
           }
         ],
         "types": {
