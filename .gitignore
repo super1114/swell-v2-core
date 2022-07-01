@@ -35,3 +35,5 @@ coverage.json
 .openzeppelin/unknown-31337.json
 contracts/latest
 contracts/latest-tag
+
+.eslintignore

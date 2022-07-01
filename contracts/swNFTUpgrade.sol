@@ -65,7 +65,6 @@ contract SWNFTUpgrade is
     bytes[] public validators;
     mapping(bytes => uint256) public validatorDeposits;
     mapping(bytes => bool) public whiteList;
-    mapping(bytes => bool) public superWhiteList;
 
     /// @dev The token ID position data
     mapping(uint256 => Position) public positions;
@@ -76,7 +75,6 @@ contract SWNFTUpgrade is
         require(msg.sender == botAddress, "sender is not the bot");
         _;
     }
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -468,4 +466,5 @@ contract SWNFTUpgrade is
     address public botAddress;
     mapping(bytes => bool) public isValidatorActive;
     EnumerableSetUpgradeable.AddressSet private strategiesSet;
+    mapping(bytes => bool) public superWhiteList;
 }
