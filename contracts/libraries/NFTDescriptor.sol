@@ -3,9 +3,9 @@
 
 pragma solidity 0.8.9;
 
-import '@openzeppelin/contracts/utils/Strings.sol';
-import './NFTSVG.sol';
-import './HexStrings.sol';
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "./NFTSVG.sol";
+import "./HexStrings.sol";
 
 library NFTDescriptor {
     using HexStrings for uint256;
@@ -23,22 +23,24 @@ library NFTDescriptor {
         uint256 value;
     }
 
-    function constructTokenURI(ConstructTokenURIParams memory params) public pure returns (string memory) {
+    function constructTokenURI(ConstructTokenURIParams memory params)
+        public
+        pure
+        returns (string memory)
+    {
         string memory name = generateName(params);
-        string memory descriptionPartOne =
-            generateDescriptionPartOne();
-        string memory descriptionPartTwo =
-            generateDescriptionPartTwo(
-                params.tokenId.toString(),
-                params.baseTokenSymbol,
-                addressToString(params.baseTokenAddress)
-            );
+        string memory descriptionPartOne = generateDescriptionPartOne();
+        string memory descriptionPartTwo = generateDescriptionPartTwo(
+            params.tokenId.toString(),
+            params.baseTokenSymbol,
+            addressToString(params.baseTokenAddress)
+        );
         string memory image = Base64.encode(bytes(generateSVGImage(params)));
 
         return
             string(
                 abi.encodePacked(
-                    'data:application/json;base64,',
+                    "data:application/json;base64,",
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
@@ -48,7 +50,7 @@ library NFTDescriptor {
                                 descriptionPartOne,
                                 descriptionPartTwo,
                                 '", "image": "',
-                                'data:image/svg+xml;base64,',
+                                "data:image/svg+xml;base64,",
                                 image,
                                 '"}'
                             )
@@ -58,13 +60,12 @@ library NFTDescriptor {
             );
     }
 
-    function generateDescriptionPartOne(
-    ) private pure returns (string memory) {
+    function generateDescriptionPartOne() private pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
-                    'This NFT represents a liquidity position in a Swell Network Validator. ',
-                    'The owner of this NFT can modify or redeem the position.\\n'
+                    "This NFT represents a liquidity position in a Swell Network Validator. ",
+                    "The owner of this NFT can modify or redeem the position.\\n"
                 )
             );
     }
@@ -78,12 +79,12 @@ library NFTDescriptor {
             string(
                 abi.encodePacked(
                     baseTokenSymbol,
-                    ' Address: ',
+                    " Address: ",
                     baseTokenAddress,
-                    '\\nToken ID: ',
+                    "\\nToken ID: ",
                     tokenId,
-                    '\\n\\n',
-                    unicode'⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.'
+                    "\\n\\n",
+                    unicode"⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated."
                 )
             );
     }
@@ -96,19 +97,24 @@ library NFTDescriptor {
         return
             string(
                 abi.encodePacked(
-                    'Swell Network Validator - ',
+                    "Swell Network Validator - ",
                     params.baseTokenSymbol,
-                    ' - ',
+                    " - ",
                     params.pubKey,
-                    ' <> ',
+                    " <> ",
                     (params.value / params.baseTokenDecimals).toString(),
                     " Ether"
                 )
             );
     }
 
-    function generateSVGImage(ConstructTokenURIParams memory params) internal pure returns (string memory svg) {
-        svg = NFTSVG.generateSVG(NFTSVG.SVGParams({
+    function generateSVGImage(ConstructTokenURIParams memory params)
+        internal
+        pure
+        returns (string memory svg)
+    {
+        svg = NFTSVG.generateSVG(
+            NFTSVG.SVGParams({
                 quoteToken: addressToString(params.quoteTokenAddress),
                 baseToken: addressToString(params.baseTokenAddress),
                 quoteTokenSymbol: params.quoteTokenSymbol,
@@ -117,24 +123,105 @@ library NFTDescriptor {
                 baseTokenBalance: params.baseTokenBalance,
                 baseTokenDecimals: params.baseTokenDecimals,
                 value: params.value,
-                color0: tokenToColorHex(uint256(uint160(params.quoteTokenAddress)), 136),
-                color1: tokenToColorHex(uint256(uint160(params.baseTokenAddress)), 136),
-                color2: tokenToColorHex(uint256(uint160(params.quoteTokenAddress)), 0),
-                color3: tokenToColorHex(uint256(uint160(params.baseTokenAddress)), 0),
-                x1: scale(getCircleCoord(uint256(uint160( params.quoteTokenAddress )), 16, params.tokenId), 0, 255, 16, 274),
-                y1: scale(getCircleCoord(uint256(uint160( params.baseTokenAddress )), 16, params.tokenId), 0, 255, 100, 484),
-                x2: scale(getCircleCoord(uint256(uint160( params.quoteTokenAddress )), 32, params.tokenId), 0, 255, 16, 274),
-                y2: scale(getCircleCoord(uint256(uint160( params.baseTokenAddress )), 32, params.tokenId), 0, 255, 100, 484),
-                x3: scale(getCircleCoord(uint256(uint160( params.quoteTokenAddress )), 48, params.tokenId), 0, 255, 16, 274),
-                y3: scale(getCircleCoord(uint256(uint160( params.baseTokenAddress )), 48, params.tokenId), 0, 255, 100, 484)
-            }));
+                color0: tokenToColorHex(
+                    uint256(uint160(params.quoteTokenAddress)),
+                    136
+                ),
+                color1: tokenToColorHex(
+                    uint256(uint160(params.baseTokenAddress)),
+                    136
+                ),
+                color2: tokenToColorHex(
+                    uint256(uint160(params.quoteTokenAddress)),
+                    0
+                ),
+                color3: tokenToColorHex(
+                    uint256(uint160(params.baseTokenAddress)),
+                    0
+                ),
+                x1: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.quoteTokenAddress)),
+                        16,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    16,
+                    274
+                ),
+                y1: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.baseTokenAddress)),
+                        16,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    100,
+                    484
+                ),
+                x2: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.quoteTokenAddress)),
+                        32,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    16,
+                    274
+                ),
+                y2: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.baseTokenAddress)),
+                        32,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    100,
+                    484
+                ),
+                x3: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.quoteTokenAddress)),
+                        48,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    16,
+                    274
+                ),
+                y3: scale(
+                    getCircleCoord(
+                        uint256(uint160(params.baseTokenAddress)),
+                        48,
+                        params.tokenId
+                    ),
+                    0,
+                    255,
+                    100,
+                    484
+                )
+            })
+        );
     }
 
-    function addressToString(address addr) internal pure returns (string memory) {
+    function addressToString(address addr)
+        internal
+        pure
+        returns (string memory)
+    {
         return (uint256(uint160(addr))).toHexString(20);
     }
 
-    function tokenToColorHex(uint256 token, uint256 offset) internal pure returns (string memory str) {
+    function tokenToColorHex(uint256 token, uint256 offset)
+        internal
+        pure
+        returns (string memory str)
+    {
         return string((token >> offset).toHexStringNoPrefix(3));
     }
 
@@ -145,7 +232,8 @@ library NFTDescriptor {
         uint256 outMn,
         uint256 outMx
     ) private pure returns (string memory) {
-        return (n - inMn * (outMx - outMn) / (inMx - inMn) + (outMn)).toString();
+        return
+            (n - (inMn * (outMx - outMn)) / (inMx - inMn) + (outMn)).toString();
     }
 
     function getCircleCoord(
@@ -156,7 +244,11 @@ library NFTDescriptor {
         return (sliceTokenHex(tokenAddress, offset) * tokenId) % 255;
     }
 
-    function sliceTokenHex(uint256 token, uint256 offset) internal pure returns (uint256) {
+    function sliceTokenHex(uint256 token, uint256 offset)
+        internal
+        pure
+        returns (uint256)
+    {
         return uint256(uint8(token >> offset));
     }
 }

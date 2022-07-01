@@ -9,7 +9,7 @@ import "./interfaces/ISWNFT.sol";
 /// @title Contract for Strategy
 contract Strategy is IStrategy {
     /// @dev The token ID position data
-    mapping(uint256 => uint) public positions;
+    mapping(uint256 => uint256) public positions;
 
     address public immutable swNFT;
 
@@ -18,7 +18,7 @@ contract Strategy is IStrategy {
         swNFT = _swNFT;
     }
 
-    modifier onlyswNFT {
+    modifier onlyswNFT() {
         require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
         _;
     }
@@ -27,19 +27,31 @@ contract Strategy is IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function enter(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
+    function enter(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
         require(amount > 0, "cannot enter strategy with 0 amount");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
-        success = ISWETH(swETHAddress).transferFrom(msg.sender, address(this), amount);
+        success = ISWETH(swETHAddress).transferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
     }
 
     /// @notice Exit vault
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function exit(uint tokenId, uint amount) external onlyswNFT returns (bool success) {
+    function exit(uint256 tokenId, uint256 amount)
+        external
+        onlyswNFT
+        returns (bool success)
+    {
         require(amount > 0, "No position to exit");
         require(amount <= positions[tokenId], "Not enough position to exit");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();

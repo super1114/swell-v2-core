@@ -9,7 +9,7 @@
  */
 const chainDeposit = async (balancerVault, deposits, amount, signer) => {
   for (let i = 0; i < deposits; i++) {
-    await balancerVault.connect(signer).deposit(amount, signer.address);
+    await balancerVault.connect(signer).deposit(amount, signer.address, 0);
   }
 };
 

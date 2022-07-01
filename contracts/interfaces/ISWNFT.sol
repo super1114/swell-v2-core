@@ -3,20 +3,19 @@
 pragma solidity 0.8.9;
 
 /// @title Interface for swNFT
-interface ISWNFT
-{
+interface ISWNFT {
     struct Position {
         bytes pubKey;
-        uint value;
-        uint baseTokenBalance;
-        uint timeStamp;
+        uint256 value;
+        uint256 baseTokenBalance;
+        uint256 timeStamp;
         bool operator;
     }
 
     struct Action {
-        uint tokenId;
-        uint action;
-        uint amount;
+        uint256 tokenId;
+        uint256 action;
+        uint256 amount;
         address strategy;
     }
 
@@ -24,10 +23,15 @@ interface ISWNFT
         bytes pubKey;
         bytes signature;
         bytes32 depositDataRoot;
-        uint amount;
+        uint256 amount;
     }
 
-    enum ActionChoices { Deposit, Withdraw, EnterStrategy, ExitStrategy }
+    enum ActionChoices {
+        Deposit,
+        Withdraw,
+        EnterStrategy,
+        ExitStrategy
+    }
 
     function swETHAddress() external view returns (address);
 
@@ -37,58 +41,41 @@ interface ISWNFT
         address indexed user,
         uint256 indexed itemId,
         bytes indexed pubKey,
-        uint deposit,
-        uint timeStamp,
+        uint256 deposit,
+        uint256 timeStamp,
         string referral
     );
 
-    event LogDeposit(
-        uint indexed tokenId,
-        address user,
-        uint amount
-    );
+    event LogDeposit(uint256 indexed tokenId, address user, uint256 amount);
 
-    event LogWithdraw(
-        uint indexed tokenId,
-        address user,
-        uint amount
-    );
+    event LogWithdraw(uint256 indexed tokenId, address user, uint256 amount);
 
-    event LogAddStrategy(
-        address indexed strategy
-    );
+    event LogAddStrategy(address indexed strategy);
 
-    event LogRemoveStrategy(
-        address indexed strategy
-    );
+    event LogRemoveStrategy(address indexed strategy);
 
     event LogEnterStrategy(
-        uint indexed tokenId,
+        uint256 indexed tokenId,
         address strategy,
         address user,
-        uint amount
+        uint256 amount
     );
 
     event LogExitStrategy(
-        uint indexed tokenId,
+        uint256 indexed tokenId,
         address strategy,
         address user,
-        uint amount
+        uint256 amount
     );
 
-    event LogAddWhiteList(
-        address user,
-        bytes indexed pubKey
-    );
+    event LogAddWhiteList(address user, bytes indexed pubKey);
 
     event LogAddSuperWhiteList(
         address user,
         bytes indexed pubKey
     );
 
-    event LogUpdateBotAddress(
-        address _address
-    );
+    event LogUpdateBotAddress(address _address);
 
     event LogUpdateIsValidatorActive(
         address user,
@@ -96,21 +83,11 @@ interface ISWNFT
         bool isActive
     );
 
-    event LogSetSWETHAddress(
-        address swETHAddress
-    );
+    event LogSetSWETHAddress(address swETHAddress);
 
-    event LogSetFeePool(
-        address feePool
-    );
+    event LogSetFeePool(address feePool);
 
-    event LogSetFee(
-        uint fee
-    );
+    event LogSetFee(uint256 fee);
 
-    event LogSetRate(
-        address user,
-        bytes indexed pubKey,
-        uint rate
-    );
+    event LogSetRate(address user, bytes indexed pubKey, uint256 rate);
 }

@@ -2,8 +2,8 @@
 // https://github.com/Uniswap/v3-periphery/blob/main/contracts/libraries/NFTSVG.sol
 pragma solidity 0.8.9;
 
-import '@openzeppelin/contracts/utils/Strings.sol';
-import 'base64-sol/base64.sol';
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "base64-sol/base64.sol";
 
 /// @title NFTSVG
 /// @notice Provides a function for generating an SVG associated with a the NFT
@@ -31,7 +31,11 @@ library NFTSVG {
         string y3;
     }
 
-    function generateSVG(SVGParams memory params) internal pure returns (string memory svg) {
+    function generateSVG(SVGParams memory params)
+        internal
+        pure
+        returns (string memory svg)
+    {
         return
             string(
                 abi.encodePacked(
@@ -42,23 +46,30 @@ library NFTSVG {
                         params.quoteTokenSymbol,
                         params.baseTokenSymbol
                     ),
-                    generateSVGCardMantle((params.value / params.baseTokenDecimals).toString()),
+                    generateSVGCardMantle(
+                        (params.value / params.baseTokenDecimals).toString()
+                    ),
                     generateSVGPositionDataAndLocationCurve(
                         params.tokenId.toString(),
-                        (params.baseTokenBalance / params.baseTokenDecimals).toString(),
+                        (params.baseTokenBalance / params.baseTokenDecimals)
+                            .toString(),
                         params.baseTokenSymbol
                     ),
-                    '</svg>'
+                    "</svg>"
                 )
             );
     }
 
-    function generateSVGDefs(SVGParams memory params) private pure returns (string memory svg) {
+    function generateSVGDefs(SVGParams memory params)
+        private
+        pure
+        returns (string memory svg)
+    {
         svg = string(
             abi.encodePacked(
                 '<svg width="290" height="500" viewBox="0 0 290 500" xmlns="http://www.w3.org/2000/svg"',
                 " xmlns:xlink='http://www.w3.org/1999/xlink'>",
-                '<defs>',
+                "<defs>",
                 '<filter id="f1"><feImage result="p0" xlink:href="data:image/svg+xml;base64,',
                 Base64.encode(
                     bytes(
@@ -149,39 +160,41 @@ library NFTSVG {
                 '<text text-rendering="optimizeSpeed">',
                 '<textPath startOffset="-100%" fill="white" font-family="\'Courier New\', monospace" font-size="10px" xlink:href="#text-path-a">',
                 baseToken,
-                unicode' • ',
+                unicode" • ",
                 baseTokenSymbol,
                 ' <animate additive="sum" attributeName="startOffset" from="0%" to="100%" begin="0s" dur="30s" repeatCount="indefinite" />',
                 '</textPath> <textPath startOffset="0%" fill="white" font-family="\'Courier New\', monospace" font-size="10px" xlink:href="#text-path-a">',
                 baseToken,
-                unicode' • ',
+                unicode" • ",
                 baseTokenSymbol,
                 ' <animate additive="sum" attributeName="startOffset" from="0%" to="100%" begin="0s" dur="30s" repeatCount="indefinite" /> </textPath>',
                 '<textPath startOffset="50%" fill="white" font-family="\'Courier New\', monospace" font-size="10px" xlink:href="#text-path-a">',
                 quoteToken,
-                unicode' • ',
+                unicode" • ",
                 quoteTokenSymbol,
                 ' <animate additive="sum" attributeName="startOffset" from="0%" to="100%" begin="0s" dur="30s"',
                 ' repeatCount="indefinite" /></textPath><textPath startOffset="-50%" fill="white" font-family="\'Courier New\', monospace" font-size="10px" xlink:href="#text-path-a">',
                 quoteToken,
-                unicode' • ',
+                unicode" • ",
                 quoteTokenSymbol,
                 ' <animate additive="sum" attributeName="startOffset" from="0%" to="100%" begin="0s" dur="30s" repeatCount="indefinite" /></textPath></text>'
             )
         );
     }
 
-    function generateSVGCardMantle(
-        string memory value
-    ) private pure returns (string memory svg) {
+    function generateSVGCardMantle(string memory value)
+        private
+        pure
+        returns (string memory svg)
+    {
         svg = string(
             abi.encodePacked(
                 '<g mask="url(#fade-symbol)"><rect fill="none" x="0px" y="0px" width="290px" height="200px" /> <text y="70px" x="32px" fill="white" font-family="\'Courier New\', monospace" font-weight="200" font-size="36px">',
-                'swNFT',
+                "swNFT",
                 '</text><text y="115px" x="32px" fill="white" font-family="\'Courier New\', monospace" font-weight="200" font-size="36px">',
                 value,
-                ' Ether',
-                '</text></g>',
+                " Ether",
+                "</text></g>",
                 '<rect x="16" y="16" width="258" height="468" rx="26" ry="26" fill="rgba(0,0,0,0)" stroke="rgba(255,255,255,0.2)" />'
             )
         );
@@ -203,18 +216,17 @@ library NFTSVG {
                 'px" height="26px" rx="8px" ry="8px" fill="rgba(0,0,0,0.6)" />',
                 '<text x="12px" y="17px" font-family="\'Courier New\', monospace" font-size="12px" fill="white"><tspan fill="rgba(255,255,255,0.6)">ID: </tspan>',
                 tokenId,
-                '</text></g>',
+                "</text></g>",
                 ' <g style="transform:translate(29px, 414px)">',
                 '<rect width="',
                 uint256(7 * (str2length + str3length + 4)).toString(),
                 'px" height="26px" rx="8px" ry="8px" fill="rgba(0,0,0,0.6)" />',
                 '<text x="12px" y="17px" font-family="\'Courier New\', monospace" font-size="12px" fill="white"><tspan fill="rgba(255,255,255,0.6)">Balance: </tspan>',
                 baseTokenBalance,
-                ' ',
+                " ",
                 baseTokenSymbol,
-                '</text></g>'
+                "</text></g>"
             )
         );
     }
-
 }

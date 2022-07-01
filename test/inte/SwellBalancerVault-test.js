@@ -161,7 +161,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -186,7 +186,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -214,7 +214,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -239,7 +239,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -264,7 +264,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -289,7 +289,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -314,7 +314,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account1)
-      .deposit(amount, account1.address);
+      .deposit(amount, account1.address, 0);
 
     const swETHPoolBalance = await getTestTokenBalanceFromBalancerPool(
       balancerVault,
@@ -627,22 +627,22 @@ describe("Swell Balancer Vault", function () {
     let amount = ethers.utils.parseEther("100001");
 
     await expect(
-      swellBalancerVault.connect(account1).deposit(amount, account1.address)
+      swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
     ).to.be.revertedWith("TRANSFER_FROM_FAILED");
 
     amount = ethers.utils.parseEther("100000.1");
     await expect(
-      swellBalancerVault.connect(account1).deposit(amount, account1.address)
+      swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
     ).to.be.revertedWith("TRANSFER_FROM_FAILED");
 
     amount = ethers.utils.parseEther("100000.000000001");
     await expect(
-      swellBalancerVault.connect(account1).deposit(amount, account1.address)
+      swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
     ).to.be.revertedWith("TRANSFER_FROM_FAILED");
 
     amount = ethers.utils.parseEther("100000.000000000000000001");
     await expect(
-      swellBalancerVault.connect(account1).deposit(amount, account1.address)
+      swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
     ).to.be.revertedWith("TRANSFER_FROM_FAILED");
   });
 
@@ -658,7 +658,7 @@ describe("Swell Balancer Vault", function () {
     const balanceBefore = await swETH.balanceOf(account1.address);
     await swellBalancerVault
       .connect(account1)
-      .redeem(amount, account1.address, account1.address);
+      .redeem(amount, account1.address, account1.address, 0);
     expect(await swETH.balanceOf(account1.address)).to.closeTo(
       balanceBefore.add(estimatedRecovery),
       balanceBefore.add(estimatedRecovery).div(100)
@@ -677,7 +677,7 @@ describe("Swell Balancer Vault", function () {
 
     await swellBalancerVault
       .connect(account2)
-      .withdraw(assets, account2.address, account2.address);
+      .withdraw(assets, account2.address, account2.address, 0);
     expect(await swETH.balanceOf(account2.address)).to.be.closeTo(
       balanceBefore.add(assets),
       balanceBefore.add(assets).div(100)

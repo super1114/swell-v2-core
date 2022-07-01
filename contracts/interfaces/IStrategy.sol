@@ -4,18 +4,17 @@ pragma solidity 0.8.9;
 
 /// @title Interface for swETH
 interface IStrategy {
-    function enter(uint tokenId, uint amount) external returns (bool success);
-    function exit(uint tokenId, uint amount) external returns (bool success);
+    function enter(uint256 tokenId, uint256 amount)
+        external
+        returns (bool success);
+
+    function exit(uint256 tokenId, uint256 amount)
+        external
+        returns (bool success);
 
     // ============ Events ============
 
-    event LogEnter(
-        uint indexed tokenId,
-        uint amount
-    );
+    event LogEnter(uint256 indexed tokenId, uint256 amount);
 
-    event LogExit(
-        uint indexed tokenId,
-        uint amount
-    );
+    event LogExit(uint256 indexed tokenId, uint256 amount);
 }

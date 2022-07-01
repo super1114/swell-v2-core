@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity >=0.8.0;
+pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {SafeTransferLib} from "./SafeTransferLib.sol";
@@ -48,25 +48,29 @@ abstract contract ERC4626 is ERC20Permit {
                         DEPOSIT/WITHDRAWAL LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function deposit(uint256 assets, address receiver)
+    function deposit(uint256 assets, address receiver, bytes memory params)
         public
         virtual
         returns (uint256 shares)
     {
         // Check for rounding error since we round down in previewDeposit.
         require((shares = previewDeposit(assets)) != 0, "ZERO_SHARES");
+        
+        uint256 balanceBefore = asset.balanceOf(address(this));
 
         // Need to transfer before minting or ERC777s could reenter.
         asset.safeTransferFrom(msg.sender, address(this), assets);
 
         _mint(receiver, shares);
 
+        assets = asset.balanceOf(address(this)) - balanceBefore;
+
         emit Deposit(msg.sender, receiver, assets, shares);
 
-        afterDeposit(assets, shares);
+        afterDeposit(assets, shares, params);
     }
 
-    function mint(uint256 shares, address receiver)
+    function mint(uint256 shares, address receiver, bytes memory params)
         public
         virtual
         returns (uint256 assets)
@@ -80,13 +84,14 @@ abstract contract ERC4626 is ERC20Permit {
 
         emit Deposit(msg.sender, receiver, assets, shares);
 
-        afterDeposit(assets, shares);
+        afterDeposit(assets, shares, params);
     }
 
     function withdraw(
         uint256 assets,
         address receiver,
-        address owner
+        address owner,
+        bytes memory params
     ) public virtual returns (uint256 shares) {
         shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
@@ -97,7 +102,7 @@ abstract contract ERC4626 is ERC20Permit {
                 _approve(owner, msg.sender, allowed - shares);
         }
 
-        assets = beforeWithdraw(assets, shares);
+        assets = beforeWithdraw(assets, shares, params);
 
         _burn(owner, shares);
 
@@ -109,7 +114,8 @@ abstract contract ERC4626 is ERC20Permit {
     function redeem(
         uint256 shares,
         address receiver,
-        address owner
+        address owner,
+        bytes memory params
     ) public virtual returns (uint256 assets) {
         if (msg.sender != owner) {
             uint256 allowed = allowance(owner, msg.sender); // Saves gas for limited approvals.
@@ -121,7 +127,7 @@ abstract contract ERC4626 is ERC20Permit {
         // Check for rounding error since we round down in previewRedeem.
         require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
-        assets = beforeWithdraw(assets, shares);
+        assets = beforeWithdraw(assets, shares, params);
 
         _burn(owner, shares);
 
@@ -217,11 +223,11 @@ abstract contract ERC4626 is ERC20Permit {
                          INTERNAL HOOKS LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function beforeWithdraw(uint256 assets, uint256 shares)
+    function beforeWithdraw(uint256 assets, uint256 shares, bytes memory)
         internal
         virtual
         returns (uint256)
     {}
 
-    function afterDeposit(uint256 assets, uint256 shares) internal virtual {}
+    function afterDeposit(uint256 assets, uint256 shares, bytes memory) internal virtual {}
 }

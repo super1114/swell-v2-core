@@ -30,23 +30,6 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   },
 };
 
-const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
-  version: "0.8.9",
-  settings: {
-    evmVersion: "istanbul",
-    optimizer: {
-      enabled: true,
-      runs: 1,
-      details: {
-        yul: false,
-      },
-    },
-    metadata: {
-      bytecodeHash: "none",
-    },
-  },
-};
-
 const DEFAULT_COMPILER_SETTINGS = {
   version: "0.8.9",
   settings: {
@@ -64,6 +47,23 @@ const DEFAULT_COMPILER_SETTINGS = {
   },
 };
 
+const UNISWAP_COMPILER_SETTINGS = {
+  version: "0.8.9",
+  settings: {
+    evmVersion: "istanbul",
+    optimizer: {
+      enabled: true,
+      runs: 1,
+      details: {
+        yul: true,
+      },
+    },
+    metadata: {
+      bytecodeHash: "none",
+    },
+  },
+};
+
 module.exports = {
   networks: {
     hardhat: {
@@ -71,6 +71,10 @@ module.exports = {
       forking: {
         url:
           "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
+      },
+      blockNumber: 14439914, // latest as of (04/05/22)
+      mining: {
+        auto: true,
       },
     },
     goerli: {
@@ -106,6 +110,7 @@ module.exports = {
         LOW_OPTIMIZER_COMPILER_SETTINGS,
       "contracts/latest-tag/tests/swNFTUpgradeTestnet.sol":
         LOW_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/SwellIzumiVault.sol": UNISWAP_COMPILER_SETTINGS,
     },
   },
   abiExporter: {

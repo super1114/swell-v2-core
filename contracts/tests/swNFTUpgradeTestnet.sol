@@ -5,8 +5,10 @@ pragma solidity 0.8.9;
 import "../swNFTUpgrade.sol";
 
 contract SWNFTUpgradeTestnet is SWNFTUpgrade {
-
-    function initialize(address _swellAddress, address _depositContract) external initializer {
+    function initialize(address _swellAddress, address _depositContract)
+        external
+        initializer
+    {
         require(_swellAddress != address(0), "SwellAddress cannot be 0");
         require(_depositContract != address(0), "depositContract cannot be 0");
         __ERC721_init(swNFTName, swNFTSymbol);
