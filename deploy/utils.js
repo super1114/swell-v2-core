@@ -11,6 +11,7 @@ const retryWithDelay = async (
         return await fn();
     } catch (err) {
         console.log(`${functionType} call failed: ${err.message}`);
+        console.log(`Retries remaining: ${retries}`);
         if (retries <= 0) {
             return Promise.reject(finalErr);
         }
