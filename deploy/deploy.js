@@ -140,6 +140,11 @@ task("deploy", "Deploy the contracts")
 
       await swNFT.addStrategy(strategy.address);
 
+      await hre.run("verify:verify", {
+          address: versions[oldTag].contracts.swNFTImplementation,
+          constructorArguments: [],
+      });
+
       // convert JSON object to string
       const data = JSON.stringify(versions, null, 2);
 

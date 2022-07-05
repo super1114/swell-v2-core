@@ -7,26 +7,6 @@ task("Verify", "Verify the swNFTImplementation contract")
 
     let network = await ethers.provider.getNetwork();
 
-    // if Main env, change network manifest file name temporarily
-    const manifestFile = networkNames[network.chainId]
-      ? networkNames[network.chainId]
-      : `unknown-${network.chainId}`;
-
-    if (isMain) {
-      if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
-        fs.renameSync(
-          `.openzeppelin/${manifestFile}.json`,
-          `.openzeppelin/${manifestFile}-orig.json`
-        );
-      }
-      if (fs.existsSync(`.openzeppelin/${manifestFile}-main.json`)) {
-        fs.renameSync(
-          `.openzeppelin/${manifestFile}-main.json`,
-          `.openzeppelin/${manifestFile}.json`
-        );
-      }
-    }
-
     try {
       // Init tag
       const path = `./deployments/${network.chainId}_versions${isMain ? "-main" : ""
@@ -41,24 +21,7 @@ task("Verify", "Verify the swNFTImplementation contract")
       });
     } catch (e) {
       console.log("error", e);
-    } finally {
-      if (isMain) {
-        // restore network manifest file
-        if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
-          fs.renameSync(
-            `.openzeppelin/${manifestFile}.json`,
-            `.openzeppelin/${manifestFile}-main.json`
-          );
-        }
-
-        if (fs.existsSync(`.openzeppelin/${manifestFile}-orig.json`)) {
-          fs.renameSync(
-            `.openzeppelin/${manifestFile}-orig.json`,
-            `.openzeppelin/${manifestFile}.json`
-          );
-        }
-      }
-    }
+    } 
   });
 
 module.exports = {};

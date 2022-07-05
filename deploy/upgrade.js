@@ -70,6 +70,11 @@ task("upgrade", "Upgrade the contracts")
       });
       versions[newTag].contracts.swNFT = swNFT.address;
 
+      await hre.run("verify:verify", {
+          address: contracts.swNFTImplementation,
+          constructorArguments: [],
+      });
+
       // convert JSON object to string
       const data = JSON.stringify(versions, null, 2);
 
