@@ -1,5 +1,4 @@
-const fs = require("fs");
-const { networkNames } = require("@openzeppelin/upgrades-core");
+const { getImplementation, tryVerify } = require("./helpers");
 
 task("Verify", "Verify the swNFTImplementation contract")
   .setAction(async (taskArgs, hre) => {
@@ -15,13 +14,11 @@ task("Verify", "Verify the swNFTImplementation contract")
       const latest = Object.keys(versions)[Object.keys(versions).length - 1];
       const contracts = versions[latest].contracts;
 
-      await hre.run("verify:verify", {
-          address: contracts.swNFTImplementation,
-          constructorArguments: [],
-      });
+      const swNFTImplementation = await getImplementation(contracts.swNFT, hre);
+      await tryVerify(hre, swNFTImplementation, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", []);
     } catch (e) {
       console.log("error", e);
-    } 
+    }
   });
 
 module.exports = {};

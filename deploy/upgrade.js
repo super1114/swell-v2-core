@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { networkNames } = require("@openzeppelin/upgrades-core");
-const { getTag } = require("./helpers");
+const { getTag, getImplementation, tryVerify  } = require("./helpers");
 
 task("upgrade", "Upgrade the contracts")
   .addOptionalParam(
@@ -70,10 +70,8 @@ task("upgrade", "Upgrade the contracts")
       });
       versions[newTag].contracts.swNFT = swNFT.address;
 
-      await hre.run("verify:verify", {
-          address: contracts.swNFTImplementation,
-          constructorArguments: [],
-      });
+      const swNFTImplementation = await getImplementation(swNFT.address, hre);
+      await tryVerify(hre, swNFTImplementation, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", []);
 
       // convert JSON object to string
       const data = JSON.stringify(versions, null, 2);
