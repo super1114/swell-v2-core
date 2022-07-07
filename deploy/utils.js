@@ -3,8 +3,8 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const retryWithDelay = async (
     fn,
     functionType = "Function",
-    retries = 30,
-    interval = 10000,
+    retries = 3,
+    interval = 5000,
     finalErr = Error("Retry failed"),
 ) => {
     try {
