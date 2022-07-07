@@ -92,7 +92,7 @@ describe("SWNFT", async () => {
           value: amount,
         }
       )
-    ).to.be.revertedWith("Must send 16 ETH bond");
+    ).to.be.revertedWith("ERR-042");
   });
 
   it("owner sets the bot address", async function () {
