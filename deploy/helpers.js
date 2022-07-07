@@ -38,6 +38,7 @@ const tryVerify = async (hre, address, path, constructorArguments) => {
             if (!e.message.toLowerCase().includes("already verified")) {
                 throw e;
             }
+            console.log(e.message);
         }
     }, "Try Verify Failed: " + address);
 };
