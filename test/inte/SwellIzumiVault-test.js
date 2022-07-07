@@ -312,7 +312,7 @@ describe("Swell Izumi Vault", () => {
     );
     await expect(
       swellVault.deposit(amountToDeposit, owner.address, swapParams)
-    ).to.be.revertedWith("ERR-006");
+    ).to.be.revertedWith("amountIn 0");
 
     sqrtPriceLimitX96 = await _getPriceLimit(
       amountIn,
@@ -327,7 +327,7 @@ describe("Swell Izumi Vault", () => {
     );
     await expect(
       swellVault.deposit(amountToDeposit, owner.address, swapParams)
-    ).to.be.revertedWith("ERR-007");
+    ).to.be.revertedWith("amountOutMin 0");
 
     sqrtPriceLimitX96 = await _getPriceLimit(
       amountIn,
@@ -342,6 +342,6 @@ describe("Swell Izumi Vault", () => {
     );
     await expect(
       swellVault.deposit(amountToDeposit, owner.address, swapParams)
-    ).to.be.revertedWith("ERR-008");
+    ).to.be.revertedWith("priceLimit 0");
   });
 });

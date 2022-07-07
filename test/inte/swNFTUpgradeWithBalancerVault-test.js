@@ -106,7 +106,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-039");
+      ).to.be.revertedWith("less than 1eth");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -119,7 +119,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-042");
+      ).to.be.revertedWith("not 16eth bond");
       amount = ethers.utils.parseEther("16");
       await expect(
         swNFT.stake(
@@ -184,7 +184,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-044");
+      ).to.be.revertedWith("not active val");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -280,23 +280,23 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-041");
+      ).to.be.revertedWith("over 32 eth");
     });
 
     it("cannot withdraw 2 swETH", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("ERR-028");
+      ).to.be.revertedWith("over pos bal");
 
       await expect(
         swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("ERR-027");
+      ).to.be.revertedWith("not owner");
     });
 
     it("can not withdraw with no balance", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("ERR-028");
+      ).to.be.revertedWith("over pos bal");
 
       const position = await swNFT.positions("1");
       await expect(position.pubKey).to.be.equal(pubKey2);
@@ -321,7 +321,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("ERR-025");
+      ).to.be.revertedWith("not owner");
     });
 
     it("can deposit 1 swETH", async function () {
@@ -344,7 +344,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
     it("can add strategy", async function () {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
-        "ERR-001"
+        "address 0"
       );
 
       await expect(
@@ -369,7 +369,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         swNFT
           .connect(user)
           .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("ERR-030");
+      ).to.be.revertedWith("not owner");
 
       await expect(
         swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
@@ -403,7 +403,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
           strategy.address,
           ethers.utils.parseEther("0.5")
         )
-      ).to.be.revertedWith("ERR-031");
+      ).to.be.revertedWith("not owner");
 
       await expect(
         swNFT
@@ -420,7 +420,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
       await expect(
         swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("ERR-005");
+      ).to.be.revertedWith("not enough pos");
     });
 
     it("can batch actions", async function () {
@@ -496,7 +496,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-043");
+      ).to.be.revertedWith("not 1eth bond");
 
       amount = ethers.utils.parseEther("1");
       await expect(
@@ -520,7 +520,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("ERR-044");
+      ).to.be.revertedWith("not active val");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();

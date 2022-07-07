@@ -14,7 +14,7 @@ library HexStrings {
     //         buffer[i] = ALPHABET[value & 0xf];
     //         value >>= 4;
     //     }
-    //     require(value == 0, "ERR-047");
+    //     require(value == 0, "insuff hex len");
     //     return string(buffer);
     // }
 
