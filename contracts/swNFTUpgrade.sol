@@ -72,7 +72,7 @@ contract SWNFTUpgrade is
     address[] public deprecatedStrategies; // deprecated
 
     modifier onlyBot() {
-        require(msg.sender == botAddress, "sender is not the bot");
+        require(msg.sender == botAddress, "ERR-013");
         _;
     }
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -81,7 +81,7 @@ contract SWNFTUpgrade is
     /// @notice initialise the contract to issue the token
     /// @param _swellAddress The address of the swell contract
     function initialize(address _swellAddress) external virtual initializer {
-        require(_swellAddress != address(0), "SwellAddress cannot be 0");
+        require(_swellAddress != address(0), "ERR-014");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
@@ -97,7 +97,7 @@ contract SWNFTUpgrade is
     /// @notice set base token address
     /// @param _swETHAddress The address of the base token
     function setswETHAddress(address _swETHAddress) external onlyOwner {
-        require(_swETHAddress != address(0), "Address cannot be 0");
+        require(_swETHAddress != address(0), "ERR-001");
         swETHAddress = _swETHAddress;
         emit LogSetSWETHAddress(swETHAddress);
     }
@@ -105,7 +105,7 @@ contract SWNFTUpgrade is
     /// @notice set fee pool address
     /// @param _feePool The address of the fee pool
     function setFeePool(address _feePool) external onlyOwner {
-        require(_feePool != address(0), "Address cannot be 0");
+        require(_feePool != address(0), "ERR-001");
         feePool = _feePool;
         emit LogSetFeePool(feePool);
     }
@@ -113,7 +113,7 @@ contract SWNFTUpgrade is
     /// @notice set fee
     /// @param _fee The fee that's going to be paid to the fee pool
     function setFee(uint256 _fee) external onlyOwner {
-        require(_fee > 0, "Fee needs to be more than 0");
+        require(_fee > 0, "ERR-022");
         fee = _fee;
         emit LogSetFee(_fee);
     }
@@ -125,7 +125,7 @@ contract SWNFTUpgrade is
         onlyOwner
         returns (bool added)
     {
-        require(strategy != address(0), "address cannot be 0");
+        require(strategy != address(0), "ERR-001");
         added = strategiesSet.add(strategy);
         if (added) {
             emit LogAddStrategy(strategy);
@@ -178,7 +178,7 @@ contract SWNFTUpgrade is
     // @notice Update the cronjob bot address
     /// @param _address The address of the cronjob bot
     function updateBotAddress(address _address) external onlyOwner {
-        require(_address != address(0), "address cannot be 0");
+        require(_address != address(0), "ERR-001");
         botAddress = _address;
         emit LogUpdateBotAddress(_address);
     }
@@ -205,7 +205,7 @@ contract SWNFTUpgrade is
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
     function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
-        require(rate > 0, "rate should be bigger than zero");
+        require(rate > 0, "ERR-023");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
     }
@@ -223,7 +223,7 @@ contract SWNFTUpgrade is
 
     /// @notice Renonce ownership is not allowed
     function renounceOwnership() public view override onlyOwner {
-        revert("Cannot renonce ownership");
+        revert("ERR-062");
     }
 
     // ============ Public mutative without permission functions ============
@@ -236,11 +236,11 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "Amount must be greater than 0");
-        require(ownerOf(tokenId) == msg.sender, "Only owner can deposit");
+        require(amount > 0, "ERR-024");
+        require(ownerOf(tokenId) == msg.sender, "ERR-025");
         require(
             msg.sender != address(this),
-            "Contract cannot deposit/withdraw"
+            "ERR-026"
         );
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
@@ -259,16 +259,16 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "Amount must be greater than 0");
-        require(ownerOf(tokenId) == msg.sender, "Only owner can withdraw");
+        require(amount > 0, "ERR-024");
+        require(ownerOf(tokenId) == msg.sender, "ERR-027");
         require(
             msg.sender != address(this),
-            "Contract cannot deposit/withdraw"
+            "ERR-026"
         );
         uint256 baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(
             amount <= baseTokenBalance,
-            "cannot withdraw more than the position balance"
+            "ERR-028"
         );
         positions[tokenId].baseTokenBalance -= amount;
         emit LogWithdraw(tokenId, msg.sender, amount);
@@ -285,12 +285,12 @@ contract SWNFTUpgrade is
         address strategy,
         uint256 amount
     ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "Invalid strategy address");
+        require(strategiesSet.contains(strategy), "ERR-029");
         require(
             ownerOf(tokenId) == msg.sender,
-            "Only owner can enter strategy"
+            "ERR-030"
         );
-        require(amount > 0, "cannot enter strategy with 0 amount");
+        require(amount > 0, "ERR-003");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(tokenId, strategy, msg.sender, amount);
         ISWETH(swETHAddress).approve(strategy, amount);
@@ -307,9 +307,9 @@ contract SWNFTUpgrade is
         address strategy,
         uint256 amount
     ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "Invalid strategy address");
-        require(ownerOf(tokenId) == msg.sender, "Only owner can exit strategy");
-        require(amount > 0, "cannot exit strategy with 0 amount");
+        require(strategiesSet.contains(strategy), "ERR-029");
+        require(ownerOf(tokenId) == msg.sender, "ERR-031");
+        require(amount > 0, "ERR-032");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(tokenId, strategy, msg.sender, amount);
         success = IStrategy(strategy).exit(tokenId, amount);
@@ -366,10 +366,10 @@ contract SWNFTUpgrade is
     }
 
     function unstake() external pure {
-        // require(_exists(tokenId), "Query for nonexistent token");
-        // require(ownerOf(tokenId) == msg.sender, "Only owner can unstake");
-        // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough base token balance");
-        revert("Need to wait till LP is available");
+        // require(_exists(tokenId), "ERR-033");
+        // require(ownerOf(tokenId) == msg.sender, "ERR-034");
+        // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "ERR-035");
+        revert("ERR-036");
     }
 
     // ============ Public/External Getter functions ============
@@ -397,7 +397,7 @@ contract SWNFTUpgrade is
         override
         returns (string memory)
     {
-        require(_exists(tokenId), "Query for nonexistent token");
+        require(_exists(tokenId), "ERR-033");
         Position memory position = positions[tokenId];
         return
             NFTDescriptor.constructTokenURI(
@@ -437,7 +437,7 @@ contract SWNFTUpgrade is
     /// @notice Get the strategy with index
     /// @return Strategy address
     function strategies(uint256 strategyIndex) external view returns (address) {
-        require(strategyIndex < strategiesSet.length(), "Index out");
+        require(strategyIndex < strategiesSet.length(), "ERR-037");
         return strategiesSet.at(strategyIndex);
     }
 
@@ -463,28 +463,28 @@ contract SWNFTUpgrade is
         uint256 amount,
         string calldata referral
     ) private returns (uint256 newItemId) {
-        require(amount <= msg.value, "cannot stake more than sent");
-        require(amount >= 1 ether, "Must send at least 1 ETH");
-        require(amount % 1 ether == 0, "stake value not multiple of Ether");
+        require(amount <= msg.value, "ERR-038");
+        require(amount >= 1 ether, "ERR-039");
+        require(amount % 1 ether == 0, "ERR-040");
         require(
             validatorDeposits[pubKey] + amount <= 32 ether,
-            "cannot stake more than 32 ETH"
+            "ERR-041"
         );
 
         bool operator;
         if(!superWhiteList[pubKey]) {
             if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
-                require(amount == 16 ether, "Must send 16 ETH bond");
+                require(amount == 16 ether, "ERR-042");
                 //TODO: Will add require for swDAO bond once there's price
             }
             if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
-                require(amount == 1 ether, "Must send 1 ETH bond"); 
+                require(amount == 1 ether, "ERR-043"); 
                 //TODO: Will add require for swDAO bond once there's price 
             }
             if(validatorDeposits[pubKey] == 0) {
                 operator = true;
             } else {
-                require(isValidatorActive[pubKey], 'validator is not active');
+                require(isValidatorActive[pubKey], "ERR-044");
             }
         }
         depositContract.deposit{value: amount}(

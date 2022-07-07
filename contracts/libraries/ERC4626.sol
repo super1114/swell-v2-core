@@ -54,7 +54,7 @@ abstract contract ERC4626 is ERC20Permit {
         returns (uint256 shares)
     {
         // Check for rounding error since we round down in previewDeposit.
-        require((shares = previewDeposit(assets)) != 0, "ZERO_SHARES");
+        require((shares = previewDeposit(assets)) != 0, "ERR-045");
         
         uint256 balanceBefore = asset.balanceOf(address(this));
 
@@ -125,7 +125,7 @@ abstract contract ERC4626 is ERC20Permit {
         }
 
         // Check for rounding error since we round down in previewRedeem.
-        require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
+        require((assets = previewRedeem(shares)) != 0, "ERR-046");
 
         assets = beforeWithdraw(assets, shares, params);
 

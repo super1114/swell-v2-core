@@ -60,20 +60,20 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
 
     // checks if nftID is valid
     modifier validTokenId() {
-        require(nftID != 0, "invalid token id");
+        require(nftID != 0, "ERR-011");
         _;
     }
 
     modifier validSender(address sender) {
         require(
             sender == address(positionManager.ownerOf(nftID)),
-            "invalid nft sender"
+            "ERR-012"
         );
         _;
     }
 
     modifier onlyswNFT() {
-        require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
+        require(msg.sender == swNFT, "ERR-002");
         _;
     }
 
@@ -81,23 +81,23 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
     constructor(ConstructorParams memory _params)
         ERC4626(_params.asset, _params.name, _params.symbol)
     {
-        require(_params.swNFT != address(0), "Address cannot be 0");
+        require(_params.swNFT != address(0), "ERR-001");
         require(
             _params.positionManager != address(0),
-            "invalid position manager"
+            "ERR-015"
         );
-        require(_params.swapRouter != address(0), "invalid swap router");
-        require(address(_params.poolData.pool) != address(0), "invalid pool");
+        require(_params.swapRouter != address(0), "ERR-016");
+        require(address(_params.poolData.pool) != address(0), "ERR-017");
         require(
             address(_params.poolData.counterToken) != address(0),
-            "invalid token"
+            "ERR-018"
         );
-        require(_params.poolData.fee > 0, "invalid fee");
+        require(_params.poolData.fee > 0, "ERR-019");
         require(
             _params.poolData.tickLower < _params.poolData.tickUpper,
-            "invalid tick range"
+            "ERR-020"
         );
-        require(_params.IzumiLiquidBox != address(0), "invalid liquid box");
+        require(_params.IzumiLiquidBox != address(0), "ERR-021");
 
         swNFT = _params.swNFT;
         positionManager = INonfungiblePositionManager(_params.positionManager);
@@ -137,7 +137,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "cannot enter strategy with 0 amount");
+        require(amount > 0, "ERR-003");
         deposit(amount, msg.sender, new bytes(0));
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
@@ -153,8 +153,8 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "No position to exit");
-        require(amount <= positions[tokenId], "Not enough position to exit");
+        require(amount > 0, "ERR-004");
+        require(amount <= positions[tokenId], "ERR-005");
         withdraw(amount, msg.sender, msg.sender, new bytes(0));
         positions[tokenId] -= amount;
         emit LogExit(tokenId, amount);
@@ -353,9 +353,9 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 
-        require(amountIn != 0, "amountIn cannot be 0");
-        require(amountOutMin != 0, "amountOutMin cannot be 0");
-        require(sqrtPriceLimit != 0, "sqrtPriceLimit cannot be 0");
+        require(amountIn != 0, "ERR-006");
+        require(amountOutMin != 0, "ERR-007");
+        require(sqrtPriceLimit != 0, "ERR-008");
 
         UniswapPoolData memory position = poolData;
         (address token0, address token1) = _canonicalTokenSort(
@@ -449,9 +449,9 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         (uint256 amountIn, uint256 amountOutMin, uint160 sqrtPriceLimit) = abi
             .decode(params, (uint256, uint256, uint160));
 
-        require(amountIn != 0, "amountIn cannot be 0");
-        require(amountOutMin != 0, "amountOutMin cannot be 0");
-        require(sqrtPriceLimit != 0, "sqrtPriceLimit cannot be 0");
+        require(amountIn != 0, "ERR-006");
+        require(amountOutMin != 0, "ERR-007");
+        require(sqrtPriceLimit != 0, "ERR-008");
 
         (address token0, address token1) = _canonicalTokenSort(
             address(asset),
@@ -480,7 +480,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
             );
             (, , , , , , , uint128 liquidity, , , , ) = positionManager
                 .positions(nftID);
-            require(requiredLiquidity <= liquidity, "Not enough liquidity");
+            require(requiredLiquidity <= liquidity, "ERR-009");
 
             // Withdraw LP NFT from liquidbox after checking there is enough liquidity
             withdrawFromLiquidBox(false);

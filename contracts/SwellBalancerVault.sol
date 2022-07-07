@@ -29,7 +29,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         IVault _vault,
         bytes32 _poolId
     ) ERC4626(_asset, _name, _symbol) {
-        require(_swNFT != address(0), "Address cannot be 0");
+        require(_swNFT != address(0), "ERR-001");
         swNFT = _swNFT;
 
         balancerVault = _vault;
@@ -40,7 +40,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     }
 
     modifier onlyswNFT() {
-        require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
+        require(msg.sender == swNFT, "ERR-002");
         _;
     }
 
@@ -57,7 +57,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "cannot enter strategy with 0 amount");
+        require(amount > 0, "ERR-003");
         deposit(amount, msg.sender, new bytes(0));
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
@@ -73,8 +73,8 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "No position to exit");
-        require(amount <= positions[tokenId], "Not enough position to exit");
+        require(amount > 0, "ERR-004");
+        require(amount <= positions[tokenId], "ERR-005");
         withdraw(amount, msg.sender, msg.sender, new bytes(0));
         positions[tokenId] -= amount;
         emit LogExit(tokenId, amount);

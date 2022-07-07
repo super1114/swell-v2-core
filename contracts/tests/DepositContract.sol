@@ -108,26 +108,26 @@ contract DepositContract is IDepositContract, ERC165 {
         bytes32 deposit_data_root
     ) external payable override {
         // Extended ABI length checks since dynamic types are used.
-        require(pubkey.length == 48, "DepositContract: invalid pubkey length");
+        require(pubkey.length == 48, "ERR-052");
         require(
             withdrawal_credentials.length == 32,
-            "DepositContract: invalid withdrawal_credentials length"
+            "ERR-053"
         );
         require(
             signature.length == 96,
-            "DepositContract: invalid signature length"
+            "ERR-054"
         );
 
         // Check deposit amount
-        require(msg.value >= 1 ether, "DepositContract: deposit value too low");
+        require(msg.value >= 1 ether, "ERR-055");
         require(
             msg.value % 1 gwei == 0,
-            "DepositContract: deposit value not multiple of gwei"
+            "ERR-056"
         );
         uint256 deposit_amount = msg.value / 1 gwei;
         require(
             deposit_amount <= type(uint64).max,
-            "DepositContract: deposit value too high"
+            "ERR-057"
         );
 
         // Emit `DepositEvent` log
@@ -158,13 +158,13 @@ contract DepositContract is IDepositContract, ERC165 {
         // Verify computed and expected deposit data roots match
         require(
             node == deposit_data_root,
-            "DepositContract: reconstructed DepositData does not match supplied deposit_data_root"
+            "ERR-058"
         );
 
         // Avoid overflowing the Merkle tree (and prevent edge case in computing `branch`)
         require(
             deposit_count < MAX_DEPOSIT_COUNT,
-            "DepositContract: merkle tree full"
+            "ERR-059"
         );
 
         // Add deposit data root to Merkle tree (update a single `branch` node)
