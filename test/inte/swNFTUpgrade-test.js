@@ -105,7 +105,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("less than 1eth");
+      ).to.be.revertedWith("1 ETH minimum");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -118,7 +118,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not 16eth bond");
+      ).to.be.revertedWith("16ETH required");
       amount = ethers.utils.parseEther("16");
       await expect(
         swNFT.stake(
@@ -250,23 +250,23 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("over 32 eth");
+      ).to.be.revertedWith("Over 32 ETH");
     });
 
     it("cannot withdraw 2 swETH", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("over pos bal");
+      ).to.be.revertedWith("Over balance");
 
       await expect(
         swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("not owner");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can not withdraw with no balance", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("over pos bal");
+      ).to.be.revertedWith("Over balance");
 
       const position = await swNFT.positions("1");
       await expect(position.pubKey).to.be.equal(pubKey2);
@@ -287,11 +287,11 @@ describe("SWNFTUpgrade", () => {
       );
     });
 
-    it("cannot deposit if not owner", async function () {
+    it("cannot deposit if Owner only", async function () {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("not owner");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can deposit 1 swETH", async function () {
@@ -314,7 +314,7 @@ describe("SWNFTUpgrade", () => {
 
     it("can add strategy", async function () {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
-        "address 0"
+        "Address is 0"
       );
 
       await expect(
@@ -339,7 +339,7 @@ describe("SWNFTUpgrade", () => {
         swNFT
           .connect(user)
           .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("not owner");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
@@ -369,7 +369,7 @@ describe("SWNFTUpgrade", () => {
     it("can exit strategy", async function () {
       await expect(
         swNFT.exitStrategy("2", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("not owner");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT
@@ -386,7 +386,7 @@ describe("SWNFTUpgrade", () => {
 
       await expect(
         swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("not enough pos");
+      ).to.be.revertedWith("Amount too big");
     });
 
     it("can batch actions", async function () {
@@ -462,7 +462,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not 1eth bond");
+      ).to.be.revertedWith("1 ETH required");
 
       amount = ethers.utils.parseEther("1");
       await expect(

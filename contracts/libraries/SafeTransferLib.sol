@@ -22,7 +22,7 @@ library SafeTransferLib {
             success := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(success, "eth_tx_fail");
+        require(success, "Transfer fail");
     }
 
     /*///////////////////////////////////////////////////////////////
