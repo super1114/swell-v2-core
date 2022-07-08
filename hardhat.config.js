@@ -9,6 +9,7 @@ require("solidity-coverage");
 require("./deploy/deploy");
 require("./deploy/deployMultisender");
 require("./deploy/upgrade");
+require("./deploy/verify");
 require("./bin/dispatchETH");
 require("./bin/addWhiteLists");
 require("./bin/updateIsValidatorsActive");
@@ -19,7 +20,7 @@ const LOW_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: "istanbul",
     optimizer: {
       enabled: true,
-      runs: 50,
+      runs: 110,
       details: {
         yul: false,
       },
