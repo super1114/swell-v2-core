@@ -9,6 +9,7 @@ require("solidity-coverage");
 require("./deploy/deploy");
 require("./deploy/deployMultisender");
 require("./deploy/upgrade");
+require("./deploy/upgradeFromMultisig");
 require("./deploy/verify");
 require("./bin/dispatchETH");
 require("./bin/addWhiteLists");
