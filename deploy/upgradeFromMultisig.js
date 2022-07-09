@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { networkNames } = require("@openzeppelin/upgrades-core");
-const { getTag } = require("./helpers");
+const { getTag, tryVerify } = require("./helpers");
+const { ethers } = require("hardhat");
 
 task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
   .addOptionalParam(
@@ -15,6 +16,14 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
       console.log("Only available for goerli and mainnet");
       return;
     }
+    console.log("--> valid");
+    // transferownership
+    const swNFT = await ethers.getContractAt(
+      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      "0xEEEF6eF2E0b21211B1D51A442c3436a3232ed169"
+    );
+    await swNFT.transferOwnership("0xA6FF5B3CF991721E02981Aac174e54878d2eE616");
+    return;
     const isMain = hre.network.name.includes("-main");
     console.log("network:", network);
     // if Main env, change network manifest file name temporarily
@@ -67,7 +76,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
           },
         }
       );
-      const swNFT = await upgrades.prepareUpgrade(
+      const swNFTImplementation = await upgrades.prepareUpgrade(
         contracts.swNFT,
         SWNFTUpgrade,
         {
@@ -78,7 +87,12 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
           unsafeAllowLinkedLibraries: true,
         }
       );
-      versions[newTag].contracts.swNFT = swNFT.address;
+      await tryVerify(
+        hre,
+        swNFTImplementation,
+        "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+        []
+      );
 
       // convert JSON object to string
       const data = JSON.stringify(versions, null, 2);
