@@ -4,7 +4,7 @@ const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
 const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
-const Safe = require("@gnosis.pm/safe-core-sdk");
+const Safe = require("@gnosis.pm/safe-core-sdk").default;
 const { EthersAdapter } = require("@gnosis.pm/safe-core-sdk");
 
 const getTag = async () => {
@@ -59,6 +59,7 @@ const getNonce = async (
   restartFromLastConfirmedNonce
 ) => {
   const lastConfirmedNonce = await safeSdk.getNonce();
+  console.log({ lastConfirmedNonce });
   if (restartFromLastConfirmedNonce) {
     console.log(
       "GetNonce: Starting from LAST CONFIRMED NONCE: ",
@@ -99,20 +100,22 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
 
   const service = new SafeService(addresses.gnosisApi);
 
-  //   const contractNetworks = {
-  //     [chainId]: {
-  //       multiSendAddress: addresses.gnosisMultiSendAddress,
-  //       safeMasterCopyAddress: "",
-  //       safeProxyFactoryAddress: "",
-  //     },
-  //   };
+  const contractNetworks = {
+    [chainId]: {
+      multiSendAddress: "",
+      safeMasterCopyAddress: "",
+      safeProxyFactoryAddress: "",
+    },
+  };
 
   const chainSafeAddress = addresses.protocolDaoAddress;
+
+  console.log({ chainId, addresses, chainSafeAddress });
 
   const safeSdk = await Safe.create({
     ethAdapter,
     safeAddress: chainSafeAddress,
-    // contractNetworks,
+    contractNetworks,
   });
 
   nonce = nonce
@@ -121,6 +124,8 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
         () => getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
         "Gnosis Get Nonce"
       );
+
+  console.log({ nonce });
 
   const transaction = {
     to: to,
