@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { networkNames } = require("@openzeppelin/upgrades-core");
-const { getTag, tryVerify } = require("./helpers");
-const { ethers } = require("hardhat");
+const { getTag, tryVerify, proposeTx } = require("./helpers");
+const { GNOSIS_SAFE } = require("../constants/addresses");
 
 task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
   .addOptionalParam(
@@ -16,14 +16,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
       console.log("Only available for goerli and mainnet");
       return;
     }
-    console.log("--> valid");
-    // transferownership
-    const swNFT = await ethers.getContractAt(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-      "0xEEEF6eF2E0b21211B1D51A442c3436a3232ed169"
-    );
-    await swNFT.transferOwnership("0xA6FF5B3CF991721E02981Aac174e54878d2eE616");
-    return;
+
     const isMain = hre.network.name.includes("-main");
     console.log("network:", network);
     // if Main env, change network manifest file name temporarily
@@ -87,11 +80,37 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
           unsafeAllowLinkedLibraries: true,
         }
       );
-      await tryVerify(
-        hre,
-        swNFTImplementation,
-        "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-        []
+      try {
+        await tryVerify(
+          hre,
+          swNFTImplementation,
+          "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+          []
+        );
+      } catch (e) {
+        console.log(e);
+      }
+
+      console.log({ swNFTImplementation });
+
+      const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
+        "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
+      );
+      const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
+        swNFTUpgradeFactory.abi
+      );
+      const upgradeToABI = swNFTUpgradeFactoryABI.encodeFunctionData(
+        "upgradeTo",
+        [swNFTImplementation]
+      );
+      console.log("--> before propose", swNFTImplementation);
+      await proposeTx(
+        contracts.swNFT,
+        upgradeToABI,
+        "Upgrade to new implementation",
+        { execute: true, restartnonce: false },
+        GNOSIS_SAFE[network.chainId],
+        ethers
       );
 
       // convert JSON object to string

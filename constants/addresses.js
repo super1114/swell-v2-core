@@ -14,6 +14,13 @@ const UNISWAP_V3_SWAP_ROUTER = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
 const UNISWAP_V3_QUOTER = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
 const IZI_TOKEN_ADDRESS = "0x9ad37205d608B8b219e6a2573f922094CEc5c200"; // izumi token address
 
+const GNOSIS_SAFE = {
+  5: {
+    gnosisApi: "https://safe-transaction.goerli.gnosis.io",
+    protocolDaoAddress: "0xA6FF5B3CF991721E02981Aac174e54878d2eE616",
+  },
+};
+
 module.exports = {
   VAULT,
   WEIGHTED_POOL_FACTORY,
@@ -25,4 +32,5 @@ module.exports = {
   UNISWAP_V3_SWAP_ROUTER,
   UNISWAP_V3_QUOTER,
   IZI_TOKEN_ADDRESS,
+  GNOSIS_SAFE,
 };

@@ -4,11 +4,8 @@ const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
 const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
-const {
-  ContractNetworksConfig,
-  EthersAdapter,
-} = require("@gnosis.pm/safe-core-sdk");
 const Safe = require("@gnosis.pm/safe-core-sdk");
+const { EthersAdapter } = require("@gnosis.pm/safe-core-sdk");
 
 const getTag = async () => {
   try {
@@ -55,81 +52,113 @@ const tryVerify = async (hre, address, path, constructorArguments) => {
   }, "Try Verify Failed: " + address);
 };
 
-// const proposeTx = async (to, data, message, config, addresses) => {
-//   if (!config.execute) {
-//     console.log("Will propose transaction:", message);
-//     return;
-//   }
+const getNonce = async (
+  safeSdk,
+  chainId,
+  safeAddress,
+  restartFromLastConfirmedNonce
+) => {
+  const lastConfirmedNonce = await safeSdk.getNonce();
+  if (restartFromLastConfirmedNonce) {
+    console.log(
+      "GetNonce: Starting from LAST CONFIRMED NONCE: ",
+      lastConfirmedNonce
+    );
+    return lastConfirmedNonce;
+  }
 
-//   // Initialize the Safe SDK
-//   // eslint-disable-next-line @typescript-eslint/no-var-requires
-//   const provider = ethers.provider;
-//   const owner1 = provider.getSigner(0);
-//   const ethAdapter = new EthersAdapter({ ethers: ethers, signer: owner1 });
-//   const chainId = await ethAdapter.getChainId();
+  const safeTxApi = `https://safe-client.gnosis.io/v1/chains/${chainId}/safes/${safeAddress}/transactions/queued`;
+  const response = await axios.get(safeTxApi);
+  const results = response.data.results.reverse();
+  const last = results.find((r) => r.type === "TRANSACTION");
+  if (!last) {
+    console.log(
+      "GetNonce: No Pending Nonce - Starting from LAST CONFIRMED NONCE: ",
+      lastConfirmedNonce
+    );
+    return lastConfirmedNonce;
+  }
 
-//   const service = new SafeService(addresses.gnosisApi);
+  const nonce = last.transaction.executionInfo.nonce + 1;
+  console.log("GetNonce: Starting from last PENDING nonce: ", nonce);
+  return nonce;
+};
 
-//   const contractNetworks = {
-//     [chainId]: {
-//       multiSendAddress: addresses.gnosisMultiSendAddress,
-//       safeMasterCopyAddress: "",
-//       safeProxyFactoryAddress: "",
-//     },
-//   };
+const proposeTx = async (to, data, message, config, addresses, ethers) => {
+  if (!config.execute) {
+    console.log("Will propose transaction:", message);
+    return;
+  }
 
-//   const chainSafeAddress = addresses.protocolDaoAddress;
+  // Initialize the Safe SDK
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const provider = ethers.provider;
+  const owner1 = provider.getSigner(0);
+  const ethAdapter = new EthersAdapter({ ethers: ethers, signer: owner1 });
+  const chainId = await ethAdapter.getChainId();
 
-//   const safeSdk = await Safe.create({
-//     ethAdapter,
-//     safeAddress: chainSafeAddress,
-//     contractNetworks,
-//   });
+  const service = new SafeService(addresses.gnosisApi);
 
-//   nonce = nonce
-//     ? nonce
-//     : await retryWithDelay(
-//         () => getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
-//         "Gnosis Get Nonce"
-//       );
+  //   const contractNetworks = {
+  //     [chainId]: {
+  //       multiSendAddress: addresses.gnosisMultiSendAddress,
+  //       safeMasterCopyAddress: "",
+  //       safeProxyFactoryAddress: "",
+  //     },
+  //   };
 
-//   const transaction = {
-//     to: to,
-//     value: "0",
-//     data: data,
-//     nonce: nonce,
-//   };
+  const chainSafeAddress = addresses.protocolDaoAddress;
 
-//   const log = {
-//     nonce: nonce,
-//     message: message,
-//   };
+  const safeSdk = await Safe.create({
+    ethAdapter,
+    safeAddress: chainSafeAddress,
+    // contractNetworks,
+  });
 
-//   console.log("Proposing transaction: ", transaction);
-//   console.log(`Nonce Log`, log);
-//   nonceLog.push(log);
+  nonce = nonce
+    ? nonce
+    : await retryWithDelay(
+        () => getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
+        "Gnosis Get Nonce"
+      );
 
-//   nonce += 1;
+  const transaction = {
+    to: to,
+    value: "0",
+    data: data,
+    nonce: nonce,
+  };
 
-//   const safeTransaction = await safeSdk.createTransaction(...[transaction]);
-//   // off-chain sign
-//   const txHash = await safeSdk.getTransactionHash(safeTransaction);
-//   const signature = await safeSdk.signTransactionHash(txHash);
-//   // on-chain sign
-//   // const approveTxResponse = await safeSdk.approveTransactionHash(txHash)
-//   // console.log("approveTxResponse", approveTxResponse);
-//   console.log("safeTransaction: ", safeTransaction);
+  const log = {
+    nonce: nonce,
+    message: message,
+  };
 
-//   await retryWithDelay(
-//     () =>
-//       service.proposeTx(chainSafeAddress, txHash, safeTransaction, signature),
-//     "Gnosis safe"
-//   );
-// };
+  console.log("Proposing transaction: ", transaction);
+  console.log(`Nonce Log`, log);
+  nonceLog.push(log);
+
+  nonce += 1;
+
+  const safeTransaction = await safeSdk.createTransaction(...[transaction]);
+  // off-chain sign
+  const txHash = await safeSdk.getTransactionHash(safeTransaction);
+  const signature = await safeSdk.signTransactionHash(txHash);
+  // on-chain sign
+  // const approveTxResponse = await safeSdk.approveTransactionHash(txHash)
+  // console.log("approveTxResponse", approveTxResponse);
+  console.log("safeTransaction: ", safeTransaction);
+
+  await retryWithDelay(
+    () =>
+      service.proposeTx(chainSafeAddress, txHash, safeTransaction, signature),
+    "Gnosis safe"
+  );
+};
 
 module.exports = {
   getTag,
   getImplementation,
   tryVerify,
-  //   proposeTx,
+  proposeTx,
 };
