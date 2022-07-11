@@ -228,9 +228,6 @@ describe("SWNFTUpgrade", () => {
         "16000000000000000000"
       );
       await expect(position.operator).to.be.equal(false); //whitelist second deposit
-
-      const tvl = await swNFT.tvl();
-      await expect(tvl).to.be.equal("32000000000000000000");
     });
 
     it("cannot stake more than 32 Ether", async function () {

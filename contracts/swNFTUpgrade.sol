@@ -380,14 +380,6 @@ contract SWNFTUpgrade is
         length = validators.length;
     }
 
-    /// @notice get total staked value of all positions
-    /// @return value The total Ether value has been staked
-    function tvl() external view returns (uint256 value) {
-        for (uint256 i = 0; i < validators.length; i++) {
-            value += validatorDeposits[validators[i]];
-        }
-    }
-
     /// @notice get token URI from token ID
     /// @param tokenId The token ID
     /// @return The URI of the token
