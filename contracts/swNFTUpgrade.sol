@@ -369,7 +369,7 @@ contract SWNFTUpgrade is
         // require(_exists(tokenId), "Non-exist token");
         // require(ownerOf(tokenId) == msg.sender, "Owner only");
         // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough bal");
-        revert("Lp not avail");
+        revert("LP Unavailable");
     }
 
     // ============ Public/External Getter functions ============
