@@ -73,7 +73,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
     }
 
     modifier onlyswNFT() {
-        require(msg.sender == swNFT, "not swNFT call");
+        require(msg.sender == swNFT, "swNFT only");
         _;
     }
 
@@ -95,7 +95,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         require(_params.poolData.fee > 0, "Invalid fee");
         require(
             _params.poolData.tickLower < _params.poolData.tickUpper,
-            "inv tick range"
+            "Inv tick range"
         );
         require(_params.IzumiLiquidBox != address(0), "Invalid addr");
 

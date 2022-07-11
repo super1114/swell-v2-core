@@ -22,7 +22,7 @@ library SafeTransferLib {
             success := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(success, "Transfer fail");
+        require(success, "TRANSFER FAIL");
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ library SafeTransferLib {
             )
         }
 
-        require(success, "tx_from_fail");
+        require(success, "TX_FROM_FAIL");
     }
 
     function safeTransfer(
@@ -102,7 +102,7 @@ library SafeTransferLib {
             )
         }
 
-        require(success, "tx_fail");
+        require(success, "TRANSFER FAIL");
     }
 
     function safeApprove(
@@ -139,6 +139,6 @@ library SafeTransferLib {
             )
         }
 
-        require(success, "approve_fail");
+        require(success, "APPROVE FAIL");
     }
 }

@@ -9,8 +9,8 @@ contract SWNFTUpgradeTestnet is SWNFTUpgrade {
         external
         initializer
     {
-        require(_swellAddress != address(0), "swellAddress is 0");
-        require(_depositContract != address(0), "depositCtr 0");
+        require(_swellAddress != address(0), "Address is 0");
+        require(_depositContract != address(0), "DepositCtr 0");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         ETHER = 1e18;

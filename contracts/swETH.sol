@@ -22,7 +22,7 @@ contract SWETH is ISWETH, ERC20Permit {
     }
 
     modifier onlyMinter() {
-        require(msg.sender == minter, "not minter");
+        require(msg.sender == minter, "Minter only");
         _;
     }
 

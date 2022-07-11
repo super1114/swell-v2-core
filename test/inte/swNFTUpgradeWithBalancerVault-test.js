@@ -106,7 +106,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("1 ETH minimum");
+      ).to.be.revertedWith("Min 1 ETH");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -184,7 +184,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not active val");
+      ).to.be.revertedWith("Not active val");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -520,7 +520,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not active val");
+      ).to.be.revertedWith("Not active val");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();

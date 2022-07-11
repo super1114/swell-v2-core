@@ -40,7 +40,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     }
 
     modifier onlyswNFT() {
-        require(msg.sender == swNFT, "not swNFT call");
+        require(msg.sender == swNFT, "swNFT only");
         _;
     }
 

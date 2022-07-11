@@ -105,7 +105,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("1 ETH minimum");
+      ).to.be.revertedWith("Min 1 ETH");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -183,7 +183,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not active val");
+      ).to.be.revertedWith("Not active val");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -486,7 +486,7 @@ describe("SWNFTUpgrade", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("not active val");
+      ).to.be.revertedWith("Not active val");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();
@@ -514,11 +514,11 @@ describe("SWNFTUpgrade", () => {
     it("Bot can set the validator rate", async function () {
       await expect(
         swNFT.connect(user).updateIsValidatorActiveAndSetRate(pubKey, 2)
-      ).to.be.revertedWith("sender not bot");
+      ).to.be.revertedWith("Bot only");
 
       await expect(
         swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 0)
-      ).to.be.revertedWith("rate is 0");
+      ).to.be.revertedWith("Rate is 0");
 
       await expect(
         swNFT.connect(bot).updateIsValidatorActiveAndSetRate(pubKey, 2)

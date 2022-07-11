@@ -72,7 +72,7 @@ contract SWNFTUpgrade is
     address[] public deprecatedStrategies; // deprecated
 
     modifier onlyBot() {
-        require(msg.sender == botAddress, "sender not bot");
+        require(msg.sender == botAddress, "Bot only");
         _;
     }
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -81,7 +81,7 @@ contract SWNFTUpgrade is
     /// @notice initialise the contract to issue the token
     /// @param _swellAddress The address of the swell contract
     function initialize(address _swellAddress) external virtual initializer {
-        require(_swellAddress != address(0), "swellAddress is 0");
+        require(_swellAddress != address(0), "Address is 0");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
@@ -113,7 +113,7 @@ contract SWNFTUpgrade is
     /// @notice set fee
     /// @param _fee The fee that's going to be paid to the fee pool
     function setFee(uint256 _fee) external onlyOwner {
-        require(_fee > 0, "fee is 0");
+        require(_fee > 0, "Fee is 0");
         fee = _fee;
         emit LogSetFee(_fee);
     }
@@ -205,7 +205,7 @@ contract SWNFTUpgrade is
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
     function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
-        require(rate > 0, "rate is 0");
+        require(rate > 0, "Rate is 0");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
     }
@@ -223,7 +223,7 @@ contract SWNFTUpgrade is
 
     /// @notice Renonce ownership is not allowed
     function renounceOwnership() public view override onlyOwner {
-        revert("Can't renounce");
+        revert("No renounce");
     }
 
     // ============ Public mutative without permission functions ============
@@ -236,11 +236,11 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "amount is 0");
+        require(amount > 0, "Amount is 0");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(
             msg.sender != address(this),
-            "contract call"
+            "NoContractCall"
         );
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
@@ -259,11 +259,11 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "amount is 0");
+        require(amount > 0, "Amount is 0");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(
             msg.sender != address(this),
-            "contract call"
+            "NoContractCall"
         );
         uint256 baseTokenBalance = positions[tokenId].baseTokenBalance;
         require(
@@ -285,7 +285,7 @@ contract SWNFTUpgrade is
         address strategy,
         uint256 amount
     ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "inv strategy");
+        require(strategiesSet.contains(strategy), "Inv strategy");
         require(
             ownerOf(tokenId) == msg.sender,
             "Owner only"
@@ -307,9 +307,9 @@ contract SWNFTUpgrade is
         address strategy,
         uint256 amount
     ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "inv strategy");
+        require(strategiesSet.contains(strategy), "Inv strategy");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
-        require(amount > 0, "amount is 0");
+        require(amount > 0, "Amount is 0");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(tokenId, strategy, msg.sender, amount);
         success = IStrategy(strategy).exit(tokenId, amount);
@@ -437,7 +437,7 @@ contract SWNFTUpgrade is
     /// @notice Get the strategy with index
     /// @return Strategy address
     function strategies(uint256 strategyIndex) external view returns (address) {
-        require(strategyIndex < strategiesSet.length(), "index out");
+        require(strategyIndex < strategiesSet.length(), "Index out");
         return strategiesSet.at(strategyIndex);
     }
 
@@ -464,8 +464,8 @@ contract SWNFTUpgrade is
         string calldata referral
     ) private returns (uint256 newItemId) {
         require(amount <= msg.value, "Too much stake");
-        require(amount >= 1 ether, "1 ETH minimum");
-        require(amount % 1 ether == 0, "not multi eth");
+        require(amount >= 1 ether, "Min 1 ETH");
+        require(amount % 1 ether == 0, "Not multi ETH");
         require(
             validatorDeposits[pubKey] + amount <= 32 ether,
             "Over 32 ETH"
@@ -484,7 +484,7 @@ contract SWNFTUpgrade is
             if(validatorDeposits[pubKey] == 0) {
                 operator = true;
             } else {
-                require(isValidatorActive[pubKey], "not active val");
+                require(isValidatorActive[pubKey], "Not active val");
             }
         }
         depositContract.deposit{value: amount}(
