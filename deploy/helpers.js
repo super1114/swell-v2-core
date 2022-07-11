@@ -6,11 +6,20 @@ const { retryWithDelay } = require("./utils");
 const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
 const { EthersAdapter } = require("@gnosis.pm/safe-core-sdk");
+const axios = require("axios");
+
+let nonce;
+
+const nonceLog = [];
 
 const getTag = async () => {
+  /*eslint no-useless-catch: "error"*/
   try {
     await execProm("git pull --tags");
-  } catch {}
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
   let result = await execProm("git tag | sort -V | tail -1");
   return result.stdout.trim();
 };
@@ -92,21 +101,12 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   }
 
   // Initialize the Safe SDK
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const provider = ethers.provider;
   const owner1 = provider.getSigner(0);
   const ethAdapter = new EthersAdapter({ ethers: ethers, signer: owner1 });
   const chainId = await ethAdapter.getChainId();
 
   const service = new SafeService(addresses.gnosisApi);
-
-  const contractNetworks = {
-    [chainId]: {
-      multiSendAddress: "",
-      safeMasterCopyAddress: "",
-      safeProxyFactoryAddress: "",
-    },
-  };
 
   const chainSafeAddress = addresses.protocolDaoAddress;
 
@@ -115,7 +115,6 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   const safeSdk = await Safe.create({
     ethAdapter,
     safeAddress: chainSafeAddress,
-    contractNetworks,
   });
 
   nonce = nonce
