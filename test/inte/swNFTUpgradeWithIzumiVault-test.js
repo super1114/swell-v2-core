@@ -34,7 +34,6 @@ const depositDataRoot2 =
 
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = "0x0000000000000000000000000000000000000000";
-const wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const referralCode = "test-referral";
 let swell, swNFT, swETH, wethToken, signer, bot, amount, user, strategy;
 
@@ -87,20 +86,31 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
     await swNFT.deployed();
 
-    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
-    swETH = await SWETH.deploy(swNFT.address);
-    await swETH.deployed();
-    await swNFT.setswETHAddress(swETH.address);
-
-    // get the test token and wrapped ether contracts
-    wethToken = await ethers.getContractAt(
-      "contracts/interfaces/IWETH.sol:IWETH",
-      wethAddress
+    swETH = await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      USDT_ADDRESS
     );
-    // deposit one thousand ether from the deployer account into the wrapped ether contract
-    await wethToken
-      .connect(signer)
-      .deposit({ value: ethers.utils.parseEther("1000") });
+    wethToken = await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      USDC_ADDRESS
+    );
+
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [USD_WHALE],
+    });
+    const whale = await ethers.provider.getSigner(USD_WHALE);
+
+    const whaleBalanceUSDT = await swETH.balanceOf(USD_WHALE);
+    swETH.connect(whale).transfer(signer.address, whaleBalanceUSDT.div(2));
+    swETH.connect(whale).transfer(user.address, whaleBalanceUSDT.div(2));
+
+    const whaleBalanceUSDC = await wethToken.balanceOf(USD_WHALE);
+    wethToken.connect(whale).transfer(signer.address, whaleBalanceUSDC);
+
+    console.log(whaleBalanceUSDT.toString(), whaleBalanceUSDC.toString());
+
+    await swNFT.setswETHAddress(swETH.address);
   });
 
   describe("If not operator", () => {
