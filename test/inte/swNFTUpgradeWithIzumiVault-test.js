@@ -1,4 +1,4 @@
-const { ethers, upgrades, network } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
@@ -7,14 +7,10 @@ const {
 const {
   NONFUNGIBLE_POSITION_MANAGER,
   UNISWAP_V3_SWAP_ROUTER,
+  WETH_ADDRESS,
+  ZERO_ADDRESS,
 } = require("../../constants/addresses");
-const {
-  IZUMI_LIQUID_BOX,
-  USDT_ADDRESS,
-  USDC_ADDRESS,
-  USD_WHALE,
-  UNISWAP_USDT_USDC_POOL,
-} = require("../constants/izumiTestVariables");
+const { IZUMI_LIQUID_BOX } = require("../constants/izumiTestVariables");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
 
 const pubKey =
@@ -33,7 +29,8 @@ const depositDataRoot2 =
   "0xc846f5e5ff1f6748a980747bc00bdfa75c2c2631201561fad976c2e167206e07";
 
 const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
-const zeroAddress = "0x0000000000000000000000000000000000000000";
+const zeroAddress = ZERO_ADDRESS;
+const wethAddress = WETH_ADDRESS;
 const referralCode = "test-referral";
 let swell, swNFT, swETH, wethToken, signer, bot, amount, user, strategy;
 
@@ -86,31 +83,20 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
     await swNFT.deployed();
 
-    swETH = await ethers.getContractAt(
-      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-      USDT_ADDRESS
-    );
-    wethToken = await ethers.getContractAt(
-      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-      USDC_ADDRESS
-    );
-
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [USD_WHALE],
-    });
-    const whale = await ethers.provider.getSigner(USD_WHALE);
-
-    const whaleBalanceUSDT = await swETH.balanceOf(USD_WHALE);
-    swETH.connect(whale).transfer(signer.address, whaleBalanceUSDT.div(2));
-    swETH.connect(whale).transfer(user.address, whaleBalanceUSDT.div(2));
-
-    const whaleBalanceUSDC = await wethToken.balanceOf(USD_WHALE);
-    wethToken.connect(whale).transfer(signer.address, whaleBalanceUSDC);
-
-    console.log(whaleBalanceUSDT.toString(), whaleBalanceUSDC.toString());
-
+    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
+    swETH = await SWETH.deploy(swNFT.address);
+    await swETH.deployed();
     await swNFT.setswETHAddress(swETH.address);
+
+    // get the test token and wrapped ether contracts
+    wethToken = await ethers.getContractAt(
+      "contracts/interfaces/IWETH.sol:IWETH",
+      wethAddress
+    );
+    // deposit one thousand ether from the deployer account into the wrapped ether contract
+    await wethToken
+      .connect(signer)
+      .deposit({ value: ethers.utils.parseEther("1000") });
   });
 
   describe("If not operator", () => {
@@ -264,28 +250,9 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       );
       const pool = await ethers.getContractAt(
         "IUniswapV3Pool",
-        UNISWAP_USDT_USDC_POOL
+        // UNISWAP_USDT_USDC_POOL
+        ""
       );
-
-      await network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [USD_WHALE],
-      });
-
-      const whaleSigner = await ethers.provider.getSigner(USD_WHALE);
-
-      const USDT = await ethers.getContractAt(
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-        USDT_ADDRESS
-      );
-      const USDC = await ethers.getContractAt(
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-        USDC_ADDRESS
-      );
-
-      const whaleBalance = await USDT.balanceOf(USD_WHALE);
-      USDT.connect(whaleSigner).transfer(user.address, whaleBalance.div(2));
-      USDT.connect(whaleSigner).transfer(signer.address, whaleBalance.div(2));
 
       const testTickSpacing = await getTickRange(pool.address, 100);
 
@@ -294,15 +261,15 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       );
 
       strategy = await swellVaultFactory.deploy({
-        asset: USDT.address,
+        asset: swETH.address,
         swNFT: swNFT.address,
-        name: "Test Swell Uniswap Vault Token",
-        symbol: "TSUVT",
+        name: "Test Swell Izumi Vault Token",
+        symbol: "TSIVT",
         positionManager: NONFUNGIBLE_POSITION_MANAGER,
         swapRouter: UNISWAP_V3_SWAP_ROUTER,
         poolData: {
           pool: pool.address,
-          counterToken: USDC.address,
+          counterToken: wethToken.address,
           fee: await pool.fee(),
           tickLower: testTickSpacing.tickLower,
           tickUpper: testTickSpacing.tickUpper,
@@ -312,24 +279,20 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       });
       await strategy.deployed();
 
-      await USDC.approve(strategy.address, ethers.constants.MaxUint256);
-      await USDT.approve(strategy.address, ethers.constants.MaxUint256);
-      await USDC.connect(user).approve(
-        strategy.address,
-        ethers.constants.MaxUint256
-      );
-      await USDT.connect(user).approve(
-        strategy.address,
-        ethers.constants.MaxUint256
-      );
-      await USDC.connect(user).approve(
-        positionManager.address,
-        ethers.constants.MaxUint256
-      );
-      await USDT.connect(user).approve(
-        positionManager.address,
-        ethers.constants.MaxUint256
-      );
+      await swETH.approve(strategy.address, ethers.constants.MaxUint256);
+      await wethToken.approve(strategy.address, ethers.constants.MaxUint256);
+      await swETH
+        .connect(user)
+        .approve(strategy.address, ethers.constants.MaxUint256);
+      await wethToken
+        .connect(user)
+        .approve(strategy.address, ethers.constants.MaxUint256);
+      await swETH
+        .connect(user)
+        .approve(positionManager.address, ethers.constants.MaxUint256);
+      await wethToken
+        .connect(user)
+        .approve(positionManager.address, ethers.constants.MaxUint256);
     });
 
     it("cannot stake more than 32 Ether", async function () {

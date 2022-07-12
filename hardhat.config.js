@@ -73,9 +73,9 @@ module.exports = {
       allowUnlimitedContractSize: true,
       forking: {
         url:
-          "https://eth-mainnet.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
+          "https://eth-goerli.alchemyapi.io/v2/" + process.env.ALCHEMY_API_KEY,
       },
-      blockNumber: 14439914, // latest as of (04/05/22)
+      blockNumber: 7216300,
       mining: {
         auto: true,
       },
