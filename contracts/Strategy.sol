@@ -14,7 +14,7 @@ contract Strategy is IStrategy {
     address public immutable swNFT;
 
     constructor(address _swNFT) {
-        require(_swNFT != address(0), "Address is 0");
+        require(_swNFT != address(0), "InvalidAddress");
         swNFT = _swNFT;
     }
 
@@ -32,7 +32,7 @@ contract Strategy is IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);

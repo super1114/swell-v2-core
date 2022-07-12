@@ -29,7 +29,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         IVault _vault,
         bytes32 _poolId
     ) ERC4626(_asset, _name, _symbol) {
-        require(_swNFT != address(0), "Address is 0");
+        require(_swNFT != address(0), "InvalidAddress");
         swNFT = _swNFT;
 
         balancerVault = _vault;
@@ -57,7 +57,7 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         deposit(amount, msg.sender, new bytes(0));
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);

@@ -81,7 +81,7 @@ contract SWNFTUpgrade is
     /// @notice initialise the contract to issue the token
     /// @param _swellAddress The address of the swell contract
     function initialize(address _swellAddress) external virtual initializer {
-        require(_swellAddress != address(0), "Address is 0");
+        require(_swellAddress != address(0), "InvalidAddress");
         __ERC721_init(swNFTName, swNFTSymbol);
         __Ownable_init();
         depositContract = IDepositContract(
@@ -97,7 +97,7 @@ contract SWNFTUpgrade is
     /// @notice set base token address
     /// @param _swETHAddress The address of the base token
     function setswETHAddress(address _swETHAddress) external onlyOwner {
-        require(_swETHAddress != address(0), "Address is 0");
+        require(_swETHAddress != address(0), "InvalidAddress");
         swETHAddress = _swETHAddress;
         emit LogSetSWETHAddress(swETHAddress);
     }
@@ -105,7 +105,7 @@ contract SWNFTUpgrade is
     /// @notice set fee pool address
     /// @param _feePool The address of the fee pool
     function setFeePool(address _feePool) external onlyOwner {
-        require(_feePool != address(0), "Address is 0");
+        require(_feePool != address(0), "InvalidAddress");
         feePool = _feePool;
         emit LogSetFeePool(feePool);
     }
@@ -125,7 +125,7 @@ contract SWNFTUpgrade is
         onlyOwner
         returns (bool added)
     {
-        require(strategy != address(0), "Address is 0");
+        require(strategy != address(0), "InvalidAddress");
         added = strategiesSet.add(strategy);
         if (added) {
             emit LogAddStrategy(strategy);
@@ -178,7 +178,7 @@ contract SWNFTUpgrade is
     // @notice Update the cronjob bot address
     /// @param _address The address of the cronjob bot
     function updateBotAddress(address _address) external onlyOwner {
-        require(_address != address(0), "Address is 0");
+        require(_address != address(0), "InvalidAddress");
         botAddress = _address;
         emit LogUpdateBotAddress(_address);
     }
@@ -205,7 +205,7 @@ contract SWNFTUpgrade is
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
     function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
-        require(rate > 0, "Rate is 0");
+        require(rate > 0, "Invalid rate");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
     }
@@ -236,7 +236,7 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(
             msg.sender != address(this),
@@ -259,7 +259,7 @@ contract SWNFTUpgrade is
         public
         returns (bool success)
     {
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(
             msg.sender != address(this),
@@ -290,7 +290,7 @@ contract SWNFTUpgrade is
             ownerOf(tokenId) == msg.sender,
             "Owner only"
         );
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(tokenId, strategy, msg.sender, amount);
         ISWETH(swETHAddress).approve(strategy, amount);
@@ -309,7 +309,7 @@ contract SWNFTUpgrade is
     ) public returns (bool success) {
         require(strategiesSet.contains(strategy), "Inv strategy");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(tokenId, strategy, msg.sender, amount);
         success = IStrategy(strategy).exit(tokenId, amount);
@@ -484,7 +484,7 @@ contract SWNFTUpgrade is
             if(validatorDeposits[pubKey] == 0) {
                 operator = true;
             } else {
-                require(isValidatorActive[pubKey], "Not active val");
+                require(isValidatorActive[pubKey], "Val inactive");
             }
         }
         depositContract.deposit{value: amount}(

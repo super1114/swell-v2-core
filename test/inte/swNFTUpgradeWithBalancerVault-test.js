@@ -184,7 +184,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Not active val");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -344,7 +344,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
     it("can add strategy", async function () {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
-        "Address is 0"
+        "InvalidAddress"
       );
 
       await expect(
@@ -520,7 +520,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Not active val");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();

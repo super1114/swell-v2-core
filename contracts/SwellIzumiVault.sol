@@ -81,7 +81,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
     constructor(ConstructorParams memory _params)
         ERC4626(_params.asset, _params.name, _params.symbol)
     {
-        require(_params.swNFT != address(0), "Address is 0");
+        require(_params.swNFT != address(0), "InvalidAddress");
         require(
             _params.positionManager != address(0),
             "Invalid mgr"
@@ -137,7 +137,7 @@ contract SwellIzumiVault is ERC4626, IERC721Receiver, WeightedMath, IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "Amount is 0");
+        require(amount > 0, "Invalid amount");
         deposit(amount, msg.sender, new bytes(0));
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
