@@ -3,6 +3,7 @@ const util = require("util");
 const { exec } = require("child_process");
 const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
+const { GNOSIS_SAFE } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
 const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
@@ -208,7 +209,7 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   );
 };
 
-const upgradeNFTContract = async ({ hre, keepVersion }) => {
+const upgradeNFTContract = async ({ hre, keepVersion, multisig = false }) => {
   const { ethers, upgrades } = hre;
   let network = await ethers.provider.getNetwork();
   const isMain = hre.network.name.includes("-main");
@@ -241,14 +242,29 @@ const upgradeNFTContract = async ({ hre, keepVersion }) => {
       },
     }
   );
-  const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
-    kind: "uups",
-    libraries: {
-      NFTDescriptor: contracts.nftDescriptorLibrary,
-    },
-    unsafeAllowLinkedLibraries: true,
-  });
-  const swNFTImplementation = await getImplementation(swNFT.address, hre);
+  let swNFTImplementation;
+  if (multisig) {
+    swNFTImplementation = await upgrades.prepareUpgrade(
+      contracts.swNFT,
+      SWNFTUpgrade,
+      {
+        kind: "uups",
+        libraries: {
+          NFTDescriptor: contracts.nftDescriptorLibrary,
+        },
+        unsafeAllowLinkedLibraries: true,
+      }
+    );
+  } else {
+    const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
+      kind: "uups",
+      libraries: {
+        NFTDescriptor: contracts.nftDescriptorLibrary,
+      },
+      unsafeAllowLinkedLibraries: true,
+    });
+    swNFTImplementation = await getImplementation(swNFT.address, hre);
+  }
   try {
     await tryVerify(
       hre,
@@ -259,6 +275,33 @@ const upgradeNFTContract = async ({ hre, keepVersion }) => {
   } catch (e) {
     console.log(e);
   }
+
+  if (multisig) {
+    const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
+      "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
+    );
+    const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
+      swNFTUpgradeFactory.abi
+    );
+    const upgradeToABI = swNFTUpgradeFactoryABI.encodeFunctionData(
+      "upgradeTo",
+      [swNFTImplementation]
+    );
+    console.log("--> before propose", swNFTImplementation);
+    await proposeTx(
+      contracts.swNFT,
+      upgradeToABI,
+      "Upgrade to new implementation",
+      { execute: true, restartnonce: false },
+      GNOSIS_SAFE[network.chainId],
+      ethers
+    );
+  }
+  // convert JSON object to string
+  const data = JSON.stringify(versions, null, 2);
+
+  // write to version file
+  fs.writeFileSync(path, data);
 };
 
 module.exports = {
