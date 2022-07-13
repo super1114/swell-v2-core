@@ -5,9 +5,9 @@ const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
 const { GNOSIS_SAFE } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
-const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
+const SafeServiceClient = require("@gnosis.pm/safe-service-client").default;
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
-const { EthersAdapter } = require("@gnosis.pm/safe-core-sdk");
+const EthersAdapter = require("@gnosis.pm/safe-ethers-lib").default;
 const axios = require("axios");
 const { networkNames } = require("@openzeppelin/upgrades-core");
 
@@ -152,10 +152,13 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   // Initialize the Safe SDK
   const provider = ethers.provider;
   const owner1 = provider.getSigner(0);
-  const ethAdapter = new EthersAdapter({ ethers: ethers, signer: owner1 });
+  const ethAdapter = new EthersAdapter({ ethers, signer: owner1 });
   const chainId = await ethAdapter.getChainId();
 
-  const service = new SafeService(addresses.gnosisApi);
+  const service = new SafeServiceClient({
+    txServiceUrl: addresses.gnosisApi,
+    ethAdapter,
+  });
 
   const chainSafeAddress = addresses.protocolDaoAddress;
 
@@ -201,7 +204,7 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   console.log(`Nonce Log`, log);
   nonceLog.push(log);
 
-  const safeTransaction = await safeSdk.createTransaction(...[transaction]);
+  const safeTransaction = await safeSdk.createTransaction(transaction);
   // off-chain sign
   const txHash = await safeSdk.getTransactionHash(safeTransaction);
   const signature = await safeSdk.signTransactionHash(txHash);
@@ -212,7 +215,13 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
 
   await retryWithDelay(
     () =>
-      service.proposeTx(chainSafeAddress, txHash, safeTransaction, signature),
+      service.proposeTransaction({
+        safeAddress: chainSafeAddress,
+        safeTransactionData: safeTransaction.data,
+        safeTxHash: txHash,
+        senderAddress: owner1,
+        senderSignature: signature.data,
+      }),
     "Gnosis safe"
   );
 };
