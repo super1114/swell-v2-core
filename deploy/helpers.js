@@ -1,3 +1,4 @@
+const fs = require("fs");
 const util = require("util");
 const { exec } = require("child_process");
 const execProm = util.promisify(exec);
@@ -7,10 +8,57 @@ const { SafeService } = require("@gnosis.pm/safe-ethers-adapters");
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
 const { EthersAdapter } = require("@gnosis.pm/safe-core-sdk");
 const axios = require("axios");
+const { networkNames } = require("@openzeppelin/upgrades-core");
 
 let nonce;
-
 const nonceLog = [];
+
+const getManifestFile = async (hre) => {
+  let network = await hre.ethers.provider.getNetwork();
+  console.log("network:", network);
+  // if Main env, change network manifest file name temporarily
+  const manifestFile = networkNames[network.chainId]
+    ? networkNames[network.chainId]
+    : `unknown-${network.chainId}`;
+
+  return manifestFile;
+};
+
+const renameManifestForMainEnv = ({ isMain, manifestFile }) => {
+  if (isMain) {
+    if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+      fs.renameSync(
+        `.openzeppelin/${manifestFile}.json`,
+        `.openzeppelin/${manifestFile}-orig.json`
+      );
+    }
+    if (fs.existsSync(`.openzeppelin/${manifestFile}-main.json`)) {
+      fs.renameSync(
+        `.openzeppelin/${manifestFile}-main.json`,
+        `.openzeppelin/${manifestFile}.json`
+      );
+    }
+  }
+};
+
+const restoreManifestForMainEnv = ({ isMain, manifestFile }) => {
+  if (isMain) {
+    // restore network manifest file
+    if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
+      fs.renameSync(
+        `.openzeppelin/${manifestFile}.json`,
+        `.openzeppelin/${manifestFile}-main.json`
+      );
+    }
+
+    if (fs.existsSync(`.openzeppelin/${manifestFile}-orig.json`)) {
+      fs.renameSync(
+        `.openzeppelin/${manifestFile}-orig.json`,
+        `.openzeppelin/${manifestFile}.json`
+      );
+    }
+  }
+};
 
 const getTag = async () => {
   /*eslint no-useless-catch: "error"*/
@@ -160,9 +208,66 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   );
 };
 
+const upgradeNFTContract = async ({ hre, keepVersion }) => {
+  const { ethers, upgrades } = hre;
+  let network = await ethers.provider.getNetwork();
+  const isMain = hre.network.name.includes("-main");
+  // Init tag
+  const path = `./deployments/${network.chainId}_versions${
+    isMain ? "-main" : ""
+  }.json`;
+  const versions = require("." + path);
+
+  const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
+  let newTag;
+  if (keepVersion) {
+    newTag = oldTag;
+  } else {
+    // update to latest release version
+    newTag = await getTag();
+  }
+
+  const contracts = versions[oldTag].contracts;
+  versions[newTag] = new Object();
+  versions[newTag].contracts = contracts;
+  versions[newTag].network = network;
+  versions[newTag].date = new Date().toUTCString();
+
+  const SWNFTUpgrade = await ethers.getContractFactory(
+    "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+    {
+      libraries: {
+        NFTDescriptor: contracts.nftDescriptorLibrary,
+      },
+    }
+  );
+  const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
+    kind: "uups",
+    libraries: {
+      NFTDescriptor: contracts.nftDescriptorLibrary,
+    },
+    unsafeAllowLinkedLibraries: true,
+  });
+  const swNFTImplementation = await getImplementation(swNFT.address, hre);
+  try {
+    await tryVerify(
+      hre,
+      swNFTImplementation,
+      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      []
+    );
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
+  getManifestFile,
+  renameManifestForMainEnv,
+  restoreManifestForMainEnv,
   getTag,
   getImplementation,
   tryVerify,
   proposeTx,
+  upgradeNFTContract,
 };

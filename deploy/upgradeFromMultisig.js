@@ -1,6 +1,12 @@
 const fs = require("fs");
-const { networkNames } = require("@openzeppelin/upgrades-core");
-const { getTag, tryVerify, proposeTx } = require("./helpers");
+const {
+  getTag,
+  tryVerify,
+  proposeTx,
+  getManifestFile,
+  renameManifestForMainEnv,
+  restoreManifestForMainEnv,
+} = require("./helpers");
 const { GNOSIS_SAFE } = require("../constants/addresses");
 
 task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
@@ -18,26 +24,9 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
     }
 
     const isMain = hre.network.name.includes("-main");
-    console.log("network:", network);
     // if Main env, change network manifest file name temporarily
-    const manifestFile = networkNames[network.chainId]
-      ? networkNames[network.chainId]
-      : `unknown-${network.chainId}`;
-
-    if (isMain) {
-      if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
-        fs.renameSync(
-          `.openzeppelin/${manifestFile}.json`,
-          `.openzeppelin/${manifestFile}-orig.json`
-        );
-      }
-      if (fs.existsSync(`.openzeppelin/${manifestFile}-main.json`)) {
-        fs.renameSync(
-          `.openzeppelin/${manifestFile}-main.json`,
-          `.openzeppelin/${manifestFile}.json`
-        );
-      }
-    }
+    const manifestFile = getManifestFile(hre);
+    renameManifestForMainEnv({ isMain, manifestFile });
 
     try {
       // Init tag
@@ -121,22 +110,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
     } catch (e) {
       console.log("error", e);
     } finally {
-      if (isMain) {
-        // restore network manifest file
-        if (fs.existsSync(`.openzeppelin/${manifestFile}.json`)) {
-          fs.renameSync(
-            `.openzeppelin/${manifestFile}.json`,
-            `.openzeppelin/${manifestFile}-main.json`
-          );
-        }
-
-        if (fs.existsSync(`.openzeppelin/${manifestFile}-orig.json`)) {
-          fs.renameSync(
-            `.openzeppelin/${manifestFile}-orig.json`,
-            `.openzeppelin/${manifestFile}.json`
-          );
-        }
-      }
+      restoreManifestForMainEnv({ isMain, manifestFile });
     }
   });
 
