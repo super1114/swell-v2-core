@@ -401,7 +401,7 @@ contract SWNFTUpgrade is
                     baseTokenSymbol: swETHSymbol,
                     baseTokenBalance: position.baseTokenBalance,
                     baseTokenDecimals: 1 ether,
-                    pubKey: _pubKeyToString(position.pubKey),
+                    pubKey: position.pubKey._pubKeyToString(),
                     value: position.value
                 })
             );
@@ -512,23 +512,6 @@ contract SWNFTUpgrade is
 
         if (!operator) ISWETH(swETHAddress).mint(amount);
         _safeMint(msg.sender, newItemId);
-    }
-
-    /// @notice Convert public key from bytes to string output
-    /// @param pubKey The public key
-    /// @return The public key in string format
-    function _pubKeyToString(bytes memory pubKey)
-        private
-        pure
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(
-                    bytes32(pubKey).toHex(),
-                    (pubKey.bytesToBytes16(32)).toHex16()
-                )
-            );
     }
 
     /// @notice authorize upgrade for UUPS

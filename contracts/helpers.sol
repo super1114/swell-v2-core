@@ -77,4 +77,21 @@ library Helpers {
             out |= bytes16(b[offset + i] & 0xFF) >> (i * 8);
         }
     }
+    
+    /// @notice Convert public key from bytes to string output
+    /// @param pubKey The public key
+    /// @return The public key in string format
+    function _pubKeyToString(bytes memory pubKey)
+        internal
+        pure
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    toHex(bytes32(pubKey)),
+                    toHex16((bytesToBytes16(pubKey, 32)))
+                )
+            );
+    }
 }
