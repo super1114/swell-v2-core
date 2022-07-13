@@ -232,7 +232,8 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
     function enterStrategy(
         uint256 tokenId,
         address strategy,
-        uint256 amount
+        uint256 amount,
+        bytes memory params
     ) public whenNotPaused returns (bool success) {
         _checkStrategy(strategy);
         require(ownerOf(tokenId) == msg.sender, "Owner only");
@@ -240,7 +241,7 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(tokenId, strategy, msg.sender, amount);
         ISWETH(swETHAddress).approve(strategy, amount);
-        success = IStrategy(strategy).enter(tokenId, amount);
+        success = IStrategy(strategy).enter(tokenId, amount, params);
     }
 
     /// @notice Exit strategy for a token
@@ -251,14 +252,15 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
     function exitStrategy(
         uint256 tokenId,
         address strategy,
-        uint256 amount
+        uint256 amount,
+        bytes memory params
     ) public whenNotPaused returns (bool success) {
         _checkStrategy(strategy);
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(amount > 0, "Invalid amount");
         positions[tokenId].baseTokenBalance += amount;
         emit LogExitStrategy(tokenId, strategy, msg.sender, amount);
-        success = IStrategy(strategy).exit(tokenId, amount);
+        success = IStrategy(strategy).exit(tokenId, amount, params);
     }
 
     /// @notice Able to bactch action for multiple tokens
@@ -275,14 +277,16 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
                 enterStrategy(
                     actions[i].tokenId,
                     actions[i].strategy,
-                    actions[i].amount
+                    actions[i].amount,
+                    new bytes(0)
                 );
             }
             if (actions[i].action == uint256(ActionChoices.ExitStrategy)) {
                 exitStrategy(
                     actions[i].tokenId,
                     actions[i].strategy,
-                    actions[i].amount
+                    actions[i].amount,
+                    new bytes(0)
                 );
             }
         }

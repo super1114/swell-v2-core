@@ -8,6 +8,7 @@ const {
 const {
   NONFUNGIBLE_POSITION_MANAGER,
   UNISWAP_V3_SWAP_ROUTER,
+  UNISWAP_V3_QUOTER,
   WETH_ADDRESS,
   ZERO_ADDRESS,
 } = require("../../constants/addresses");
@@ -15,6 +16,10 @@ const { IZUMI_LIQUID_BOX } = require("../constants/izumiTestVariables");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
 const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
 const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
+const {
+  generateParams,
+  isToken0,
+} = require("../helpers/uniswap/generateBytesParams");
 
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -35,7 +40,17 @@ const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
 const zeroAddress = ZERO_ADDRESS;
 const wethAddress = WETH_ADDRESS;
 const referralCode = "test-referral";
-let swell, swNFT, swETH, wethToken, signer, bot, amount, user, strategy;
+let swell,
+  swNFT,
+  swETH,
+  wethToken,
+  signer,
+  bot,
+  amount,
+  user,
+  strategy,
+  pool,
+  fee;
 
 describe("SWNFTUpgrade with IzumiVault", () => {
   before(async () => {
@@ -249,7 +264,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         NONFUNGIBLE_POSITION_MANAGER
       );
 
-      const pool = await createUniswapPool(swETH.address, wethToken.address);
+      pool = await createUniswapPool(swETH.address, wethToken.address);
 
       await pool.initialize(BigNumber.from(2).pow(96));
 
@@ -260,6 +275,8 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         swETH,
         wethToken
       );
+
+      fee = (await pool.fee()).toString();
 
       const testTickSpacing = await getTickRange(pool.address, 100);
 
@@ -404,20 +421,47 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
 
     it("can enter strategy", async function () {
+      const amountToDeposit = ethers.utils.parseEther("1");
+      const amountIn = amountToDeposit.div(2);
+      const swapParams = generateParams(
+        amountIn,
+        swETH,
+        wethToken,
+        fee,
+        UNISWAP_V3_QUOTER,
+        pool,
+        strategy
+      );
+
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+          .enterStrategy(
+            "1",
+            strategy.address,
+            ethers.utils.parseEther("1"),
+            swapParams
+          )
       ).to.be.revertedWith("Only owner can enter strategy");
 
       await expect(
-        swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.enterStrategy(
+          "3",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          swapParams
+        )
       ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("2", strategy.address, ethers.utils.parseEther("1"))
+          .enterStrategy(
+            "2",
+            strategy.address,
+            ethers.utils.parseEther("1"),
+            swapParams
+          )
       )
         .to.emit(swNFT, "LogEnterStrategy")
         .withArgs(
@@ -428,26 +472,57 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         );
 
       // await expect(
-      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"), swapParams)
       // ).to.be.revertedWith("reverted with panic code 0x11");
       await expect(
-        swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.enterStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          swapParams
+        )
       ).to.be.reverted;
     });
 
     it("can exit strategy", async function () {
+      let assetsToWithdraw = await strategy.previewRedeem(
+        ethers.utils.parseEther("0.5")
+      );
+      let getRequiredLiquidity = await strategy.getRequiredLiquidity(
+        assetsToWithdraw,
+        isToken0(swETH.address, wethToken.address)
+      );
+      let amountWithdrawIn = (
+        await strategy.getAmountsRequired(getRequiredLiquidity)
+      )[2];
+      let withdrawParams = generateParams(
+        amountWithdrawIn,
+        wethToken,
+        swETH,
+        fee,
+        UNISWAP_V3_QUOTER,
+        pool,
+        strategy
+      );
+
       await expect(
         swNFT.exitStrategy(
           "2",
           strategy.address,
-          ethers.utils.parseEther("0.5")
+          ethers.utils.parseEther("0.5"),
+          withdrawParams
         )
       ).to.be.revertedWith("Only owner can exit strategy");
 
       await expect(
         swNFT
           .connect(user)
-          .exitStrategy("2", strategy.address, ethers.utils.parseEther("0.5"))
+          .exitStrategy(
+            "2",
+            strategy.address,
+            ethers.utils.parseEther("0.5"),
+            withdrawParams
+          )
       )
         .to.emit(swNFT, "LogExitStrategy")
         .withArgs(
@@ -458,49 +533,13 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         );
 
       await expect(
-        swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.exitStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          withdrawParams
+        )
       ).to.be.revertedWith("Not enough position to exit");
-    });
-
-    it("can batch actions", async function () {
-      await expect(
-        await swNFT.connect(user).batchAction([
-          {
-            tokenId: "2",
-            action: "2",
-            amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address,
-          },
-          {
-            tokenId: "2",
-            action: "3",
-            amount: ethers.utils.parseEther("1"),
-            strategy: strategy.address,
-          },
-          {
-            tokenId: "2",
-            action: "1",
-            amount: ethers.utils.parseEther("1"),
-            strategy: depositAddress,
-          },
-        ])
-      )
-        .to.emit(swNFT, "LogEnterStrategy")
-        .withArgs(
-          "2",
-          strategy.address,
-          user.address,
-          ethers.utils.parseEther("1")
-        )
-        .to.emit(swNFT, "LogExitStrategy")
-        .withArgs(
-          "2",
-          strategy.address,
-          user.address,
-          ethers.utils.parseEther("1")
-        )
-        .to.emit(swNFT, "LogWithdraw")
-        .withArgs("2", user.address, ethers.utils.parseEther("1"));
     });
 
     it("can remove strategy", async function () {
