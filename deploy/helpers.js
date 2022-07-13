@@ -213,16 +213,19 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   // console.log("approveTxResponse", approveTxResponse);
   console.log("safeTransaction: ", safeTransaction);
 
+  const senderAddress = await owner1.getAddress();
   await retryWithDelay(
     () =>
       service.proposeTransaction({
         safeAddress: chainSafeAddress,
-        senderAddress: owner1,
+        senderAddress,
         safeTransaction: safeTransaction,
         safeTxHash: txHash,
       }),
     "Gnosis safe"
   );
+
+  console.log("--> gnosis propose tx success");
 };
 
 const upgradeNFTContract = async ({
