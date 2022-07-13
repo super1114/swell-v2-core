@@ -628,22 +628,22 @@ describe("Swell Balancer Vault", function () {
 
     await expect(
       swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
-    ).to.be.revertedWith("TRANSFER_FROM_FAILED");
+    ).to.be.revertedWith("Transfer fail");
 
     amount = ethers.utils.parseEther("100000.1");
     await expect(
       swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
-    ).to.be.revertedWith("TRANSFER_FROM_FAILED");
+    ).to.be.revertedWith("Transfer fail");
 
     amount = ethers.utils.parseEther("100000.000000001");
     await expect(
       swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
-    ).to.be.revertedWith("TRANSFER_FROM_FAILED");
+    ).to.be.revertedWith("Transfer fail");
 
     amount = ethers.utils.parseEther("100000.000000000000000001");
     await expect(
       swellBalancerVault.connect(account1).deposit(amount, account1.address, 0)
-    ).to.be.revertedWith("TRANSFER_FROM_FAILED");
+    ).to.be.revertedWith("Transfer fail");
   });
 
   /*///////////////////////////////////////////////////////////////

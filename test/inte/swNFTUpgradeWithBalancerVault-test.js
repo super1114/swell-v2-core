@@ -106,7 +106,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send at least 1 ETH");
+      ).to.be.revertedWith("Min 1 ETH");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -119,7 +119,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send 16 ETH bond");
+      ).to.be.revertedWith("16ETH required");
       amount = ethers.utils.parseEther("16");
       await expect(
         swNFT.stake(
@@ -184,7 +184,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("validator is not active");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -277,23 +277,23 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("cannot stake more than 32 ETH");
+      ).to.be.revertedWith("Over 32 ETH");
     });
 
     it("cannot withdraw 2 swETH", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("cannot withdraw more than the position balance");
+      ).to.be.revertedWith("Over balance");
 
       await expect(
         swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Only owner can withdraw");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can not withdraw with no balance", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("cannot withdraw more than the position balance");
+      ).to.be.revertedWith("Over balance");
 
       const position = await swNFT.positions("1");
       await expect(position.pubKey).to.be.equal(pubKey2);
@@ -314,11 +314,11 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       );
     });
 
-    it("cannot deposit if not owner", async function () {
+    it("cannot deposit if Owner only", async function () {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("Only owner can deposit");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can deposit 1 swETH", async function () {
@@ -341,7 +341,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
     it("can add strategy", async function () {
       await expect(swNFT.addStrategy(zeroAddress)).to.be.revertedWith(
-        "address cannot be 0"
+        "InvalidAddress"
       );
 
       await expect(
@@ -366,7 +366,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         swNFT
           .connect(user)
           .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Only owner can enter strategy");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
@@ -400,7 +400,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
           strategy.address,
           ethers.utils.parseEther("0.5")
         )
-      ).to.be.revertedWith("Only owner can exit strategy");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT
@@ -417,7 +417,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
       await expect(
         swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Not enough position to exit");
+      ).to.be.revertedWith("Amount too big");
     });
 
     it("can batch actions", async function () {
@@ -493,7 +493,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send 1 ETH bond");
+      ).to.be.revertedWith("1 ETH required");
 
       amount = ethers.utils.parseEther("1");
       await expect(
@@ -517,7 +517,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("validator is not active");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();
