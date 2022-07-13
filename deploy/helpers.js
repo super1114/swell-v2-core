@@ -166,32 +166,40 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
     safeAddress: chainSafeAddress,
   });
 
-  nonce = nonce
-    ? nonce
-    : await retryWithDelay(
-        () => getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
-        "Gnosis Get Nonce"
-      );
+  let txNonce;
 
-  console.log({ nonce });
+  if (config.nonce !== -1) {
+    console.log("--> config manual nonce", config.nonce);
+    txNonce = config.nonce;
+  } else {
+    nonce = nonce
+      ? nonce
+      : await retryWithDelay(
+          () =>
+            getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
+          "Gnosis Get Nonce"
+        );
+
+    console.log({ nonce });
+    txNonce = nonce;
+    nonce += 1;
+  }
 
   const transaction = {
     to: to,
     value: "0",
     data: data,
-    nonce: nonce,
+    nonce: txNonce,
   };
 
   const log = {
-    nonce: nonce,
+    nonce: txNonce,
     message: message,
   };
 
   console.log("Proposing transaction: ", transaction);
   console.log(`Nonce Log`, log);
   nonceLog.push(log);
-
-  nonce += 1;
 
   const safeTransaction = await safeSdk.createTransaction(...[transaction]);
   // off-chain sign
@@ -209,7 +217,12 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   );
 };
 
-const upgradeNFTContract = async ({ hre, keepVersion, multisig = false }) => {
+const upgradeNFTContract = async ({
+  hre,
+  keepVersion,
+  multisig = false,
+  nonce = -1,
+}) => {
   const { ethers, upgrades } = hre;
   let network = await ethers.provider.getNetwork();
   const isMain = hre.network.name.includes("-main");
@@ -292,7 +305,7 @@ const upgradeNFTContract = async ({ hre, keepVersion, multisig = false }) => {
       contracts.swNFT,
       upgradeToABI,
       "Upgrade to new implementation",
-      { execute: true, restartnonce: false },
+      { execute: true, restartnonce: false, nonce },
       GNOSIS_SAFE[network.chainId],
       ethers
     );

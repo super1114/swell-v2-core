@@ -12,6 +12,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
     false,
     types.boolean
   )
+  .addOptionalParam("nonce", "Manually set nonce", -1, types.int)
   .setAction(async (taskArgs, hre) => {
     let network = await ethers.provider.getNetwork();
     if (network.chainId !== 1 && network.chainId !== 5) {
@@ -30,6 +31,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
         hre,
         keepVersion: taskArgs.keepVersion,
         multisig: true,
+        nonce: taskArgs.nonce,
       });
     } catch (e) {
       console.log("error", e);
