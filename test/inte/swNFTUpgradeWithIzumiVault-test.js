@@ -1,5 +1,6 @@
 const { ethers, upgrades } = require("hardhat");
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
   getLastTagContractFactory,
@@ -12,6 +13,8 @@ const {
 } = require("../../constants/addresses");
 const { IZUMI_LIQUID_BOX } = require("../constants/izumiTestVariables");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
+const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
+const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
 
 const pubKey =
   "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
@@ -233,9 +236,6 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         "16000000000000000000"
       );
       await expect(position.operator).to.be.equal(false); //whitelist second deposit
-
-      const tvl = await swNFT.tvl();
-      await expect(tvl).to.be.equal("32000000000000000000");
     });
 
     it("create the strategy", async function () {
@@ -248,10 +248,17 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         "INonfungiblePositionManager",
         NONFUNGIBLE_POSITION_MANAGER
       );
-      const pool = await ethers.getContractAt(
-        "IUniswapV3Pool",
-        // UNISWAP_USDT_USDC_POOL
-        ""
+
+      const pool = await createUniswapPool(swETH.address, wethToken.address);
+
+      await pool.initialize(BigNumber.from(2).pow(96));
+
+      await seedLiquidity(
+        signer,
+        ethers.utils.parseEther("10"),
+        ethers.utils.parseEther("10"),
+        swETH,
+        wethToken
       );
 
       const testTickSpacing = await getTickRange(pool.address, 100);
@@ -397,15 +404,15 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
 
     it("can enter strategy", async function () {
-      // await expect(
-      //   swNFT
-      //     .connect(user)
-      //     .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      // ).to.be.revertedWith("Only owner can enter strategy");
+      await expect(
+        swNFT
+          .connect(user)
+          .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+      ).to.be.revertedWith("Only owner can enter strategy");
 
-      // await expect(
-      //   swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
-      // ).to.be.revertedWith("ERC721: owner query for nonexistent token");
+      await expect(
+        swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
+      ).to.be.revertedWith("ERC721: owner query for nonexistent token");
 
       await expect(
         swNFT
@@ -423,9 +430,9 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       // await expect(
       //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
       // ).to.be.revertedWith("reverted with panic code 0x11");
-      // await expect(
-      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
-      // ).to.be.reverted;
+      await expect(
+        swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+      ).to.be.reverted;
     });
 
     it("can exit strategy", async function () {
