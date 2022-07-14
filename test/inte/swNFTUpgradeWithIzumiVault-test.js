@@ -11,6 +11,7 @@ const {
   UNISWAP_V3_QUOTER,
   SWETH_ADDRESS,
   WETH_ADDRESS,
+  DEPOSIT_CONTRACT_ADDRESS,
   ZERO_ADDRESS,
 } = require("../../constants/addresses");
 const {
@@ -26,21 +27,21 @@ const {
 } = require("../helpers/uniswap/generateBytesParams");
 
 const pubKey =
-  "0xb57e2062d1512a64831462228453975326b65c7008faaf283d5e621e58725e13d10f87e0877e8325c2b1fe754f16b1ec";
+  "0x93aae6a63f3b0d3410db80f5c23ecbbb94d0c5b609f94edbd49db0f7dfadfc2ce2b51bb564b2ae52a7e7c194d172677b";
 const signature =
-  "0xb224d558d829c245fe56bff9d28c7fd0d348d6795eb8faef8ce220c3657e373f8dc0a0c8512be589ecaa749fe39fc0371380a97aab966606ba7fa89c78dc1703858dfc5d3288880a813e7743f1ff379192e1f6b01a6a4a3affee1d50e5b3c849";
+  "0xa0a2ce340ee72a75422ae1f30aa43cfaace31791be54b2d352e7530280891338a49d53e36926987a1aa7319da51a73500b08497b374a1e2db4fa328f641de30a05789b88963408173d2de9e2c1b5625c1792dfe59d77102e57e19b6b5a90e00f";
 const depositDataRoot =
-  "0x81a814655bfc695f5f207d433b4d2e272d764857fee6efd58ba4677c076e60a9";
+  "0x131a6c23f40c57d1f9ac143876c011608a13398b65eae2b4bb644916b678350c";
 
 // 16 ETH
 const pubKey2 =
-  "0x8b6819ec8c0a14b8173f3134c18af012d45ba946f07d3d88f2c7787bf79c352f6b7132e14120974103c6ba6f44f00f7f";
+  "0x93aae6a63f3b0d3410db80f5c23ecbbb94d0c5b609f94edbd49db0f7dfadfc2ce2b51bb564b2ae52a7e7c194d172677b";
 const signature2 =
-  "0xa16818eec390e04076589ecf2b1b065cd664c9cc791f16b1ad841b7b18727d87b9fbcdc1dbfde7a848b805e71ecd353006b8f1763538fe7946420880dd7d1f4e47a6ec2e6192da30db77349909c944d695a346069d6bce8fe6ee695386840b6e";
+  "0xa0a2ce340ee72a75422ae1f30aa43cfaace31791be54b2d352e7530280891338a49d53e36926987a1aa7319da51a73500b08497b374a1e2db4fa328f641de30a05789b88963408173d2de9e2c1b5625c1792dfe59d77102e57e19b6b5a90e00f";
 const depositDataRoot2 =
-  "0xc846f5e5ff1f6748a980747bc00bdfa75c2c2631201561fad976c2e167206e07";
+  "0x131a6c23f40c57d1f9ac143876c011608a13398b65eae2b4bb644916b678350c";
 
-const depositAddress = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
+const depositAddress = DEPOSIT_CONTRACT_ADDRESS;
 const zeroAddress = ZERO_ADDRESS;
 const wethAddress = WETH_ADDRESS;
 const referralCode = "test-referral";
@@ -72,7 +73,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     );
     const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy();
     const SWNFTUpgrade = await ethers.getContractFactory(
-      "contracts/latest-tag/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      "contracts/latest-tag/tests/swNFTUpgradeTestnet.sol:SWNFTUpgradeTestnet",
       {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address,
@@ -80,15 +81,19 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       }
     );
 
-    const oldswNFT = await upgrades.deployProxy(SWNFTUpgrade, [swell.address], {
-      kind: "uups",
-      initializer: "initialize(address)",
-      unsafeAllowLinkedLibraries: true,
-    });
+    const oldswNFT = await upgrades.deployProxy(
+      SWNFTUpgrade,
+      [swell.address, depositAddress],
+      {
+        kind: "uups",
+        initializer: "initialize(address, address)",
+        unsafeAllowLinkedLibraries: true,
+      }
+    );
     await oldswNFT.deployed();
 
     const SWNFTUpgradeNew = await ethers.getContractFactory(
-      "contracts/tests/TestswNFTUpgrade.sol:TestswNFTUpgrade",
+      "contracts/tests/swNFTUpgradeTestnet.sol:SWNFTUpgradeTestnet",
       {
         libraries: {
           NFTDescriptor: nftDescriptorLibrary.address,
@@ -143,7 +148,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send at least 1 ETH");
+      ).to.be.revertedWith("Min 1 ETH");
     });
 
     it("Must send 16 ETH bond as first deposit (Operator) and it should not mint any swETH", async function () {
@@ -156,7 +161,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send 16 ETH bond");
+      ).to.be.revertedWith("16ETH required");
       amount = ethers.utils.parseEther("16");
       await expect(
         swNFT.stake(
@@ -221,7 +226,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("validator is not active");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       await expect(swNFT.updateBotAddress(bot.address))
@@ -351,7 +356,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("cannot stake more than 32 ETH");
+      ).to.be.revertedWith("Over 32 ETH");
     });
 
     it("cannot withdraw 2 swETH", async function () {
@@ -361,13 +366,13 @@ describe("SWNFTUpgrade with IzumiVault", () => {
 
       await expect(
         swNFT.connect(user).withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("Only owner can withdraw");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can not withdraw with no balance", async function () {
       await expect(
         swNFT.withdraw("1", ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("cannot withdraw more than the position balance");
+      ).to.be.revertedWith("Over balance");
 
       const position = await swNFT.positions("1");
       await expect(position.pubKey).to.be.equal(pubKey2);
@@ -392,7 +397,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       await swETH.approve(swNFT.address, ethers.utils.parseEther("2"));
       await expect(
         swNFT.connect(user).deposit("1", ethers.utils.parseEther("2"))
-      ).to.be.revertedWith("Only owner can deposit");
+      ).to.be.revertedWith("Owner only");
     });
 
     it("can deposit 1 swETH", async function () {
@@ -457,7 +462,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             ethers.utils.parseEther("1"),
             swapParams
           )
-      ).to.be.revertedWith("Only owner can enter strategy");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT.enterStrategy(
@@ -527,7 +532,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
           ethers.utils.parseEther("0.5"),
           withdrawParams
         )
-      ).to.be.revertedWith("Only owner can exit strategy");
+      ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT
@@ -554,7 +559,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
           ethers.utils.parseEther("1"),
           withdrawParams
         )
-      ).to.be.revertedWith("Not enough position to exit");
+      ).to.be.revertedWith("Amount too big");
     });
 
     it("can remove strategy", async function () {
@@ -589,7 +594,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("Must send 1 ETH bond");
+      ).to.be.revertedWith("1 ETH required");
 
       amount = ethers.utils.parseEther("1");
       await expect(
@@ -613,7 +618,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             value: amount,
           }
         )
-      ).to.be.revertedWith("validator is not active");
+      ).to.be.revertedWith("Val inactive");
 
       // Owner makes the validator active by bot
       const owner = await swNFT.owner();
