@@ -1,4 +1,4 @@
-const { ethers, upgrades } = require("hardhat");
+const { ethers, upgrades, network } = require("hardhat");
 const { expect } = require("chai");
 const { BigNumber } = require("ethers");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
@@ -9,10 +9,14 @@ const {
   NONFUNGIBLE_POSITION_MANAGER,
   UNISWAP_V3_SWAP_ROUTER,
   UNISWAP_V3_QUOTER,
+  SWETH_ADDRESS,
   WETH_ADDRESS,
   ZERO_ADDRESS,
 } = require("../../constants/addresses");
-const { IZUMI_LIQUID_BOX } = require("../constants/izumiTestVariables");
+const {
+  IZUMI_LIQUID_BOX,
+  SWETH_WHALE,
+} = require("../constants/izumiTestVariables");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
 const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
 const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
@@ -101,9 +105,20 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
     await swNFT.deployed();
 
-    const SWETH = await ethers.getContractFactory("contracts/swETH.sol:SWETH");
-    swETH = await SWETH.deploy(swNFT.address);
-    await swETH.deployed();
+    swETH = await ethers.getContractAt(
+      "contracts/swETH.sol:SWETH",
+      SWETH_ADDRESS
+    );
+
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [SWETH_WHALE],
+    });
+
+    const whaleBalance = await swETH.balanceOf(SWETH_WHALE);
+    const whale = await ethers.provider.getSigner(SWETH_WHALE);
+    swETH.connect(whale).transfer(signer.address, whaleBalance);
+
     await swNFT.setswETHAddress(swETH.address);
 
     // get the test token and wrapped ether contracts
