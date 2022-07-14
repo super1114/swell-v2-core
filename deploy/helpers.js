@@ -123,7 +123,7 @@ const getNonce = async (safeSdk, chainId, safeAddress) => {
       "GetNonce: No Pending Nonce - Starting from LAST CONFIRMED NONCE: ",
       lastConfirmedNonce
     );
-    return lastConfirmedNonce;
+    return lastConfirmedNonce + 1;
   }
 
   const nonce = last.transaction.executionInfo.nonce + 1;
