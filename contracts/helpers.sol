@@ -81,7 +81,7 @@ library Helpers {
     /// @notice Convert public key from bytes to string output
     /// @param pubKey The public key
     /// @return The public key in string format
-    function _pubKeyToString(bytes memory pubKey)
+    function pubKeyToString(bytes memory pubKey)
         internal
         pure
         returns (string memory)

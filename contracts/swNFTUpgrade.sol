@@ -401,7 +401,7 @@ contract SWNFTUpgrade is
                     baseTokenSymbol: swETHSymbol,
                     baseTokenBalance: position.baseTokenBalance,
                     baseTokenDecimals: 1 ether,
-                    pubKey: position.pubKey._pubKeyToString(),
+                    pubKey: position.pubKey.pubKeyToString(),
                     value: position.value
                 })
             );
