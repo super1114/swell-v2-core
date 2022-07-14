@@ -110,21 +110,9 @@ const tryVerify = async (hre, address, path, constructorArguments) => {
   }, "Try Verify Failed: " + address);
 };
 
-const getNonce = async (
-  safeSdk,
-  chainId,
-  safeAddress,
-  restartFromLastConfirmedNonce
-) => {
+const getNonce = async (safeSdk, chainId, safeAddress) => {
   const lastConfirmedNonce = await safeSdk.getNonce();
   console.log({ lastConfirmedNonce });
-  if (restartFromLastConfirmedNonce) {
-    console.log(
-      "GetNonce: Starting from LAST CONFIRMED NONCE: ",
-      lastConfirmedNonce
-    );
-    return lastConfirmedNonce;
-  }
 
   const safeTxApi = `https://safe-client.gnosis.io/v1/chains/${chainId}/safes/${safeAddress}/transactions/queued`;
   const response = await axios.get(safeTxApi);
@@ -178,8 +166,7 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
     nonce = nonce
       ? nonce
       : await retryWithDelay(
-          () =>
-            getNonce(safeSdk, chainId, chainSafeAddress, config.restartnonce),
+          () => getNonce(safeSdk, chainId, chainSafeAddress),
           "Gnosis Get Nonce"
         );
 
@@ -225,7 +212,7 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
     "Gnosis safe"
   );
 
-  console.log("--> gnosis propose tx success");
+  console.log("--> gnosis propose tx success", nonceLog);
 };
 
 const upgradeNFTContract = async ({
@@ -316,7 +303,7 @@ const upgradeNFTContract = async ({
       contracts.swNFT,
       upgradeToABI,
       "Upgrade to new implementation",
-      { execute: true, restartnonce: false, nonce },
+      { execute: true, nonce },
       GNOSIS_SAFE[network.chainId],
       ethers
     );
