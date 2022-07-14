@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("hardhat-gas-reporter");
 require("hardhat-abi-exporter");
+require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-etherscan");
 require("dotenv").config();
 require("@openzeppelin/hardhat-upgrades");

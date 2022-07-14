@@ -17,12 +17,12 @@ contract SWETH is ISWETH, ERC20Permit {
         ERC20(swETHName, swETHSymbol)
         ERC20Permit(swETHName)
     {
-        require(_minter != address(0), "Address cannot be 0");
+        require(_minter != address(0), "InvalidAddress");
         minter = _minter;
     }
 
     modifier onlyMinter() {
-        require(msg.sender == minter, "SWETH: caller is not the minter");
+        require(msg.sender == minter, "Minter only");
         _;
     }
 

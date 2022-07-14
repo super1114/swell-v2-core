@@ -55,6 +55,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "google-spreadsheet": "^3.0.14",
+    "hardhat-contract-sizer": "^2.6.1",
     "prettier-eslint": "^15.0.1"
   },
   "lint-staged": {

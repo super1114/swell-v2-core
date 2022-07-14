@@ -14,12 +14,12 @@ contract Strategy is IStrategy {
     address public immutable swNFT;
 
     constructor(address _swNFT) {
-        require(_swNFT != address(0), "Address cannot be 0");
+        require(_swNFT != address(0), "InvalidAddress");
         swNFT = _swNFT;
     }
 
     modifier onlyswNFT() {
-        require(msg.sender == swNFT, "Strategy: caller is not the swNFT");
+        require(msg.sender == swNFT, "swNFT only");
         _;
     }
 
@@ -32,7 +32,7 @@ contract Strategy is IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "cannot enter strategy with 0 amount");
+        require(amount > 0, "Invalid amount");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] += amount;
         emit LogEnter(tokenId, amount);
@@ -52,8 +52,8 @@ contract Strategy is IStrategy {
         onlyswNFT
         returns (bool success)
     {
-        require(amount > 0, "No position to exit");
-        require(amount <= positions[tokenId], "Not enough position to exit");
+        require(amount > 0, "No position");
+        require(amount <= positions[tokenId], "Amount too big");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] -= amount;
         emit LogExit(tokenId, amount);

@@ -1449,19 +1449,6 @@
   },
   {
     "inputs": [],
-    "name": "tvl",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "unstake",
     "outputs": [],
     "stateMutability": "pure",
