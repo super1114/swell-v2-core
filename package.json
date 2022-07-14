@@ -44,7 +44,7 @@
     "prettier": "^2.6.2",
     "semantic-release": "^19.0.3",
     "solhint": "^3.3.6",
-    "solidity-coverage": "^0.7.18"
+    "solidity-coverage": "0.7.19"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
