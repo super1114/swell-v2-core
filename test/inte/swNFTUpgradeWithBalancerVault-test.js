@@ -370,7 +370,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
 
       await expect(
         swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
-      ).to.be.revertedWith("ERC721: owner query for nonexistent token");
+      ).to.be.revertedWith("ERC721: invalid token ID");
 
       await expect(
         swNFT
