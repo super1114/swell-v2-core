@@ -17,9 +17,13 @@ const IMPLEMENTATION_STORAGE_ADDRESS =
   "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 
 const GNOSIS_SAFE = {
+  1: {
+    gnosisApi: "https://safe-transaction.gnosis.io",
+    protocolDaoAddress: "0x20fDF47509C5eFC0e1101e3CE443691781C17F90",
+  },
   5: {
     gnosisApi: "https://safe-transaction.goerli.gnosis.io",
-    protocolDaoAddress: "0xA6FF5B3CF991721E02981Aac174e54878d2eE616",
+    protocolDaoAddress: "0x02b6147E288874BcB5fa6986f6eBD44C14F09582",
   },
 };
 
