@@ -193,8 +193,8 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
 
   const safeTransaction = await safeSdk.createTransaction(transaction);
   // off-chain sign
-  const txHash = await safeSdk.getTransactionHash(safeTransaction);
-  // const signature = await safeSdk.signTransactionHash(txHash);
+  const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+  const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
   // on-chain sign
   // const approveTxResponse = await safeSdk.approveTransactionHash(txHash)
   // console.log("approveTxResponse", approveTxResponse);
@@ -205,9 +205,10 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
     () =>
       service.proposeTransaction({
         safeAddress: chainSafeAddress,
+        safeTransactionData: safeTransaction.data,
+        safeTxHash,
         senderAddress,
-        safeTransaction: safeTransaction,
-        safeTxHash: txHash,
+        senderSignature: senderSignature.data,
       }),
     "Gnosis safe"
   );
