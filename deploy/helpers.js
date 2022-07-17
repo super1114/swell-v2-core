@@ -246,6 +246,8 @@ const upgradeNFTContract = async ({
   versions[newTag].network = network;
   versions[newTag].date = new Date().toUTCString();
 
+  pauseSWNFTContract(hre, contracts.swNFT);
+
   const SWNFTUpgrade = await ethers.getContractFactory(
     "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
     {
@@ -309,12 +311,27 @@ const upgradeNFTContract = async ({
       ethers
     );
   }
+  
+  unpauseSWNFTContract(hre, contracts.swNFT);
+
   // convert JSON object to string
   const data = JSON.stringify(versions, null, 2);
 
   // write to version file
   fs.writeFileSync(path, data);
 };
+
+const pauseSWNFTContract = async (hre, contractAddress) => {
+  const { ethers } = hre;
+  const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+  await swNFT.pause();
+}
+
+const unpauseSWNFTContract = async (hre, contractAddress) => {
+  const { ethers } = hre;
+  const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+  await swNFT.unpause();
+}
 
 module.exports = {
   getManifestFile,
