@@ -427,7 +427,12 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         );
 
       await expect(
-        swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"), 0)
+        swNFT.exitStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("Amount too big");
     });
 

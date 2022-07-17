@@ -370,7 +370,12 @@ describe("SWNFTUpgrade", () => {
 
     it("can exit strategy", async function () {
       await expect(
-        swNFT.exitStrategy("2", strategy.address, ethers.utils.parseEther("1"), 0)
+        swNFT.exitStrategy(
+          "2",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("Owner only");
 
       await expect(
@@ -387,7 +392,12 @@ describe("SWNFTUpgrade", () => {
         );
 
       await expect(
-        swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"), 0)
+        swNFT.exitStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("Amount too big");
     });
 
