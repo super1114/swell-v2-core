@@ -4,14 +4,12 @@ const {
   NONFUNGIBLE_POSITION_MANAGER,
   UNISWAP_V3_QUOTER,
   UNISWAP_V3_SWAP_ROUTER,
-} = require("../../constants/addresses");
-const {
   IZUMI_LIQUID_BOX,
   USDT_ADDRESS,
   USDC_ADDRESS,
   USD_WHALE,
   UNISWAP_USDT_USDC_POOL,
-} = require("../constants/izumiTestVariables");
+} = require("../../constants/addresses");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
 const {
   _getQuoteForToken,

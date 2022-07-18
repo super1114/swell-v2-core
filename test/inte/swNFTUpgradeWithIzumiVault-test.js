@@ -14,12 +14,10 @@ const {
   DEPOSIT_CONTRACT_ADDRESS,
   ZERO_ADDRESS,
   SWNFT_ADDRESS,
-} = require("../../constants/addresses");
-const {
   IZUMI_LIQUID_BOX,
   SWETH_WHALE,
   SWNFT_DEPLOYER,
-} = require("../constants/izumiTestVariables");
+} = require("../../constants/goerliAddresses");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
 const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
 const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
@@ -62,6 +60,23 @@ let swNFT,
 
 describe("SWNFTUpgrade with IzumiVault", () => {
   before(async () => {
+    await network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl:
+              "https://eth-goerli.alchemyapi.io/v2/" +
+              process.env.ALCHEMY_API_KEY,
+            blockNumber: 7222105,
+          },
+          mining: {
+            auto: true,
+          },
+        },
+      ],
+    });
+
     [signer, user, bot] = await ethers.getSigners();
 
     await network.provider.request({
@@ -117,7 +132,8 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       deployer,
     });
     await swNFT.deployed();
-    tokenId = 307;
+    tokenId = (await swNFT.tokenIds()).toNumber() + 1;
+    console.log(tokenId);
 
     swETH = await ethers.getContractAt(
       "contracts/swETH.sol:SWETH",
