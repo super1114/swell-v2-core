@@ -276,6 +276,7 @@ const upgradeNFTContract = async ({
         NFTDescriptor: contracts.nftDescriptorLibrary,
       },
       unsafeAllowLinkedLibraries: true,
+      unsafeSkipStorageCheck: true,
     });
     swNFTImplementation = await getImplementation(swNFT.address, hre);
   }
@@ -311,7 +312,7 @@ const upgradeNFTContract = async ({
       ethers
     );
   }
-  
+
   unpauseSWNFTContract(hre, contracts.swNFT);
 
   // convert JSON object to string
@@ -323,15 +324,21 @@ const upgradeNFTContract = async ({
 
 const pauseSWNFTContract = async (hre, contractAddress) => {
   const { ethers } = hre;
-  const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+  const swNFT = await ethers.getContractAt(
+    "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+    contractAddress
+  );
   await swNFT.pause();
-}
+};
 
 const unpauseSWNFTContract = async (hre, contractAddress) => {
   const { ethers } = hre;
-  const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+  const swNFT = await ethers.getContractAt(
+    "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+    contractAddress
+  );
   await swNFT.unpause();
-}
+};
 
 module.exports = {
   getManifestFile,

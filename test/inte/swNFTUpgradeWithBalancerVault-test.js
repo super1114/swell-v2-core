@@ -76,6 +76,7 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         NFTDescriptor: nftDescriptorLibrary.address,
       },
       unsafeAllowLinkedLibraries: true,
+      unsafeSkipStorageCheck: true,
     });
     await swNFT.deployed();
 
