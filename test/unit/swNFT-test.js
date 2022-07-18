@@ -67,7 +67,6 @@ describe("SWNFT", async () => {
         NFTDescriptor: nftDescriptorLibrary.address,
       },
       unsafeAllowLinkedLibraries: true,
-      unsafeSkipStorageCheck: true,
     });
     await swNFT.deployed();
 
