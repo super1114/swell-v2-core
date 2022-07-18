@@ -178,5 +178,4 @@ const seedLiquidity = async (whale, amountA, amountB, tokenA, tokenB) => {
 module.exports = {
   generateTrades,
   generateUSDTrades,
-  seedLiquidity,
 };

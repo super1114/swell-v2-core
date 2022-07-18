@@ -1,6 +1,5 @@
 const { ethers, upgrades, network } = require("hardhat");
 const { expect } = require("chai");
-const { BigNumber } = require("ethers");
 const { extractJSONFromURI } = require("../helpers/extractJSONFromURI");
 const {
   getLastTagContractFactory,
@@ -17,10 +16,9 @@ const {
   IZUMI_LIQUID_BOX,
   SWETH_WHALE,
   SWNFT_DEPLOYER,
+  SWETH_WETH_POOL,
 } = require("../../constants/goerliAddresses");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
-const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
-const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
 const {
   generateParams,
   isToken0,
@@ -68,7 +66,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             jsonRpcUrl:
               "https://eth-goerli.alchemyapi.io/v2/" +
               process.env.ALCHEMY_API_KEY,
-            blockNumber: 7222105,
+            blockNumber: 7250570,
           },
           mining: {
             auto: true,
@@ -301,18 +299,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
         NONFUNGIBLE_POSITION_MANAGER
       );
 
-      pool = await createUniswapPool(swETH.address, wethToken.address);
-
-      await pool.initialize(BigNumber.from(2).pow(96));
-
-      await seedLiquidity(
-        signer,
-        ethers.utils.parseEther("10"),
-        ethers.utils.parseEther("10"),
-        swETH,
-        wethToken
-      );
-
+      pool = await ethers.getContractAt("IUniswapV3Pool", SWETH_WETH_POOL);
       fee = (await pool.fee()).toString();
 
       const testTickSpacing = await getTickRange(pool.address, 100);

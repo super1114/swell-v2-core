@@ -339,7 +339,12 @@ describe("SWNFTUpgrade", () => {
       ).to.be.revertedWith("Owner only");
 
       await expect(
-        swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"), 0)
+        swNFT.enterStrategy(
+          "3",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("ERC721: invalid token ID");
 
       await expect(
