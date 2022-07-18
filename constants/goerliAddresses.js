@@ -1,6 +1,7 @@
 /*///////////////////////////////////////////////////////////////
                     CONSTANT ADDRESSES
-    //////////////////////////////////////////////////////////////*/
+//////////////////////////////////////////////////////////////*/
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SWETH_ADDRESS = "0x30ebB58888E94095939e220CAb04C59Ea65ded2E";
 const WETH_ADDRESS = "0x706A11AF5bb5C2a50aB9802503ddbfF69373D1bd";
 const SWNFT_ADDRESS = "0x23e33FC2704Bb332C0410B006e8016E7B99CF70A";
@@ -17,6 +18,7 @@ const SWETH_WHALE = "0xc1E0E8f96F2fABf0bAb46Ce7b056ef4FFFb1083D";
 const SWNFT_DEPLOYER = "0x441eC70Ca587Dd0d180023F2C8e9471d03be4983";
 
 module.exports = {
+  ZERO_ADDRESS,
   SWETH_ADDRESS,
   WETH_ADDRESS,
   SWNFT_ADDRESS,
