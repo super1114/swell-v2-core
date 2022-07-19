@@ -5,20 +5,24 @@ const {
   getLastTagContractFactory,
 } = require("../../deploy/swNFTContractFromLastTag");
 const {
-  NONFUNGIBLE_POSITION_MANAGER,
-  UNISWAP_V3_SWAP_ROUTER,
-  UNISWAP_V3_QUOTER,
   SWETH_ADDRESS,
   WETH_ADDRESS,
+  SWETH_WETH_POOL,
   DEPOSIT_CONTRACT_ADDRESS,
   ZERO_ADDRESS,
   SWNFT_ADDRESS,
   IZUMI_LIQUID_BOX,
   SWETH_WHALE,
   SWNFT_DEPLOYER,
-  SWETH_WETH_POOL,
 } = require("../../constants/goerliAddresses");
+const {
+  NONFUNGIBLE_POSITION_MANAGER,
+  UNISWAP_V3_SWAP_ROUTER,
+  UNISWAP_V3_QUOTER,
+} = require("../../constants/addresses");
 const { getTickRange } = require("../helpers/uniswap/getTickRange");
+// const { createUniswapPool } = require("../helpers/uniswap/createUniswapPool");
+const { seedLiquidity } = require("../helpers/uniswap/generateTrades");
 const {
   generateParams,
   isToken0,
@@ -66,7 +70,7 @@ describe("SWNFTUpgrade with IzumiVault", () => {
             jsonRpcUrl:
               "https://eth-goerli.alchemyapi.io/v2/" +
               process.env.ALCHEMY_API_KEY,
-            blockNumber: 7250570,
+            blockNumber: 7253925,
           },
           mining: {
             auto: true,
@@ -300,6 +304,19 @@ describe("SWNFTUpgrade with IzumiVault", () => {
       );
 
       pool = await ethers.getContractAt("IUniswapV3Pool", SWETH_WETH_POOL);
+      // pool = await createUniswapPool(swETH.address, wethToken.address);
+
+      // await pool.initialize(BigNumber.from(2).pow(96));
+
+      await seedLiquidity(
+        signer,
+        ethers.utils.parseEther("10"),
+        ethers.utils.parseEther("10"),
+        swETH,
+        wethToken,
+        500
+      );
+
       fee = (await pool.fee()).toString();
 
       const testTickSpacing = await getTickRange(pool.address, 100);
@@ -411,17 +428,18 @@ describe("SWNFTUpgrade with IzumiVault", () => {
     });
 
     it("can exit strategy", async function () {
-      let assetsToWithdraw = await strategy.previewRedeem(
+      const tokenIndex = isToken0(swETH.address, wethAddress.address) ? 1 : 0;
+      const assetsToWithdraw = await strategy.previewRedeem(
         ethers.utils.parseEther("0.5")
       );
-      let getRequiredLiquidity = await strategy.getRequiredLiquidity(
+      const getRequiredLiquidity = await strategy.getRequiredLiquidity(
         assetsToWithdraw,
         isToken0(swETH.address, wethToken.address)
       );
-      let amountWithdrawIn = (
+      const amountWithdrawIn = (
         await strategy.getAmountsRequired(getRequiredLiquidity)
-      )[2];
-      let withdrawParams = generateParams(
+      )[tokenIndex];
+      const withdrawParams = generateParams(
         amountWithdrawIn,
         wethToken,
         swETH,

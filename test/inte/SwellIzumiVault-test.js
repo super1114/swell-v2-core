@@ -113,7 +113,7 @@ describe("Swell Izumi Vault", () => {
 
     let amountToDeposit = parseUSD("100");
     let amountIn = amountToDeposit.div(2);
-    let swapParams = generateParams(
+    let swapParams = await generateParams(
       amountIn,
       testToken,
       weth,
