@@ -36,13 +36,8 @@ interface IDepositContract {
     ) external payable;
 }
 
-contract BoxStorage {
-    uint256[49] private gap;
-}
-
 /// @title Contract for SWNFTUpgrade
 contract SWNFTUpgrade is
-    BoxStorage,
     ERC721EnumerableUpgradeable,
     UUPSUpgradeable,
     OwnableUpgradeable,

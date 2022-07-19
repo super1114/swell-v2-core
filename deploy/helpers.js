@@ -246,7 +246,7 @@ const upgradeNFTContract = async ({
   versions[newTag].network = network;
   versions[newTag].date = new Date().toUTCString();
 
-  pauseSWNFTContract(hre, contracts.swNFT, multisig, nonce);
+  pauseSWNFTContract(hre, contracts.swNFT, multisig);
 
   const SWNFTUpgrade = await ethers.getContractFactory(
     "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -306,13 +306,13 @@ const upgradeNFTContract = async ({
       contracts.swNFT,
       upgradeToABI,
       "Upgrade to new implementation",
-      { execute: true, nonce : nonce + 1 },
+      { execute: true, nonce },
       GNOSIS_SAFE[network.chainId],
       ethers
     );
   }
   
-  unpauseSWNFTContract(hre, contracts.swNFT, multisig, nonce);
+  unpauseSWNFTContract(hre, contracts.swNFT, multisig);
 
   // convert JSON object to string
   const data = JSON.stringify(versions, null, 2);
@@ -321,7 +321,7 @@ const upgradeNFTContract = async ({
   fs.writeFileSync(path, data);
 };
 
-const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce) => {
+const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) => {
   const { ethers } = hre;
   if(multisig) {
     let network = await ethers.provider.getNetwork();
@@ -349,7 +349,7 @@ const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce) => {
   }
 }
  
-const unpauseSWNFTContract = async (hre, contractAddress, multisig, nonce) => {
+const unpauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) => {
   const { ethers } = hre;
   if(multisig) {
     let network = await ethers.provider.getNetwork();
