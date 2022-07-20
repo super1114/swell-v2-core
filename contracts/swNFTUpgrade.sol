@@ -28,7 +28,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;
-    // using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     modifier onlyBot() {
         require(msg.sender == botAddress, "Bot only");
@@ -115,15 +114,15 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Add a new validator into superWhiteList
     /// @param pubKey The public key of the validator
-    function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
+    function addSuperWhiteList(bytes calldata pubKey) public onlyOwner {
         superWhiteList[pubKey] = true;
         emit LogAddSuperWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into superWhiteList
     /// @param pubKeys Array of public keys of the validator
-    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
-        for(uint i = 0; i < pubKeys.length; i++){
+    function addSuperWhiteLists(bytes[] calldata pubKeys) external onlyOwner {
+        for (uint256 i = 0; i < pubKeys.length; i++) {
             addSuperWhiteList(pubKeys[i]);
         }
     }
@@ -376,11 +375,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Get the strategy with index
     /// @return Strategy address
-    function strategies(uint256 strategyIndex)
-        external
-        view
-        returns (address)
-    {
+    function strategies(uint256 strategyIndex) external view returns (address) {
         _checkStrategyIndex(strategyIndex);
 
         return _getStrategyIndex(strategyIndex);
@@ -388,11 +383,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Get all strategies
     /// @return All strategy address
-    function allStrategies()
-        external
-        view
-        returns (address[] memory)
-    {
+    function allStrategies() external view returns (address[] memory) {
         return _getAllStrategies();
     }
 
