@@ -56,11 +56,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice set base token address
     /// @param _swETHAddress The address of the base token
-    function setswETHAddress(address _swETHAddress)
-        external
-        onlyOwner
-        whenNotPaused
-    {
+    function setswETHAddress(address _swETHAddress) external onlyOwner {
         require(_swETHAddress != address(0), "InvalidAddress");
         swETHAddress = _swETHAddress;
         emit LogSetSWETHAddress(swETHAddress);
@@ -68,7 +64,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice set fee pool address
     /// @param _feePool The address of the fee pool
-    function setFeePool(address _feePool) external onlyOwner whenNotPaused {
+    function setFeePool(address _feePool) external onlyOwner {
         require(_feePool != address(0), "InvalidAddress");
         feePool = _feePool;
         emit LogSetFeePool(feePool);
@@ -76,7 +72,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice set fee
     /// @param _fee The fee that's going to be paid to the fee pool
-    function setFee(uint256 _fee) external onlyOwner whenNotPaused {
+    function setFee(uint256 _fee) external onlyOwner {
         require(_fee > 0, "Fee is 0");
         fee = _fee;
         emit LogSetFee(_fee);
@@ -87,7 +83,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     function addStrategy(address strategy)
         external
         onlyOwner
-        whenNotPaused
         returns (bool added)
     {
         return _addStrategy(strategy);
@@ -98,7 +93,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     function removeStrategy(address strategy)
         external
         onlyOwner
-        whenNotPaused
         returns (bool removed)
     {
         return _removeStrategy(strategy);
@@ -106,22 +100,14 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Add a new validator into whiteList
     /// @param pubKey The public key of the validator
-    function addWhiteList(bytes calldata pubKey)
-        public
-        onlyOwner
-        whenNotPaused
-    {
+    function addWhiteList(bytes calldata pubKey) public onlyOwner {
         whiteList[pubKey] = true;
         emit LogAddWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into whiteList
     /// @param pubKeys Array of public keys of the validator
-    function addWhiteLists(bytes[] calldata pubKeys)
-        external
-        onlyOwner
-        whenNotPaused
-    {
+    function addWhiteLists(bytes[] calldata pubKeys) external onlyOwner {
         for (uint256 i = 0; i < pubKeys.length; i++) {
             addWhiteList(pubKeys[i]);
         }
@@ -129,34 +115,22 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Add a new validator into superWhiteList
     /// @param pubKey The public key of the validator
-    function addSuperWhiteList(bytes calldata pubKey)
-        public
-        onlyOwner
-        whenNotPaused
-    {
+    function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
         superWhiteList[pubKey] = true;
         emit LogAddSuperWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into superWhiteList
     /// @param pubKeys Array of public keys of the validator
-    function addSuperWhiteLists(bytes[] calldata pubKeys)
-        external
-        onlyOwner
-        whenNotPaused
-    {
-        for (uint256 i = 0; i < pubKeys.length; i++) {
+    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
+        for(uint i = 0; i < pubKeys.length; i++){
             addSuperWhiteList(pubKeys[i]);
         }
     }
 
     // @notice Update the cronjob bot address
     /// @param _address The address of the cronjob bot
-    function updateBotAddress(address _address)
-        external
-        onlyOwner
-        whenNotPaused
-    {
+    function updateBotAddress(address _address) external onlyOwner {
         require(_address != address(0), "InvalidAddress");
         botAddress = _address;
         emit LogUpdateBotAddress(_address);
@@ -164,11 +138,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey)
-        public
-        onlyBot
-        whenNotPaused
-    {
+    function updateIsValidatorActive(bytes calldata pubKey) public onlyBot {
         isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(
             msg.sender,
@@ -181,6 +151,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     /// @param pubKeys Array of public key of the validators
     function updateIsValidatorsActive(bytes[] calldata pubKeys)
         external
+        onlyBot
         whenNotPaused
     {
         for (uint256 i = 0; i < pubKeys.length; i++) {
@@ -190,11 +161,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
-    function setRate(bytes calldata pubKey, uint256 rate)
-        public
-        onlyBot
-        whenNotPaused
-    {
+    function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
         require(rate > 0, "Invalid rate");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
@@ -212,7 +179,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     }
 
     /// @notice Renonce ownership is not allowed
-    function renounceOwnership() public view override onlyOwner whenNotPaused {
+    function renounceOwnership() public view override onlyOwner {
         revert("No renounce");
     }
 
@@ -346,7 +313,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
         payable(msg.sender).transfer(totalAmount); // refund the extra ETH
     }
 
-    function unstake() external view whenNotPaused {
+    function unstake() external view {
         // require(_exists(tokenId), "Non-exist token");
         // require(ownerOf(tokenId) == msg.sender, "Owner only");
         // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough bal");
@@ -357,12 +324,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice get length of validators
     /// @return length The length of the validators
-    function validatorsLength()
-        external
-        view
-        whenNotPaused
-        returns (uint256 length)
-    {
+    function validatorsLength() external view returns (uint256 length) {
         length = validators.length;
     }
 
@@ -373,7 +335,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
         public
         view
         override
-        whenNotPaused
         returns (string memory)
     {
         require(_exists(tokenId), "Non-exist token");
@@ -402,7 +363,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
         public
         view
         virtual
-        whenNotPaused
         returns (bytes memory)
     {
         return abi.encodePacked(bytes1(0x01), bytes11(0x0), address(this));
@@ -410,13 +370,8 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
 
     /// @notice Get the length of the strategies
     /// @return length The length of the strategies
-    function getStrategyLength()
-        external
-        view
-        whenNotPaused
-        returns (uint256 length)
-    {
-        length = _getNumberOfStrategies();
+    function getStrategyLength() external view returns (uint256 length) {
+        length = strategiesSet.length();
     }
 
     /// @notice Get the strategy with index
@@ -424,7 +379,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     function strategies(uint256 strategyIndex)
         external
         view
-        whenNotPaused
         returns (address)
     {
         _checkStrategyIndex(strategyIndex);
@@ -437,7 +391,6 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     function allStrategies()
         external
         view
-        whenNotPaused
         returns (address[] memory)
     {
         return _getAllStrategies();
