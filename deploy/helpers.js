@@ -336,7 +336,7 @@ const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) =>
       []
     );
     await proposeTx(
-      contracts.swNFT,
+      contractAddress,
       pauseswNFT,
       "Pause swNFT",
       { execute: true, nonce },
@@ -364,7 +364,7 @@ const unpauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) 
       []
     );
     await proposeTx(
-      contracts.swNFT,
+      contractAddress,
       unpauseswNFT,
       "Unpause swNFT",
       { execute: true, nonce },
