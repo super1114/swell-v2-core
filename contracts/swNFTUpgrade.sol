@@ -371,7 +371,7 @@ contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
     /// @notice Get the length of the strategies
     /// @return length The length of the strategies
     function getStrategyLength() external view returns (uint256 length) {
-        length = strategiesSet.length();
+        length = _getNumberOfStrategies();
     }
 
     /// @notice Get the strategy with index
