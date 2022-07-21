@@ -3,7 +3,6 @@ const util = require("util");
 const { exec } = require("child_process");
 const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
-const { GNOSIS_SAFE } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
 const SafeServiceClient = require("@gnosis.pm/safe-service-client").default;
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
@@ -216,106 +215,6 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   console.log("--> gnosis propose tx success", nonceLog);
 };
 
-const upgradeNFTContract = async ({
-  hre,
-  keepVersion,
-  multisig = false,
-  nonce = -1,
-}) => {
-  const { ethers, upgrades } = hre;
-  let network = await ethers.provider.getNetwork();
-  const isMain = hre.network.name.includes("-main");
-  // Init tag
-  const path = `./deployments/${network.chainId}_versions${
-    isMain ? "-main" : ""
-  }.json`;
-  const versions = require("." + path);
-
-  const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
-  let newTag;
-  if (keepVersion) {
-    newTag = oldTag;
-  } else {
-    // update to latest release version
-    newTag = await getTag();
-  }
-
-  const contracts = versions[oldTag].contracts;
-  versions[newTag] = new Object();
-  versions[newTag].contracts = contracts;
-  versions[newTag].network = network;
-  versions[newTag].date = new Date().toUTCString();
-
-  const SWNFTUpgrade = await ethers.getContractFactory(
-    "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-    {
-      libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
-      },
-    }
-  );
-  let swNFTImplementation;
-  if (multisig) {
-    swNFTImplementation = await upgrades.prepareUpgrade(
-      contracts.swNFT,
-      SWNFTUpgrade,
-      {
-        kind: "uups",
-        libraries: {
-          NFTDescriptor: contracts.nftDescriptorLibrary,
-        },
-        unsafeAllowLinkedLibraries: true,
-      }
-    );
-  } else {
-    const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
-      kind: "uups",
-      libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
-      },
-      unsafeAllowLinkedLibraries: true,
-    });
-    swNFTImplementation = await getImplementation(swNFT.address, hre);
-  }
-  try {
-    await tryVerify(
-      hre,
-      swNFTImplementation,
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-      []
-    );
-  } catch (e) {
-    console.log(e);
-  }
-
-  if (multisig) {
-    const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
-    );
-    const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
-      swNFTUpgradeFactory.abi
-    );
-    const upgradeToABI = swNFTUpgradeFactoryABI.encodeFunctionData(
-      "upgradeTo",
-      [swNFTImplementation]
-    );
-    console.log("--> before propose", swNFTImplementation);
-    await proposeTx(
-      contracts.swNFT,
-      upgradeToABI,
-      "Upgrade to new implementation",
-      { execute: true, nonce },
-      GNOSIS_SAFE[network.chainId],
-      ethers
-    );
-  }
-  // convert JSON object to string
-  const data = JSON.stringify(versions, null, 2);
-
-  // write to version file
-  fs.writeFileSync(path, data);
-};
-
 module.exports = {
   getManifestFile,
   renameManifestForMainEnv,
@@ -324,5 +223,4 @@ module.exports = {
   getImplementation,
   tryVerify,
   proposeTx,
-  upgradeNFTContract,
 };

@@ -6,7 +6,11 @@ const execProm = util.promisify(exec);
 const getLastTagContractFactory = async () => {
   const tag = await getTag();
 
-  if (process.env.SKIP_GIT_CLONE === "false") {
+  if (
+    process.env.SKIP_GIT_CLONE === "false" ||
+    process.env.SKIP_GIT_CLONE === undefined ||
+    process.env.SKIP_GIT_CLONE === null
+  ) {
     await execProm("rm -rf contracts/latest-tag");
     await execProm("git clone git@github.com:SwellNetwork/v2-core.git latest");
     await execProm(

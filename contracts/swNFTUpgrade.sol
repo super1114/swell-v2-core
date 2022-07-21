@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Interfaces
@@ -20,61 +21,19 @@ import "./interfaces/IStrategy.sol";
 import {Helpers} from "./helpers.sol";
 import {NFTDescriptor} from "./libraries/NFTDescriptor.sol";
 
-interface IDepositContract {
-    /// @notice Submit a Phase 0 DepositData object.
-    /// @param pubKey A BLS12-381 public key.
-    /// @param withdrawalCredentials Commitment to a public key for withdrawals.
-    /// @param signature A BLS12-381 signature.
-    /// @param depositDataRoot The SHA-256 hash of the SSZ-encoded DepositData object.
-    /// Used as a protection against malformed input.
-    function deposit(
-        bytes calldata pubKey,
-        bytes calldata withdrawalCredentials,
-        bytes calldata signature,
-        bytes32 depositDataRoot
-    ) external payable;
-}
+import "./swNFTV1.sol";
 
 /// @title Contract for SWNFTUpgrade
-contract SWNFTUpgrade is
-    ERC721EnumerableUpgradeable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    ISWNFT
-{
-    uint256 public GWEI; // Not used
+contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
-
-    CountersUpgradeable.Counter public tokenIds;
-
-    address public swETHAddress;
-    string constant swETHSymbol = "swETH";
-    string constant swNFTName = "Swell NFT";
-    string constant swNFTSymbol = "swNFT";
-    string public swETHSymbolOld; // Not used
-    address public swellAddress;
-    uint256 public ETHER; // Not used
-    address public feePool;
-    uint256 public fee;
-
-    IDepositContract public depositContract;
-
-    bytes[] public validators;
-    mapping(bytes => uint256) public validatorDeposits;
-    mapping(bytes => bool) public whiteList;
-
-    /// @dev The token ID position data
-    mapping(uint256 => Position) public positions;
-
-    address[] public deprecatedStrategies; // deprecated
 
     modifier onlyBot() {
         require(msg.sender == botAddress, "Bot only");
         _;
     }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -125,11 +84,7 @@ contract SWNFTUpgrade is
         onlyOwner
         returns (bool added)
     {
-        require(strategy != address(0), "InvalidAddress");
-        added = strategiesSet.add(strategy);
-        if (added) {
-            emit LogAddStrategy(strategy);
-        }
+        return _addStrategy(strategy);
     }
 
     /// @notice Remove a strategy
@@ -139,10 +94,7 @@ contract SWNFTUpgrade is
         onlyOwner
         returns (bool removed)
     {
-        removed = strategiesSet.remove(strategy);
-        if (removed) {
-            emit LogRemoveStrategy(strategy);
-        }
+        return _removeStrategy(strategy);
     }
 
     /// @notice Add a new validator into whiteList
@@ -162,15 +114,15 @@ contract SWNFTUpgrade is
 
     /// @notice Add a new validator into superWhiteList
     /// @param pubKey The public key of the validator
-    function addSuperWhiteList(bytes calldata pubKey) onlyOwner public{
+    function addSuperWhiteList(bytes calldata pubKey) public onlyOwner {
         superWhiteList[pubKey] = true;
         emit LogAddSuperWhiteList(msg.sender, pubKey);
     }
 
     /// @notice Add validators into superWhiteList
     /// @param pubKeys Array of public keys of the validator
-    function addSuperWhiteLists(bytes[] calldata pubKeys) onlyOwner external{
-        for(uint i = 0; i < pubKeys.length; i++){
+    function addSuperWhiteLists(bytes[] calldata pubKeys) external onlyOwner {
+        for (uint256 i = 0; i < pubKeys.length; i++) {
             addSuperWhiteList(pubKeys[i]);
         }
     }
@@ -185,7 +137,7 @@ contract SWNFTUpgrade is
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) public onlyBot {
+    function updateIsValidatorActive(bytes calldata pubKey) public onlyBot whenNotPaused {
         isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(
             msg.sender,
@@ -196,7 +148,11 @@ contract SWNFTUpgrade is
 
     // @notice Update the validators active status
     /// @param pubKeys Array of public key of the validators
-    function updateIsValidatorsActive(bytes[] calldata pubKeys) external {
+    function updateIsValidatorsActive(bytes[] calldata pubKeys)
+        external
+        onlyBot
+        whenNotPaused
+    {
         for (uint256 i = 0; i < pubKeys.length; i++) {
             updateIsValidatorActive(pubKeys[i]);
         }
@@ -204,7 +160,7 @@ contract SWNFTUpgrade is
 
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
-    function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
+    function setRate(bytes calldata pubKey, uint256 rate) public onlyBot whenNotPaused {
         require(rate > 0, "Invalid rate");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);
@@ -216,7 +172,7 @@ contract SWNFTUpgrade is
     function updateIsValidatorActiveAndSetRate(
         bytes calldata pubKey,
         uint256 rate
-    ) external onlyBot {
+    ) external onlyBot whenNotPaused {
         updateIsValidatorActive(pubKey);
         setRate(pubKey, rate);
     }
@@ -234,14 +190,12 @@ contract SWNFTUpgrade is
     /// @return success Whether the deposit was successful
     function deposit(uint256 tokenId, uint256 amount)
         public
+        whenNotPaused
         returns (bool success)
     {
         require(amount > 0, "Invalid amount");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
-        require(
-            msg.sender != address(this),
-            "NoContractCall"
-        );
+        require(msg.sender != address(this), "NoContractCall");
         positions[tokenId].baseTokenBalance += amount;
         emit LogDeposit(tokenId, msg.sender, amount);
         success = ISWETH(swETHAddress).transferFrom(
@@ -257,19 +211,14 @@ contract SWNFTUpgrade is
     /// @return success Whether the withdraw was successful
     function withdraw(uint256 tokenId, uint256 amount)
         public
+        whenNotPaused
         returns (bool success)
     {
         require(amount > 0, "Invalid amount");
         require(ownerOf(tokenId) == msg.sender, "Owner only");
-        require(
-            msg.sender != address(this),
-            "NoContractCall"
-        );
+        require(msg.sender != address(this), "NoContractCall");
         uint256 baseTokenBalance = positions[tokenId].baseTokenBalance;
-        require(
-            amount <= baseTokenBalance,
-            "Over balance"
-        );
+        require(amount <= baseTokenBalance, "Over balance");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogWithdraw(tokenId, msg.sender, amount);
         success = ISWETH(swETHAddress).transfer(msg.sender, amount);
@@ -284,12 +233,9 @@ contract SWNFTUpgrade is
         uint256 tokenId,
         address strategy,
         uint256 amount
-    ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "Inv strategy");
-        require(
-            ownerOf(tokenId) == msg.sender,
-            "Owner only"
-        );
+    ) public whenNotPaused returns (bool success) {
+        _checkStrategy(strategy);
+        require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(amount > 0, "Invalid amount");
         positions[tokenId].baseTokenBalance -= amount;
         emit LogEnterStrategy(tokenId, strategy, msg.sender, amount);
@@ -306,8 +252,8 @@ contract SWNFTUpgrade is
         uint256 tokenId,
         address strategy,
         uint256 amount
-    ) public returns (bool success) {
-        require(strategiesSet.contains(strategy), "Inv strategy");
+    ) public whenNotPaused returns (bool success) {
+        _checkStrategy(strategy);
         require(ownerOf(tokenId) == msg.sender, "Owner only");
         require(amount > 0, "Invalid amount");
         positions[tokenId].baseTokenBalance += amount;
@@ -317,7 +263,7 @@ contract SWNFTUpgrade is
 
     /// @notice Able to bactch action for multiple tokens
     /// @param actions The actions to perform
-    function batchAction(Action[] calldata actions) external {
+    function batchAction(Action[] calldata actions) external whenNotPaused {
         for (uint256 i = 0; i < actions.length; i++) {
             if (actions[i].action == uint256(ActionChoices.Deposit)) {
                 deposit(actions[i].tokenId, actions[i].amount);
@@ -348,6 +294,7 @@ contract SWNFTUpgrade is
     function stake(Stake[] calldata stakes, string calldata referral)
         external
         payable
+        whenNotPaused
         returns (uint256[] memory ids)
     {
         ids = new uint256[](stakes.length);
@@ -365,7 +312,7 @@ contract SWNFTUpgrade is
         payable(msg.sender).transfer(totalAmount); // refund the extra ETH
     }
 
-    function unstake() external pure {
+    function unstake() external view {
         // require(_exists(tokenId), "Non-exist token");
         // require(ownerOf(tokenId) == msg.sender, "Owner only");
         // require(positions[tokenId].baseTokenBalance == positions[tokenId].value, "not enough bal");
@@ -423,20 +370,21 @@ contract SWNFTUpgrade is
     /// @notice Get the length of the strategies
     /// @return length The length of the strategies
     function getStrategyLength() external view returns (uint256 length) {
-        length = strategiesSet.length();
+        length = _getNumberOfStrategies();
     }
 
     /// @notice Get the strategy with index
     /// @return Strategy address
     function strategies(uint256 strategyIndex) external view returns (address) {
-        require(strategyIndex < strategiesSet.length(), "Index out");
-        return strategiesSet.at(strategyIndex);
+        _checkStrategyIndex(strategyIndex);
+
+        return _getStrategyIndex(strategyIndex);
     }
 
     /// @notice Get all strategies
     /// @return All strategy address
     function allStrategies() external view returns (address[] memory) {
-        return strategiesSet.values();
+        return _getAllStrategies();
     }
 
     // ============ Private functions ============
@@ -458,22 +406,19 @@ contract SWNFTUpgrade is
         require(amount <= msg.value, "Too much stake");
         require(amount >= 1 ether, "Min 1 ETH");
         require(amount % 1 ether == 0, "Not multi ETH");
-        require(
-            validatorDeposits[pubKey] + amount <= 32 ether,
-            "Over 32 ETH"
-        );
+        require(validatorDeposits[pubKey] + amount <= 32 ether, "Over 32 ETH");
 
         bool operator;
-        if(!superWhiteList[pubKey]) {
-            if(!whiteList[pubKey] && validatorDeposits[pubKey] < 16 ){
+        if (!superWhiteList[pubKey]) {
+            if (!whiteList[pubKey] && validatorDeposits[pubKey] < 16) {
                 require(amount == 16 ether, "16ETH required");
                 //TODO: Will add require for swDAO bond once there's price
             }
-            if(whiteList[pubKey] && validatorDeposits[pubKey] < 1 ){ 
-                require(amount == 1 ether, "1 ETH required"); 
-                //TODO: Will add require for swDAO bond once there's price 
+            if (whiteList[pubKey] && validatorDeposits[pubKey] < 1) {
+                require(amount == 1 ether, "1 ETH required");
+                //TODO: Will add require for swDAO bond once there's price
             }
-            if(validatorDeposits[pubKey] == 0) {
+            if (validatorDeposits[pubKey] == 0) {
                 operator = true;
             } else {
                 require(isValidatorActive[pubKey], "Val inactive");
@@ -523,9 +468,11 @@ contract SWNFTUpgrade is
         onlyOwner
     {}
 
-    mapping(bytes => uint256) public opRate;
-    address public botAddress;
-    mapping(bytes => bool) public isValidatorActive;
-    EnumerableSetUpgradeable.AddressSet private strategiesSet;
-    mapping(bytes => bool) public superWhiteList;
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 }

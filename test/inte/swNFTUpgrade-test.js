@@ -557,6 +557,28 @@ describe("SWNFTUpgrade", () => {
       ).to.emit(swNFT, "LogStake");
     });
 
+    it("Cannot stake while paused", async function () {
+      await swNFT.pause();
+      await expect(
+        swNFT.stake(
+          [
+            {
+              pubKey: pubKey3,
+              signature: signature3,
+              depositDataRoot: depositDataRoot3,
+              amount,
+            },
+          ],
+          "test-referral",
+          {
+            value: amount,
+          }
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await swNFT.unpause();
+    });
+
     it("SuperWhitelisted Validator can stake 32 ETH", async function () {
       amount = ethers.utils.parseEther("32");
       await expect(
