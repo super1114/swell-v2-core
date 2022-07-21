@@ -246,7 +246,7 @@ const upgradeNFTContract = async ({
   versions[newTag].network = network;
   versions[newTag].date = new Date().toUTCString();
 
-  pauseSWNFTContract(hre, contracts.swNFT, multisig);
+  await pauseSWNFTContract(hre, contracts.swNFT, multisig);
 
   const SWNFTUpgrade = await ethers.getContractFactory(
     "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -312,7 +312,7 @@ const upgradeNFTContract = async ({
     );
   }
 
-  unpauseSWNFTContract(hre, contracts.swNFT, multisig);
+  await unpauseSWNFTContract(hre, contracts.swNFT, multisig);
 
   // convert JSON object to string
   const data = JSON.stringify(versions, null, 2);
