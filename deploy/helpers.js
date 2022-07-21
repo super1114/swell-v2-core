@@ -246,7 +246,7 @@ const upgradeNFTContract = async ({
   versions[newTag].network = network;
   versions[newTag].date = new Date().toUTCString();
 
-  await pauseSWNFTContract(hre, contracts.swNFT, multisig);
+  await pauseContract(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, multisig);
 
   const SWNFTUpgrade = await ethers.getContractFactory(
     "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -291,10 +291,10 @@ const upgradeNFTContract = async ({
   }
 
   if (multisig) {
-    proposeTxWhenMultisig(hre, contracts.swNFT, "upgradeTo", [swNFTImplementation], nonce);
+    proposeTxWhenMultisig(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, "upgradeTo", [swNFTImplementation], nonce);
   }
 
-  await unpauseSWNFTContract(hre, contracts.swNFT, multisig);
+  await unpauseContract(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, multisig);
 
   // convert JSON object to string
   const data = JSON.stringify(versions, null, 2);
@@ -303,34 +303,36 @@ const upgradeNFTContract = async ({
   fs.writeFileSync(path, data);
 };
 
-const pauseSWNFTContract = async (
+const pauseContract = async (
   hre,
+  contractName,
   contractAddress,
   multisig
 ) => {
   const { ethers } = hre;
   if (multisig) {
-    proposeTxWhenMultisig(hre, contractAddress, "pause", []);
+    proposeTxWhenMultisig(hre, contractName, contractAddress, "pause", []);
   } else {
     const swNFT = await ethers.getContractAt(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      contractName,
       contractAddress
     );
     await swNFT.pause();
   }
 };
 
-const unpauseSWNFTContract = async (
+const unpauseContract = async (
   hre,
+  contractName,
   contractAddress,
   multisig
 ) => {
   const { ethers } = hre;
   if (multisig) {
-    proposeTxWhenMultisig(hre, contractAddress, "unpause", []);
+    proposeTxWhenMultisig(hre, contractName, contractAddress, "unpause", []);
   } else {
     const swNFT = await ethers.getContractAt(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      contractName,
       contractAddress
     );
     await swNFT.unpause();
@@ -339,6 +341,7 @@ const unpauseSWNFTContract = async (
 
 const proposeTxWhenMultisig = async (
   hre,
+  contractName,
   contractAddress,
   functionName,
   parameters,
@@ -346,13 +349,13 @@ const proposeTxWhenMultisig = async (
 ) => {
   const { artifacts, ethers } = hre;
   let network = await ethers.provider.getNetwork();
-  const swNFTUpgradeFactory = await artifacts.readArtifact(
-    "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
+  const contractFactory = await artifacts.readArtifact(
+    contractName
   );
-  const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
-    swNFTUpgradeFactory.abi
+  const contractFactoryABI = new ethers.utils.Interface(
+    contractFactory.abi
   );
-  const encodeData = swNFTUpgradeFactoryABI.encodeFunctionData(functionName, parameters);
+  const encodeData = contractFactoryABI.encodeFunctionData(functionName, parameters);
   await proposeTx(
     contractAddress,
     encodeData,
