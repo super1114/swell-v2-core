@@ -25,7 +25,7 @@ interface IDepositContract {
     ) external payable;
 }
 
-abstract contract NFTInfo is
+abstract contract swNFTV1 is
     ERC721EnumerableUpgradeable,
     UUPSUpgradeable,
     OwnableUpgradeable,

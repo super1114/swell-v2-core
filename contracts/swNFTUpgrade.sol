@@ -21,10 +21,10 @@ import "./interfaces/IStrategy.sol";
 import {Helpers} from "./helpers.sol";
 import {NFTDescriptor} from "./libraries/NFTDescriptor.sol";
 
-import "./NFTInfo.sol";
+import "./swNFTV1.sol";
 
 /// @title Contract for SWNFTUpgrade
-contract SWNFTUpgrade is NFTInfo, PausableUpgradeable {
+contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using Helpers for *;
     using Strings for uint256;

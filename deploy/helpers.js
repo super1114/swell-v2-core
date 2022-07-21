@@ -291,25 +291,7 @@ const upgradeNFTContract = async ({
   }
 
   if (multisig) {
-    const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
-    );
-    const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
-      swNFTUpgradeFactory.abi
-    );
-    const upgradeToABI = swNFTUpgradeFactoryABI.encodeFunctionData(
-      "upgradeTo",
-      [swNFTImplementation]
-    );
-    console.log("--> before propose", swNFTImplementation);
-    await proposeTx(
-      contracts.swNFT,
-      upgradeToABI,
-      "Upgrade to new implementation",
-      { execute: true, nonce },
-      GNOSIS_SAFE[network.chainId],
-      ethers
-    );
+    proposeTxWhenMultisig(hre, contracts.swNFT, "upgradeTo", [swNFTImplementation], nonce);
   }
 
   await unpauseSWNFTContract(hre, contracts.swNFT, multisig);
@@ -324,27 +306,11 @@ const upgradeNFTContract = async ({
 const pauseSWNFTContract = async (
   hre,
   contractAddress,
-  multisig,
-  nonce = -1
+  multisig
 ) => {
   const { ethers } = hre;
   if (multisig) {
-    let network = await ethers.provider.getNetwork();
-    const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
-    );
-    const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
-      swNFTUpgradeFactory.abi
-    );
-    const pauseswNFT = swNFTUpgradeFactoryABI.encodeFunctionData("pause", []);
-    await proposeTx(
-      contractAddress,
-      pauseswNFT,
-      "Pause swNFT",
-      { execute: true, nonce },
-      GNOSIS_SAFE[network.chainId],
-      ethers
-    );
+    proposeTxWhenMultisig(hre, contractAddress, "pause", []);
   } else {
     const swNFT = await ethers.getContractAt(
       "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -357,30 +323,11 @@ const pauseSWNFTContract = async (
 const unpauseSWNFTContract = async (
   hre,
   contractAddress,
-  multisig,
-  nonce = -1
+  multisig
 ) => {
   const { ethers } = hre;
   if (multisig) {
-    let network = await ethers.provider.getNetwork();
-    const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
-    );
-    const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
-      swNFTUpgradeFactory.abi
-    );
-    const unpauseswNFT = swNFTUpgradeFactoryABI.encodeFunctionData(
-      "unpause",
-      []
-    );
-    await proposeTx(
-      contractAddress,
-      unpauseswNFT,
-      "Unpause swNFT",
-      { execute: true, nonce },
-      GNOSIS_SAFE[network.chainId],
-      ethers
-    );
+    proposeTxWhenMultisig(hre, contractAddress, "unpause", []);
   } else {
     const swNFT = await ethers.getContractAt(
       "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -388,6 +335,32 @@ const unpauseSWNFTContract = async (
     );
     await swNFT.unpause();
   }
+};
+
+const proposeTxWhenMultisig = async (
+  hre,
+  contractAddress,
+  functionName,
+  parameters,
+  nonce = -1
+) => {
+  const { artifacts, ethers } = hre;
+  let network = await ethers.provider.getNetwork();
+  const swNFTUpgradeFactory = await artifacts.readArtifact(
+    "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
+  );
+  const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
+    swNFTUpgradeFactory.abi
+  );
+  const encodeData = swNFTUpgradeFactoryABI.encodeFunctionData(functionName, parameters);
+  await proposeTx(
+    contractAddress,
+    encodeData,
+    functionName,
+    { execute: true, nonce },
+    GNOSIS_SAFE[network.chainId],
+    ethers
+  );
 };
 
 module.exports = {

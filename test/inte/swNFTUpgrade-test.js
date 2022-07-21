@@ -557,7 +557,7 @@ describe("SWNFTUpgrade", () => {
       ).to.emit(swNFT, "LogStake");
     });
 
-    it("Cannot sake while paused", async function () {
+    it("Cannot stake while paused", async function () {
       await swNFT.pause();
       await expect(
         swNFT.stake(
