@@ -3,7 +3,6 @@ const util = require("util");
 const { exec } = require("child_process");
 const execProm = util.promisify(exec);
 const { IMPLEMENTATION_STORAGE_ADDRESS } = require("../constants/addresses");
-const { GNOSIS_SAFE } = require("../constants/addresses");
 const { retryWithDelay } = require("./utils");
 const SafeServiceClient = require("@gnosis.pm/safe-service-client").default;
 const Safe = require("@gnosis.pm/safe-core-sdk").default;
@@ -216,156 +215,6 @@ const proposeTx = async (to, data, message, config, addresses, ethers) => {
   console.log("--> gnosis propose tx success", nonceLog);
 };
 
-const upgradeNFTContract = async ({
-  hre,
-  keepVersion,
-  multisig = false,
-  nonce = -1,
-}) => {
-  const { ethers, upgrades } = hre;
-  let network = await ethers.provider.getNetwork();
-  const isMain = hre.network.name.includes("-main");
-  // Init tag
-  const path = `./deployments/${network.chainId}_versions${
-    isMain ? "-main" : ""
-  }.json`;
-  const versions = require("." + path);
-
-  const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
-  let newTag;
-  if (keepVersion) {
-    newTag = oldTag;
-  } else {
-    // update to latest release version
-    newTag = await getTag();
-  }
-
-  const contracts = versions[oldTag].contracts;
-  versions[newTag] = new Object();
-  versions[newTag].contracts = contracts;
-  versions[newTag].network = network;
-  versions[newTag].date = new Date().toUTCString();
-
-  await pauseContract(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, multisig);
-
-  const SWNFTUpgrade = await ethers.getContractFactory(
-    "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-    {
-      libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
-      },
-    }
-  );
-  let swNFTImplementation;
-  if (multisig) {
-    swNFTImplementation = await upgrades.prepareUpgrade(
-      contracts.swNFT,
-      SWNFTUpgrade,
-      {
-        kind: "uups",
-        libraries: {
-          NFTDescriptor: contracts.nftDescriptorLibrary,
-        },
-        unsafeAllowLinkedLibraries: true,
-      }
-    );
-  } else {
-    const swNFT = await upgrades.upgradeProxy(contracts.swNFT, SWNFTUpgrade, {
-      kind: "uups",
-      libraries: {
-        NFTDescriptor: contracts.nftDescriptorLibrary,
-      },
-      unsafeAllowLinkedLibraries: true,
-    });
-    swNFTImplementation = await getImplementation(swNFT.address, hre);
-  }
-  try {
-    await tryVerify(
-      hre,
-      swNFTImplementation,
-      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
-      []
-    );
-  } catch (e) {
-    console.log(e);
-  }
-
-  if (multisig) {
-    proposeTxWhenMultisig(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, "upgradeTo", [swNFTImplementation], nonce);
-  }
-
-  await unpauseContract(hre, "contracts/swNFTUpgrade.sol:SWNFTUpgrade", contracts.swNFT, multisig);
-
-  // convert JSON object to string
-  const data = JSON.stringify(versions, null, 2);
-
-  // write to version file
-  fs.writeFileSync(path, data);
-};
-
-const pauseContract = async (
-  hre,
-  contractName,
-  contractAddress,
-  multisig
-) => {
-  const { ethers } = hre;
-  if (multisig) {
-    proposeTxWhenMultisig(hre, contractName, contractAddress, "pause", []);
-  } else {
-    const contract = await ethers.getContractAt(
-      contractName,
-      contractAddress
-    );
-    await contract.pause();
-  }
-};
-
-const unpauseContract = async (
-  hre,
-  contractName,
-  contractAddress,
-  multisig
-) => {
-  const { ethers } = hre;
-  if (multisig) {
-    proposeTxWhenMultisig(hre, contractName, contractAddress, "unpause", []);
-  } else {
-    const contract = await ethers.getContractAt(
-      contractName,
-      contractAddress
-    );
-    await contract.unpause();
-  }
-};
-
-const proposeTxWhenMultisig = async (
-  hre,
-  contractName,
-  contractAddress,
-  functionName,
-  parameters,
-  nonce = -1
-) => {
-  const { artifacts, ethers } = hre;
-  let network = await ethers.provider.getNetwork();
-  const contractFactory = await artifacts.readArtifact(
-    contractName
-  );
-  const contractFactoryABI = new ethers.utils.Interface(
-    contractFactory.abi
-  );
-  const encodeData = contractFactoryABI.encodeFunctionData(functionName, parameters);
-  await proposeTx(
-    contractAddress,
-    encodeData,
-    functionName,
-    { execute: true, nonce },
-    GNOSIS_SAFE[network.chainId],
-    ethers
-  );
-};
-
 module.exports = {
   getManifestFile,
   renameManifestForMainEnv,
@@ -374,5 +223,4 @@ module.exports = {
   getImplementation,
   tryVerify,
   proposeTx,
-  upgradeNFTContract,
 };
