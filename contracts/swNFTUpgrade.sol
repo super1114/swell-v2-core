@@ -137,7 +137,7 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
 
     // @notice Update the validator active status
     /// @param pubKey The public key of the validator
-    function updateIsValidatorActive(bytes calldata pubKey) public onlyBot {
+    function updateIsValidatorActive(bytes calldata pubKey) public onlyBot whenNotPaused {
         isValidatorActive[pubKey] = true;
         emit LogUpdateIsValidatorActive(
             msg.sender,
@@ -160,7 +160,7 @@ contract SWNFTUpgrade is swNFTV1, PausableUpgradeable {
 
     // @notice Update validator rate
     /// @param pubKey The public key of the validator
-    function setRate(bytes calldata pubKey, uint256 rate) public onlyBot {
+    function setRate(bytes calldata pubKey, uint256 rate) public onlyBot whenNotPaused {
         require(rate > 0, "Invalid rate");
         opRate[pubKey] = rate;
         emit LogSetRate(msg.sender, pubKey, opRate[pubKey]);

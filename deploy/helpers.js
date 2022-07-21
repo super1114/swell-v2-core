@@ -313,11 +313,11 @@ const pauseContract = async (
   if (multisig) {
     proposeTxWhenMultisig(hre, contractName, contractAddress, "pause", []);
   } else {
-    const swNFT = await ethers.getContractAt(
+    const contract = await ethers.getContractAt(
       contractName,
       contractAddress
     );
-    await swNFT.pause();
+    await contract.pause();
   }
 };
 
@@ -331,11 +331,11 @@ const unpauseContract = async (
   if (multisig) {
     proposeTxWhenMultisig(hre, contractName, contractAddress, "unpause", []);
   } else {
-    const swNFT = await ethers.getContractAt(
+    const contract = await ethers.getContractAt(
       contractName,
       contractAddress
     );
-    await swNFT.unpause();
+    await contract.unpause();
   }
 };
 
