@@ -67,3 +67,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # pass the project ID from the secrets through environment variable
           CYPRESS_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          SKIP_GIT_CLONE: ${{ secrets.SKIP_GIT_CLONE }}

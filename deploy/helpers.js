@@ -311,7 +311,7 @@ const upgradeNFTContract = async ({
       ethers
     );
   }
-  
+
   unpauseSWNFTContract(hre, contracts.swNFT, multisig);
 
   // convert JSON object to string
@@ -321,9 +321,14 @@ const upgradeNFTContract = async ({
   fs.writeFileSync(path, data);
 };
 
-const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) => {
+const pauseSWNFTContract = async (
+  hre,
+  contractAddress,
+  multisig,
+  nonce = -1
+) => {
   const { ethers } = hre;
-  if(multisig) {
+  if (multisig) {
     let network = await ethers.provider.getNetwork();
     const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
       "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
@@ -331,10 +336,7 @@ const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) =>
     const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
       swNFTUpgradeFactory.abi
     );
-    const pauseswNFT = swNFTUpgradeFactoryABI.encodeFunctionData(
-      "pause",
-      []
-    );
+    const pauseswNFT = swNFTUpgradeFactoryABI.encodeFunctionData("pause", []);
     await proposeTx(
       contractAddress,
       pauseswNFT,
@@ -344,14 +346,22 @@ const pauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) =>
       ethers
     );
   } else {
-    const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+    const swNFT = await ethers.getContractAt(
+      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      contractAddress
+    );
     await swNFT.pause();
   }
-}
- 
-const unpauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) => {
+};
+
+const unpauseSWNFTContract = async (
+  hre,
+  contractAddress,
+  multisig,
+  nonce = -1
+) => {
   const { ethers } = hre;
-  if(multisig) {
+  if (multisig) {
     let network = await ethers.provider.getNetwork();
     const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
       "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
@@ -372,10 +382,13 @@ const unpauseSWNFTContract = async (hre, contractAddress, multisig, nonce = -1) 
       ethers
     );
   } else {
-    const swNFT = await ethers.getContractAt("contracts/swNFTUpgrade.sol:SWNFTUpgrade", contractAddress);
+    const swNFT = await ethers.getContractAt(
+      "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
+      contractAddress
+    );
     await swNFT.unpause();
   }
-}
+};
 
 module.exports = {
   getManifestFile,
