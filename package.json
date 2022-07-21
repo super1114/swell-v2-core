@@ -47,7 +47,7 @@
     "solidity-coverage": "0.7.19"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.4.2",
+    "@openzeppelin/contracts": "^4.7.1",
     "@openzeppelin/contracts-upgradeable": "^4.4.2",
     "base64-sol": "^1.1.0",
     "cypress": "^9.3.1",
