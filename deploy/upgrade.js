@@ -65,6 +65,7 @@ task("upgrade", "Upgrade the contracts")
         },
         unsafeAllowLinkedLibraries: true,
       });
+      console.log({ addr: swNFT.address });
       const swNFTImplementation = await getImplementation(swNFT.address, hre);
       try {
         await tryVerify(
