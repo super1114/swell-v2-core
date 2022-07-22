@@ -48,7 +48,7 @@ task("upgrade", "Upgrade the contracts")
         "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
         contracts.swNFT
       );
-      // await swNFT.pause();
+      await swNFT.pause();
 
       const SWNFTUpgrade = await ethers.getContractFactory(
         "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
@@ -65,7 +65,6 @@ task("upgrade", "Upgrade the contracts")
         },
         unsafeAllowLinkedLibraries: true,
       });
-      console.log({ addr: swNFT.address });
       const swNFTImplementation = await getImplementation(swNFT.address, hre);
       try {
         await tryVerify(
@@ -78,7 +77,7 @@ task("upgrade", "Upgrade the contracts")
         console.log(e);
       }
 
-      // await swNFT.unpause();
+      await swNFT.unpause();
 
       // convert JSON object to string
       const data = JSON.stringify(versions, null, 2);
