@@ -27,7 +27,7 @@ contract Strategy is IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function enter(uint256 tokenId, uint256 amount)
+    function enter(uint256 tokenId, uint256 amount, bytes memory params)
         external
         onlyswNFT
         returns (bool success)
@@ -35,7 +35,7 @@ contract Strategy is IStrategy {
         require(amount > 0, "Invalid amount");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] += amount;
-        emit LogEnter(tokenId, amount);
+        emit LogEnter(tokenId, amount, params);
         success = ISWETH(swETHAddress).transferFrom(
             msg.sender,
             address(this),
@@ -47,7 +47,7 @@ contract Strategy is IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function exit(uint256 tokenId, uint256 amount)
+    function exit(uint256 tokenId, uint256 amount, bytes memory params)
         external
         onlyswNFT
         returns (bool success)
@@ -56,7 +56,7 @@ contract Strategy is IStrategy {
         require(amount <= positions[tokenId], "Amount too big");
         address swETHAddress = ISWNFT(swNFT).swETHAddress();
         positions[tokenId] -= amount;
-        emit LogExit(tokenId, amount);
+        emit LogExit(tokenId, amount, params);
         success = ISWETH(swETHAddress).transfer(msg.sender, amount);
     }
 }

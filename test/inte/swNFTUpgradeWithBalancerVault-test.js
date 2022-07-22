@@ -365,17 +365,22 @@ describe("SWNFTUpgrade with BalancerVault", () => {
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+          .enterStrategy("1", strategy.address, ethers.utils.parseEther("1"), 0)
       ).to.be.revertedWith("Owner only");
 
       await expect(
-        swNFT.enterStrategy("3", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.enterStrategy(
+          "3",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("ERC721: invalid token ID");
 
       await expect(
         swNFT
           .connect(user)
-          .enterStrategy("2", strategy.address, ethers.utils.parseEther("1"))
+          .enterStrategy("2", strategy.address, ethers.utils.parseEther("1"), 0)
       )
         .to.emit(swNFT, "LogEnterStrategy")
         .withArgs(
@@ -386,10 +391,15 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         );
 
       // await expect(
-      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+      //   swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"), 0)
       // ).to.be.revertedWith("reverted with panic code 0x11");
       await expect(
-        swNFT.enterStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.enterStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.reverted;
     });
 
@@ -398,14 +408,20 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         swNFT.exitStrategy(
           "2",
           strategy.address,
-          ethers.utils.parseEther("0.5")
+          ethers.utils.parseEther("0.5"),
+          0
         )
       ).to.be.revertedWith("Owner only");
 
       await expect(
         swNFT
           .connect(user)
-          .exitStrategy("2", strategy.address, ethers.utils.parseEther("0.5"))
+          .exitStrategy(
+            "2",
+            strategy.address,
+            ethers.utils.parseEther("0.5"),
+            0
+          )
       )
         .to.emit(swNFT, "LogExitStrategy")
         .withArgs(
@@ -416,7 +432,12 @@ describe("SWNFTUpgrade with BalancerVault", () => {
         );
 
       await expect(
-        swNFT.exitStrategy("1", strategy.address, ethers.utils.parseEther("1"))
+        swNFT.exitStrategy(
+          "1",
+          strategy.address,
+          ethers.utils.parseEther("1"),
+          0
+        )
       ).to.be.revertedWith("Amount too big");
     });
 

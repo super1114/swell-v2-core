@@ -79,6 +79,7 @@ const generateParams = async (
     amountIn,
     quoter
   );
+  amountOutMin = amountOutMin.div(2);
   const sqrtPriceLimitX96 = await _getPriceLimit(
     amountIn,
     pool,

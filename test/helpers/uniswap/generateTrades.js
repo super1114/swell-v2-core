@@ -41,7 +41,8 @@ const generateTrades = async (
       parseEther("100"),
       parseEther("100"),
       tokenA,
-      tokenB
+      tokenB,
+      100
     );
   }
   for (let i = 0; i < numberOfTrades; i++) {
@@ -106,7 +107,8 @@ const generateUSDTrades = async (
       parseUSD("100"),
       parseUSD("100"),
       tokenA,
-      tokenB
+      tokenB,
+      100
     );
   }
   for (let i = 0; i < numberOfTrades; i++) {
@@ -139,7 +141,7 @@ const generateUSDTrades = async (
   }
 };
 
-const seedLiquidity = async (whale, amountA, amountB, tokenA, tokenB) => {
+const seedLiquidity = async (whale, amountA, amountB, tokenA, tokenB, fee) => {
   // Todo create position manager
   const positionManager = await ethers.getContractAt(
     "INonfungiblePositionManager",
@@ -156,14 +158,14 @@ const seedLiquidity = async (whale, amountA, amountB, tokenA, tokenB) => {
   const ticks = await getTickRange(
     await (
       await ethers.getContractAt("IUniswapV3Factory", UNISWAP_V3_FACTORY)
-    ).getPool(tokens[0], tokens[1], 100),
-    100
+    ).getPool(tokens[0], tokens[1], fee),
+    fee
   );
 
   await positionManager.mint({
     token0: tokens[0],
     token1: tokens[1],
-    fee: 100,
+    fee: fee,
     tickLower: ticks.tickLower,
     tickUpper: ticks.tickUpper,
     amount0Desired: tokens[0] === tokenA.address ? amountA : amountB,
@@ -178,4 +180,5 @@ const seedLiquidity = async (whale, amountA, amountB, tokenA, tokenB) => {
 module.exports = {
   generateTrades,
   generateUSDTrades,
+  seedLiquidity,
 };

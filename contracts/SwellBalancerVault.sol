@@ -52,15 +52,15 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function enter(uint256 tokenId, uint256 amount)
+    function enter(uint256 tokenId, uint256 amount, bytes memory params)
         external
         onlyswNFT
         returns (bool success)
     {
         require(amount > 0, "Invalid amount");
-        deposit(amount, msg.sender, new bytes(0));
+        deposit(amount, msg.sender, params);
         positions[tokenId] += amount;
-        emit LogEnter(tokenId, amount);
+        emit LogEnter(tokenId, amount, params);
         return true;
     }
 
@@ -68,16 +68,16 @@ contract SwellBalancerVault is ERC4626, WeightedMath, IStrategy {
     /// @param tokenId The token ID
     /// @param amount The amount of swETH
     /// @return success or not
-    function exit(uint256 tokenId, uint256 amount)
+    function exit(uint256 tokenId, uint256 amount, bytes memory params)
         external
         onlyswNFT
         returns (bool success)
     {
         require(amount > 0, "No position");
         require(amount <= positions[tokenId], "Amount too big");
-        withdraw(amount, msg.sender, msg.sender, new bytes(0));
+        withdraw(amount, msg.sender, msg.sender, params);
         positions[tokenId] -= amount;
-        emit LogExit(tokenId, amount);
+        emit LogExit(tokenId, amount, params);
         return true;
     }
 
