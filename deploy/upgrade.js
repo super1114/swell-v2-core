@@ -1,8 +1,11 @@
+const fs = require("fs");
 const {
+  getTag,
   getManifestFile,
   getImplementation,
   renameManifestForMainEnv,
   restoreManifestForMainEnv,
+  tryVerify,
 } = require("./helpers");
 
 task("upgrade", "Upgrade the contracts")
@@ -28,7 +31,7 @@ task("upgrade", "Upgrade the contracts")
 
       const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
       let newTag;
-      if (keepVersion) {
+      if (taskArgs.keepVersion) {
         newTag = oldTag;
       } else {
         // update to latest release version
@@ -40,7 +43,7 @@ task("upgrade", "Upgrade the contracts")
       versions[newTag].contracts = contracts;
       versions[newTag].network = network;
       versions[newTag].date = new Date().toUTCString();
-      
+
       let swNFT = await ethers.getContractAt(
         "contracts/swNFTUpgrade.sol:SWNFTUpgrade",
         contracts.swNFT

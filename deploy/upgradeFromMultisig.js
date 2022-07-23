@@ -1,7 +1,11 @@
+const fs = require("fs");
 const {
+  getTag,
   getManifestFile,
   renameManifestForMainEnv,
   restoreManifestForMainEnv,
+  proposeTx,
+  tryVerify,
 } = require("./helpers");
 const { GNOSIS_SAFE } = require("../constants/addresses");
 
@@ -36,7 +40,7 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
 
       const oldTag = Object.keys(versions)[Object.keys(versions).length - 1];
       let newTag;
-      if (keepVersion) {
+      if (taskArgs.keepVersion) {
         newTag = oldTag;
       } else {
         // update to latest release version
@@ -48,17 +52,14 @@ task("upgradeFromMultisig", "Upgrade the swNFT from multisig wallet")
       versions[newTag].contracts = contracts;
       versions[newTag].network = network;
       versions[newTag].date = new Date().toUTCString();
-      
+
       const swNFTUpgradeFactory = await hre.artifacts.readArtifact(
         "contracts/swNFTUpgrade.sol:SWNFTUpgrade"
       );
       const swNFTUpgradeFactoryABI = new ethers.utils.Interface(
         swNFTUpgradeFactory.abi
       );
-      const pauseABI = swNFTUpgradeFactoryABI.encodeFunctionData(
-        "pause",
-        []
-      );
+      const pauseABI = swNFTUpgradeFactoryABI.encodeFunctionData("pause", []);
       await proposeTx(
         contracts.swNFT,
         pauseABI,
